@@ -1,0 +1,75 @@
+# F-Droid Metadata для Secure Messenger
+# https://f-droid.org/docs/Build_Metadata_Reference
+
+Categories:
+  - Security
+  - Communication
+
+License: Apache-2.0
+AuthorName: Secure Messenger Team
+SourceCode: https://github.com/example/secure-messenger-android
+IssueTracker: https://github.com/example/secure-messenger-android/issues
+
+AutoName: Secure Messenger
+
+Summary: Бессерверный мессенджер с IPFS обновлениями и P2P fallback
+Description: |-
+  Децентрализованный клиент для безопасного общения с:
+  
+  * Постквантовым шифрованием (Kyber-1024)
+  * Обфускацией трафика (obfs4)
+  * Децентрализованными обновлениями через IPFS
+  * P2P fallback режимом
+  * Обходом блокировок
+  
+  Приложение не требует центральных серверов и устойчиво к цензуре.
+  
+  Внимание: Это исследовательский проект. Не используйте для критически важной коммуникации.
+
+RepoType: git
+Repo: https://github.com/example/secure-messenger-android
+
+Builds:
+  - versionName: 0.2.0
+    versionCode: 2
+    commit: v0.2.0
+    subdir: android
+    sudo: apt-get update && apt-get install -y cmake clang libssl-dev
+    gradle:
+      - yes
+    rm:
+      - .git
+    prebuild:
+      - export ANDROID_HOME=$$SDK$$
+      - export NDK_HOME=$$NDK$$
+    scandelete:
+      - .git
+    build:
+      - ./gradlew assembleFdroidRelease
+    binary: app/build/outputs/apk/fdroid/release/app-fdroid-release-unsigned.apk
+    signkey: release
+    gradlekey: fdroid
+    outputs:
+      - app/build/outputs/apk/fdroid/release/app-fdroid-release.apk
+
+AllowedAPKSigningKeys:
+  - a1b2c3d4e5f6789012345678901234567890abcd
+
+CurrentVersion: 0.2.0
+CurrentVersionCode: 2
+
+MaintainerNotes: |-
+  Для воспроизводимой сборки:
+  1. Используйте фиксированные версии зависимостей
+  2. Отключите timestamp в build.gradle
+  3. Используйте --locked --frozen для cargo
+
+  F-Droid flavor отключает obfuscation модули для соответствия требованиям.
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+VercodeOperation:
+  - '%c * 10 + %v'
+UpdateCheckData: app/build.gradle.kts|versionCode = (\d+)|.|versionName = "(.+)"
+
+Translation: fastlane/metadata/android

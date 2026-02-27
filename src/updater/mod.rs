@@ -1,8 +1,9 @@
 //! Модуль автообновления
-//! 
-//! Проверка и загрузка обновлений из GitHub Releases.
+//!
+//! Проверка и загрузка обновлений из GitHub Releases и IPFS.
 
 pub mod github;
+pub mod ipfs_updater;
 
 use anyhow::{Result, anyhow};
 use log::{info, warn};
@@ -116,6 +117,7 @@ fn get_target() -> &'static str {
         return "aarch64-pc-windows-msvc";
     }
 
+    #[allow(unreachable_code)]
     "unknown"
 }
 

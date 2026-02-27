@@ -1,77 +1,118 @@
 [package]
 name = "secure-telegram-client"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 authors = ["Secure Telegram Team"]
-description = "Telegram client with post-quantum encryption, DPI bypass and steganography"
+description = "Decentralized Telegram client with post-quantum encryption, anti-censorship and P2P fallback"
 license = "MIT"
+repository = "https://github.com/zametkikostik/secure-telegram-client"
+keywords = ["telegram", "privacy", "anti-censorship", "p2p", "encryption"]
+categories = ["network-programming", "cryptography", "command-line-utilities"]
 
 [dependencies]
-# TDLib bindings (используем актуальную версию)
+# TDLib bindings (официальная библиотека Telegram)
 tdlib = "0.10.0"
 
-# Post-quantum cryptography (Kyber)
+# === Криптография ===
+# Post-quantum cryptography (Kyber-1024)
 pqcrypto-kyber = "0.7.0"
-
 # Symmetric encryption (XChaCha20-Poly1305)
 chacha20poly1305 = "0.10"
-
-# Key exchange (Diffie-Hellman)
+# Key exchange (X25519 Diffie-Hellman)
 x25519-dalek = { version = "2.0", features = ["static_secrets"] }
-
-# Random number generation
-rand = "0.8"
-rand_chacha = "0.3"
-
-# Image processing for steganography
-image = "0.24"
-imageproc = "0.23"
-
-# Serialization
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-bincode = "1.3"
-
-# Async runtime
-tokio = { version = "1.0", features = ["full"] }
-async-trait = "0.1"
-
-# HTTP client для обновлений
-reqwest = { version = "0.11", features = ["json"] }
-
-# Logging
-log = "0.4"
-env_logger = "0.10"
-
-# Error handling
-thiserror = "1.0"
-anyhow = "1.0"
-
-# Директории (config path)
-dirs = "5.0"
-
-# Utilities
-hex = "0.4"
-base64 = "0.21"
-bytes = "1.5"
-
+# Digital signatures (Ed25519 для подписи релизов)
+ed25519-dalek = { version = "2.0", features = ["serde"] }
 # SHA-3 для obfs4 keystream
 sha3 = "0.10"
-
 # HKDF для ключей
 hkdf = "0.12"
 sha2 = "0.10"
 
-# Auto-update
+# === P2P и децентрализация ===
+# libp2p для P2P коммуникации
+libp2p = { version = "0.53", features = ["tcp", "dns", "websocket", "noise", "yamux", "gossipsub", "mdns", "quic", "plaintext"] }
+# IPFS для децентрализованного хранения
+ipfs-api-backend-hyper = { version = "0.6", features = ["with-hyper-rustls"] }
+hyper = { version = "0.14", features = ["full"] }
+http-body = "0.4"
+
+# === Pluggable Transports ===
+# Shadowsocks криптография
+shadowsocks-crypto = "0.6"
+# utls для подмены TLS fingerprint (TODO: реализовать)
+# webpki = "0.22"
+
+# === Сеть и прокси ===
+# HTTP client с поддержкой прокси
+reqwest = { version = "0.11", features = ["json", "socks", "rustls-tls"] }
+# Tokio socks для SOCKS5 прокси
+tokio-socks = "0.5"
+# MTProto прокси (заглушка для будущей реализации)
+# mtproto-proxy = "0.1" # TODO: добавить когда будет доступен
+
+# === Async runtime ===
+tokio = { version = "1.0", features = ["full"] }
+async-trait = "0.1"
+futures = "0.3"
+
+# === База данных ===
+# SQLite с шифрованием
+rusqlite = { version = "0.29", features = ["bundled-sqlcipher"] }
+# Время для очередей
+chrono = { version = "0.4", features = ["serde"] }
+
+# === Serialization ===
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+bincode = "1.3"
+
+# === Random generation ===
+rand = "0.8"
+rand_chacha = "0.3"
+
+# === Image processing ===
+image = "0.24"
+imageproc = "0.23"
+
+# === Logging ===
+log = "0.4"
+env_logger = "0.10"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# === Error handling ===
+thiserror = "1.0"
+anyhow = "1.0"
+
+# === Directories ===
+dirs = "5.0"
+
+# === Utilities ===
+hex = "0.4"
+base64 = "0.21"
+bytes = "1.5"
+
+# === Auto-update (резервный механизм) ===
 self_update = { version = "0.37", features = ["archive-zip"] }
+
+# === DNS over HTTPS (для обхода DNS блокировок) ===
+hickory-resolver = { version = "0.24", features = ["dns-over-https-rustls"] }
 
 [features]
 default = []
 steganography = []
 
+[lib]
+name = "secure_telegram_client"
+path = "src/lib.rs"
+
 [dev-dependencies]
-criterion = "0.5"
+criterion = { version = "0.5", features = ["html_reports"] }
 tempfile = "3.9"
+
+[[bench]]
+name = "crypto_bench"
+harness = false
 
 [[bin]]
 name = "secure-tg"

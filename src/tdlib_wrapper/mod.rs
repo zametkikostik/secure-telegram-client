@@ -4,7 +4,7 @@
 
 pub mod client;
 
-pub use client::Client;
+pub use client::TdClient;
 
 use anyhow::Result;
 

@@ -1,0 +1,48 @@
+# Secure Messenger Android
+
+Бессерверный Android-клиент с децентрализованными обновлениями через IPFS.
+
+## 📦 Быстрый старт
+
+### Сборка APK
+
+```bash
+cd android
+
+# Создание wrapper
+gradle wrapper --gradle-version 8.5
+
+# Сборка debug версии
+./gradlew assembleFdroidDebug
+
+# APK: app/build/outputs/apk/fdroid/debug/app-fdroid-debug.apk
+```
+
+### Полная сборка (с Rust)
+
+```bash
+# Установка зависимостей
+rustup target add aarch64-linux-android
+cargo install cargo-ndk
+
+# Сборка
+./build-apk.sh
+```
+
+## 📚 Документация
+
+- [BUILD_INSTRUCTIONS.md](BUILD_INSTRUCTIONS.md) — Подробная инструкция по сборке
+- [README.md](README.md) — Основная документация
+- [IMPLEMENTATION_REPORT.md](IMPLEMENTATION_REPORT.md) — Отчёт о реализации
+
+## 🔐 Особенности
+
+- ✅ IPFS обновления
+- ✅ obfs4 обфускация
+- ✅ Ed25519 подпись релизов
+- ✅ F-Droid совместимость
+- ✅ Воспроизводимая сборка
+
+## 📄 Лицензия
+
+Apache-2.0

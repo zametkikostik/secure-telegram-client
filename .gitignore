@@ -1,8 +1,12 @@
 # Rust
 /target/
-**/target/
-debug/
+**/*.rs.bk
+*.pdb
 Cargo.lock
+
+# Environment
+.env
+.env.local
 
 # IDE
 .idea/
@@ -12,33 +16,34 @@ Cargo.lock
 *~
 .DS_Store
 
-# Config
-config.json
-*.local
-config.example.json
-
 # Logs
 *.log
 logs/
 
-# Test files
-test_*.jpg
-test_*.png
-stego_*.png
+# Test artifacts
+test_images/
+*.stego.png
+*.stego.jpg
 
-# Build artifacts
-*.exe
-*.dll
-*.so
-*.dylib
+# TDLib data
+tdlib_data/
+*.tdlib
 
-# Temporary files
+# Build
+dist/
+build/
+
+# Coverage
+*.gcda
+*.gcno
+*.gcov
+coverage/
+lcov/
+
+# Benchmarks
+criterion/
+
+# Temporary
 tmp/
 temp/
 *.tmp
-
-# Secrets
-.env
-.env.local
-*.key
-*.pem
