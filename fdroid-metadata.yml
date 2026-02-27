@@ -1,0 +1,74 @@
+Categories:
+  - Security
+  - Communication
+
+License: MIT
+AuthorName: Secure Telegram Team
+SourceCode: https://github.com/zametkikostik/secure-telegram-client
+IssueTracker: https://github.com/zametkikostik/secure-telegram-client/issues
+
+AutoName: Secure Telegram Client
+
+Summary: Децентрализованный Telegram клиент с постквантовым шифрованием
+
+Description: |-
+  Secure Telegram Client — это децентрализованный клиент для Telegram с 
+  усиленной приватностью и обходом цензуры.
+  
+  Особенности:
+  * Постквантовое шифрование (Kyber-1024)
+  * Обфускация трафика (obfs4)
+  * DNS over HTTPS для обхода блокировок
+  * Децентрализованные обновления через IPFS
+  * P2P месседжинг как fallback
+  * Полностью открытый исходный код
+  
+  Внимание: Это исследовательский проект. Не используйте для критически 
+  важной коммуникации.
+
+RepoType: git
+Repo: https://github.com/zametkikostik/secure-telegram-client
+
+Builds:
+  - versionName: 0.2.0
+    versionCode: 2
+    commit: v0.2.0
+    subdir: android
+    gradle:
+      - yes
+    rm:
+      - .git
+    prebuild:
+      - export ANDROID_HOME=$$SDK$$
+      - export NDK_HOME=$$NDK$$
+    scandelete:
+      - .git
+    build:
+      - ./gradlew assembleFdroidDebug
+    binary: app/build/outputs/apk/fdroid/debug/app-fdroid-debug.apk
+    signkey: release
+    gradlekey: fdroid
+    outputs:
+      - app/build/outputs/apk/fdroid/debug/app-fdroid-debug.apk
+
+AllowedAPKSigningKeys:
+  - a1b2c3d4e5f6789012345678901234567890abcd
+
+CurrentVersion: 0.2.0
+CurrentVersionCode: 2
+
+MaintainerNotes: |-
+  Для воспроизводимой сборки:
+  1. Используйте фиксированные версии зависимостей
+  2. Отключите timestamp в build.gradle
+  3. Используйте --locked --frozen для cargo
+
+  F-Droid flavor отключает obfuscation модули для соответствия требованиям.
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+VercodeOperation:
+  - '%c * 10 + %v'
+UpdateCheckData: android/app/build.gradle.kts|versionCode = (\d+)|.|versionName = "(.+)"
+
+Translation: fastlane/metadata/android
