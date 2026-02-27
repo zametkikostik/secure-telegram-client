@@ -7,8 +7,8 @@ description = "Telegram client with post-quantum encryption, DPI bypass and steg
 license = "MIT"
 
 [dependencies]
-# TDLib будет подключаться отдельно (требует ручной сборки)
-# tdlib = "0.10.0"
+# TDLib bindings (используем актуальную версию)
+tdlib = "0.10.0"
 
 # Post-quantum cryptography (Kyber)
 pqcrypto-kyber = "0.7.0"
