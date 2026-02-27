@@ -15,5 +15,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "SecureMessenger"
-include ':app'
-include ':core'
+include("app")
