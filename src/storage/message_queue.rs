@@ -6,8 +6,8 @@
 //! - Кэш входящих сообщений
 //! - Синхронизация при появлении канала
 
-use anyhow::{Result, Context};
-use rusqlite::{Connection, params};
+use anyhow::{Context, Result};
+use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};
 
 /// Менеджер очереди сообщений
@@ -52,8 +52,7 @@ impl MessageQueue {
     /// Создание новой очереди с шифрованием
     pub fn new(db_path: &str, encryption_key: &str) -> Result<Self> {
         // Открытие базы с шифрованием
-        let conn = Connection::open(db_path)
-            .context("Ошибка открытия базы данных")?;
+        let conn = Connection::open(db_path).context("Ошибка открытия базы данных")?;
 
         // Установка ключа шифрования
         conn.execute_batch(&format!("PRAGMA key = '{}';", encryption_key))
@@ -136,17 +135,23 @@ impl MessageQueue {
              LIMIT ?2",
         )?;
 
-        let messages = stmt.query_map(params![Self::status_to_string(&MessageStatus::Pending), limit as i64], |row| {
-            Ok(QueuedMessage {
-                id: row.get(0)?,
-                from: row.get(1)?,
-                to: row.get(2)?,
-                encrypted_content: row.get(3)?,
-                created_at: row.get(4)?,
-                status: Self::string_to_status(&row.get::<_, String>(5)?),
-                retry_count: row.get(6)?,
-            })
-        })?;
+        let messages = stmt.query_map(
+            params![
+                Self::status_to_string(&MessageStatus::Pending),
+                limit as i64
+            ],
+            |row| {
+                Ok(QueuedMessage {
+                    id: row.get(0)?,
+                    from: row.get(1)?,
+                    to: row.get(2)?,
+                    encrypted_content: row.get(3)?,
+                    created_at: row.get(4)?,
+                    status: Self::string_to_status(&row.get::<_, String>(5)?),
+                    retry_count: row.get(6)?,
+                })
+            },
+        )?;
 
         let result: Vec<QueuedMessage> = messages.filter_map(|r| r.ok()).collect();
 
@@ -161,20 +166,16 @@ impl MessageQueue {
             None
         };
 
-        self.conn.execute(
-            "UPDATE messages
+        self.conn
+            .execute(
+                "UPDATE messages
              SET status = ?1,
                  sent_at = ?2,
                  error_message = ?3
              WHERE id = ?4",
-            params![
-                Self::status_to_string(&status),
-                sent_at,
-                error,
-                id
-            ],
-        )
-        .context("Ошибка обновления статуса")?;
+                params![Self::status_to_string(&status), sent_at, error, id],
+            )
+            .context("Ошибка обновления статуса")?;
 
         Ok(())
     }
@@ -272,7 +273,7 @@ impl MessageQueue {
     /// Обновление состояния синхронизации
     pub fn update_sync_state(&self, key: &str, value: &str) -> Result<bool> {
         let now = chrono::Utc::now().timestamp();
-        
+
         let rows_changed = self.conn.execute(
             "UPDATE sync_state SET value = ?1, updated_at = ?2 WHERE key = ?3",
             params![value, now, key],
@@ -283,21 +284,23 @@ impl MessageQueue {
 
     /// Удаление состояния синхронизации
     pub fn delete_sync_state(&self, key: &str) -> Result<()> {
-        self.conn.execute(
-            "DELETE FROM sync_state WHERE key = ?1",
-            params![key],
-        )?;
+        self.conn
+            .execute("DELETE FROM sync_state WHERE key = ?1", params![key])?;
         Ok(())
     }
 
     /// Получение всех состояний синхронизации
     pub fn get_all_sync_states(&self) -> Result<Vec<(String, String, i64)>> {
-        let mut stmt = self.conn.prepare(
-            "SELECT key, value, updated_at FROM sync_state ORDER BY updated_at DESC"
-        )?;
+        let mut stmt = self
+            .conn
+            .prepare("SELECT key, value, updated_at FROM sync_state ORDER BY updated_at DESC")?;
 
         let states = stmt.query_map([], |row| {
-            Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?, row.get::<_, i64>(2)?))
+            Ok((
+                row.get::<_, String>(0)?,
+                row.get::<_, String>(1)?,
+                row.get::<_, i64>(2)?,
+            ))
         })?;
 
         let result: Vec<(String, String, i64)> = states.filter_map(|r| r.ok()).collect();

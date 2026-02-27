@@ -1,5 +1,5 @@
 //! TDLib обёртка
-//! 
+//!
 //! Интеграция с TDLib для работы с Telegram.
 
 pub mod client;

@@ -2,10 +2,10 @@
 //!
 //! Загрузка и управление настройками клиента.
 
-use anyhow::{Result, anyhow, Context};
+use anyhow::{anyhow, Context, Result};
 use serde::{Deserialize, Serialize};
-use std::path::PathBuf;
 use std::fs;
+use std::path::PathBuf;
 
 /// Путь к конфигурации по умолчанию
 const CONFIG_DIR_NAME: &str = "secure-telegram-client";
@@ -222,8 +222,7 @@ impl Config {
                 .with_context(|| format!("Ошибка создания директории: {:?}", parent))?;
         }
 
-        let content = serde_json::to_string_pretty(self)
-            .context("Ошибка сериализации конфига")?;
+        let content = serde_json::to_string_pretty(self).context("Ошибка сериализации конфига")?;
 
         fs::write(&config_path, content)
             .with_context(|| format!("Ошибка записи конфига: {:?}", config_path))?;
@@ -236,7 +235,9 @@ impl Config {
     /// Проверка валидности конфигурации
     pub fn validate(&self) -> Result<()> {
         if self.api_id == 0 {
-            return Err(anyhow!("api_id должен быть установлен (получите на https://my.telegram.org)"));
+            return Err(anyhow!(
+                "api_id должен быть установлен (получите на https://my.telegram.org)"
+            ));
         }
 
         if self.api_hash.is_empty() {
@@ -244,13 +245,18 @@ impl Config {
         }
 
         if self.api_hash.len() < 32 {
-            return Err(anyhow!("api_hash должен быть не менее 32 символов, текущая длина: {}", self.api_hash.len()));
+            return Err(anyhow!(
+                "api_hash должен быть не менее 32 символов, текущая длина: {}",
+                self.api_hash.len()
+            ));
         }
 
         // Валидация прокси настроек
         if self.proxy.enabled {
             if self.proxy.host.is_empty() {
-                return Err(anyhow!("proxy host не может быть пустым когда прокси включен"));
+                return Err(anyhow!(
+                    "proxy host не может быть пустым когда прокси включен"
+                ));
             }
             if self.proxy.port == 0 {
                 return Err(anyhow!("proxy port должен быть больше 0"));
@@ -282,7 +288,7 @@ fn get_config_path() -> PathBuf {
     let mut path = dirs::config_dir()
         .or_else(|| dirs::home_dir())
         .unwrap_or_else(|| PathBuf::from("."));
-    
+
     path.push(CONFIG_DIR_NAME);
     path.push(CONFIG_FILE_NAME);
 
@@ -294,7 +300,7 @@ pub fn get_config_dir() -> PathBuf {
     let mut path = dirs::config_dir()
         .or_else(|| dirs::home_dir())
         .unwrap_or_else(|| PathBuf::from("."));
-    
+
     path.push(CONFIG_DIR_NAME);
     path
 }
@@ -312,11 +318,14 @@ pub fn create_default_config() -> Config {
 pub fn save_config_template() -> Result<PathBuf> {
     let config = create_default_config();
     let config_path = get_config_path();
-    
+
     if config_path.exists() {
-        return Err(anyhow!("Файл конфигурации уже существует: {:?}", config_path));
+        return Err(anyhow!(
+            "Файл конфигурации уже существует: {:?}",
+            config_path
+        ));
     }
-    
+
     config.save()?;
     Ok(config_path)
 }

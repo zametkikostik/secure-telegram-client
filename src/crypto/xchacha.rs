@@ -1,11 +1,11 @@
 //! Симметричное шифрование XChaCha20-Poly1305
-//! 
+//!
 //! XChaCha20-Poly1305 обеспечивает конфиденциальность и аутентификацию данных.
 //! Использует 256-битный ключ и 192-битный nonce.
 
-use anyhow::{Result, anyhow};
-use chacha20poly1305::{XChaCha20Poly1305, KeyInit, XNonce};
+use anyhow::{anyhow, Result};
 use chacha20poly1305::aead::Aead;
+use chacha20poly1305::{KeyInit, XChaCha20Poly1305, XNonce};
 use rand::rngs::OsRng;
 use rand::RngCore;
 
@@ -48,7 +48,8 @@ impl XChaChaCipher {
         let nonce = XNonce::from_slice(&nonce_bytes);
 
         // Шифрование
-        let ciphertext = cipher.encrypt(nonce, plaintext)
+        let ciphertext = cipher
+            .encrypt(nonce, plaintext)
             .map_err(|e| anyhow!("Ошибка шифрования: {}", e))?;
 
         log::debug!("Данные зашифрованы ({} байт)", ciphertext.len());
@@ -68,7 +69,8 @@ impl XChaChaCipher {
             .map_err(|e| anyhow!("Ошибка инициализации шифра: {}", e))?;
 
         let nonce = XNonce::from_slice(nonce);
-        let plaintext = cipher.decrypt(nonce, ciphertext.as_ref())
+        let plaintext = cipher
+            .decrypt(nonce, ciphertext.as_ref())
             .map_err(|e| anyhow!("Ошибка расшифровки: {}", e))?;
 
         log::debug!("Данные расшифрованы ({} байт)", plaintext.len());
@@ -80,23 +82,23 @@ impl XChaChaCipher {
 /// Тестирование модуля
 pub fn test() -> Result<()> {
     log::debug!("Тестирование XChaCha20-Poly1305 модуля...");
-    
+
     // Генерация ключа
     let key = XChaChaCipher::generate_key();
     let cipher = XChaChaCipher::new(key);
-    
+
     // Тестовые данные
     let plaintext = b"Hello, Secure Telegram!";
-    
+
     // Шифрование
     let (nonce, ciphertext) = cipher.encrypt(plaintext)?;
-    
+
     // Расшифровка
     let decrypted = cipher.decrypt(&nonce, &ciphertext)?;
-    
+
     // Проверка
     assert_eq!(plaintext.to_vec(), decrypted);
-    
+
     log::debug!("XChaCha20-Poly1305 тест пройден");
     Ok(())
 }
@@ -104,32 +106,32 @@ pub fn test() -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_encrypt_decrypt() {
         let key = XChaChaCipher::generate_key();
         let cipher = XChaChaCipher::new(key);
-        
+
         let plaintext = b"Test message for encryption";
         let (nonce, ciphertext) = cipher.encrypt(plaintext).unwrap();
         let decrypted = cipher.decrypt(&nonce, &ciphertext).unwrap();
-        
+
         assert_eq!(plaintext.to_vec(), decrypted);
     }
-    
+
     #[test]
     fn test_different_nonces() {
         let key = XChaChaCipher::generate_key();
         let cipher = XChaChaCipher::new(key);
-        
+
         let plaintext = b"Same message";
         let (nonce1, ct1) = cipher.encrypt(plaintext).unwrap();
         let (nonce2, ct2) = cipher.encrypt(plaintext).unwrap();
-        
+
         // Nonce и ciphertext должны быть разными
         assert_ne!(nonce1, nonce2);
         assert_ne!(ct1, ct2);
-        
+
         // Оба должны расшифровываться одинаково
         let dec1 = cipher.decrypt(&nonce1, &ct1).unwrap();
         let dec2 = cipher.decrypt(&nonce2, &ct2).unwrap();

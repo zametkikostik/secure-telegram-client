@@ -2,7 +2,7 @@
 //!
 //! Обход DNS блокировок через зашифрованные DNS запросы
 
-use anyhow::{Result, Context};
+use anyhow::{Context, Result};
 use reqwest::Client;
 use serde::Deserialize;
 use std::net::{IpAddr, SocketAddr};
@@ -101,7 +101,9 @@ impl DohClient {
     async fn resolve_with_endpoint(&self, domain: &str, endpoint: &str) -> Result<Vec<IpAddr>> {
         let url = format!("{}?name={}&type=A", endpoint, domain);
 
-        let response = self.http_client.get(&url)
+        let response = self
+            .http_client
+            .get(&url)
             .header("Accept", "application/dns-json")
             .send()
             .await
@@ -111,7 +113,8 @@ impl DohClient {
             anyhow::bail!("DoH вернул статус: {}", response.status());
         }
 
-        let doh_response: DohResponse = response.json()
+        let doh_response: DohResponse = response
+            .json()
             .await
             .context("Ошибка парсинга DoH ответа")?;
 
@@ -124,7 +127,8 @@ impl DohClient {
         let mut ips = Vec::new();
         if let Some(answers) = &doh_response.Answer {
             for record in answers {
-                if record.rtype == 1 { // A record
+                if record.rtype == 1 {
+                    // A record
                     if let Ok(ip) = record.data.parse::<IpAddr>() {
                         ips.push(ip);
                     }
@@ -145,7 +149,9 @@ impl DohClient {
 
         for endpoint in &self.endpoints {
             let url = format!("{}?name=google.com&type=A", endpoint);
-            let is_available = self.http_client.get(&url)
+            let is_available = self
+                .http_client
+                .get(&url)
                 .header("Accept", "application/dns-json")
                 .send()
                 .await
@@ -161,7 +167,10 @@ impl DohClient {
     /// Переключение на следующий эндпоинт
     pub fn rotate_endpoint(&mut self) {
         self.current_endpoint = (self.current_endpoint + 1) % self.endpoints.len();
-        log::info!("DoH эндпоинт ротирован: {}", self.endpoints[self.current_endpoint]);
+        log::info!(
+            "DoH эндпоинт ротирован: {}",
+            self.endpoints[self.current_endpoint]
+        );
     }
 
     /// Добавление эндпоинта
@@ -259,7 +268,7 @@ mod tests {
     async fn test_doh_resolution() {
         let mut client = DohClient::new();
         let result = client.resolve("google.com").await;
-        
+
         // Google обычно доступен
         assert!(result.is_ok());
         assert!(!result.unwrap().is_empty());
@@ -269,7 +278,7 @@ mod tests {
     async fn test_endpoint_check() {
         let client = DohClient::new();
         let results = client.check_endpoints().await;
-        
+
         // Хотя бы один эндпоинт должен работать
         let working = results.iter().filter(|(_, ok)| *ok).count();
         assert!(working > 0);

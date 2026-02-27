@@ -5,13 +5,13 @@
 //! - Keystream генерация через SHA-3
 //! - XOR шифрование трафика
 
-use anyhow::{Result, Context, anyhow};
-use sha3::{Sha3_256, Digest};
-use rand::{RngCore, rngs::OsRng};
-use x25519_dalek::{PublicKey, StaticSecret};
+use anyhow::{anyhow, Context, Result};
+use rand::{rngs::OsRng, RngCore};
+use sha3::{Digest, Sha3_256};
 use std::time::{Duration, Instant};
-use tokio::io::{AsyncRead, AsyncWrite, AsyncReadExt, AsyncWriteExt, ReadHalf, WriteHalf};
+use tokio::io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt, ReadHalf, WriteHalf};
 use tokio::net::TcpStream;
+use x25519_dalek::{PublicKey, StaticSecret};
 
 /// Размер handshake пакета
 const OBFUSCATED_HANDSHAKE_SIZE: usize = 1968;
@@ -81,7 +81,7 @@ impl Obfs4Client {
         // 2. Парсинг публичного ключа моста
         let bridge_key_bytes = hex::decode(&self.bridge_public_key)
             .context("Неверный формат публичного ключа моста")?;
-        
+
         if bridge_key_bytes.len() != 32 {
             return Err(anyhow!("Неверная длина публичного ключа"));
         }
@@ -175,7 +175,8 @@ impl Obfs4Stream {
 
         // XOR шифрование
         let keystream = self.generate_keystream(data.len());
-        let obfuscated: Vec<u8> = data.iter()
+        let obfuscated: Vec<u8> = data
+            .iter()
             .zip(keystream.iter())
             .map(|(&d, &k)| d ^ k)
             .collect();
@@ -211,7 +212,8 @@ impl Obfs4Stream {
 
         // Генерация keystream для расшифровки
         let keystream = self.generate_decrypt_keystream(size);
-        let decrypted: Vec<u8> = encrypted.iter()
+        let decrypted: Vec<u8> = encrypted
+            .iter()
             .zip(keystream.iter())
             .map(|(&e, &k)| e ^ k)
             .collect();
@@ -234,7 +236,8 @@ impl Obfs4Stream {
         if self.read_pos < self.read_buffer.len() {
             let available = self.read_buffer.len() - self.read_pos;
             let to_copy = available.min(buf.len());
-            buf[..to_copy].copy_from_slice(&self.read_buffer[self.read_pos..self.read_pos + to_copy]);
+            buf[..to_copy]
+                .copy_from_slice(&self.read_buffer[self.read_pos..self.read_pos + to_copy]);
             self.read_pos += to_copy;
             return Ok(to_copy);
         }
@@ -336,7 +339,7 @@ impl Obfs4Bridge {
 
         let without_scheme = &url[8..];
         let parts: Vec<&str> = without_scheme.split('@').collect();
-        
+
         if parts.len() != 2 {
             return Err(anyhow!("Неверный формат: ожидается obfs4://key@host:port"));
         }
@@ -360,7 +363,7 @@ mod tests {
     fn test_bridge_url_parsing() {
         let url = "obfs4://abcdef1234567890@bridge.example.com:443";
         let bridge = Obfs4Bridge::from_url(url).unwrap();
-        
+
         assert_eq!(bridge.addr, "bridge.example.com:443");
         assert_eq!(bridge.public_key, "abcdef1234567890");
     }
@@ -371,7 +374,7 @@ mod tests {
             "bridge.example.com:443".to_string(),
             "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890".to_string(),
         );
-        
+
         assert!(client.is_ok());
     }
 }

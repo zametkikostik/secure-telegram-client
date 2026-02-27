@@ -1,8 +1,8 @@
 //! Shadowsocks транспорт
-//! 
+//!
 //! Прокси с шифрованием для обхода блокировок
 
-use anyhow::{Result, Context};
+use anyhow::{Context, Result};
 use std::net::SocketAddr;
 use tokio::io::{AsyncRead, AsyncWrite, ReadHalf, WriteHalf};
 use tokio::net::TcpStream;
@@ -51,7 +51,8 @@ impl ShadowsocksTransport {
 
         let method = mp[0].to_string();
         let password = mp[1].to_string();
-        let server_addr = host_port.parse::<SocketAddr>()
+        let server_addr = host_port
+            .parse::<SocketAddr>()
             .context("Неверный формат адреса сервера")?;
 
         Ok(Self::new(server_addr, method, password))

@@ -6,7 +6,7 @@
 //! - Верификацию подписи Ed25519
 //! - Резервные зеркала (Codeberg, GitFlic)
 
-use anyhow::{Result, Context, anyhow};
+use anyhow::{anyhow, Context, Result};
 use ed25519_dalek::{Signature, Verifier, VerifyingKey};
 use ipfs_api_backend_hyper::{IpfsApi, IpfsClient};
 use serde::{Deserialize, Serialize};
@@ -62,16 +62,19 @@ impl IpfsUpdater {
         let ipfs_client = IpfsClient::default();
 
         // Парсинг публичного ключа из hex
-        let public_key_bytes = hex::decode(public_key_hex)
-            .context("Неверный формат публичного ключа")?;
-        
+        let public_key_bytes =
+            hex::decode(public_key_hex).context("Неверный формат публичного ключа")?;
+
         if public_key_bytes.len() != 32 {
-            return Err(anyhow::anyhow!("Неверная длина публичного ключа (ожидалось 32 байта)"));
+            return Err(anyhow::anyhow!(
+                "Неверная длина публичного ключа (ожидалось 32 байта)"
+            ));
         }
 
-        let public_key_array: [u8; 32] = public_key_bytes.try_into()
+        let public_key_array: [u8; 32] = public_key_bytes
+            .try_into()
             .map_err(|_| anyhow::anyhow!("Неверная длина публичного ключа"))?;
-        
+
         let public_key = VerifyingKey::from_bytes(&public_key_array)
             .context("Неверный публичный ключ Ed25519")?;
 
@@ -106,9 +109,8 @@ impl IpfsUpdater {
     /// Верификация подписи релиза
     pub fn verify_signature(&self, release: &ReleaseInfo, data: &[u8]) -> Result<bool> {
         // Декодирование подписи из hex
-        let signature_bytes = hex::decode(&release.signature)
-            .context("Неверный формат подписи")?;
-        
+        let signature_bytes = hex::decode(&release.signature).context("Неверный формат подписи")?;
+
         if signature_bytes.len() != 64 {
             return Err(anyhow!("Неверная длина подписи"));
         }
@@ -123,8 +125,9 @@ impl IpfsUpdater {
     /// Загрузка из зеркала (резервный механизм)
     pub async fn download_from_mirror(&self, mirror: &MirrorInfo) -> Result<Vec<u8>> {
         let client = reqwest::Client::new();
-        
-        let response = client.get(&mirror.url)
+
+        let response = client
+            .get(&mirror.url)
             .send()
             .await
             .with_context(|| format!("Ошибка загрузки из зеркала {}", mirror.name))?;
@@ -133,7 +136,8 @@ impl IpfsUpdater {
             return Err(anyhow!("Зеркало вернуло статус: {}", response.status()));
         }
 
-        let bytes = response.bytes()
+        let bytes = response
+            .bytes()
             .await
             .context("Ошибка чтения данных зеркала")?;
 
@@ -184,8 +188,7 @@ impl IpfsUpdater {
         log::info!("Подпись верифицирована");
 
         // 4. Сохранение бинарного файла
-        std::fs::write(output_path, &binary_data)
-            .context("Ошибка сохранения бинарного файла")?;
+        std::fs::write(output_path, &binary_data).context("Ошибка сохранения бинарного файла")?;
 
         log::info!("Обновление успешно загружено и сохранено");
 
@@ -197,7 +200,7 @@ impl IpfsUpdater {
         // В реальной реализации здесь будет использование libp2p DHT
         // для поиска пиров, хранящих данные по теме
         log::info!("Поиск релизов в DHT по теме: {}", topic);
-        
+
         // Заглушка - в реальности нужно использовать libp2p Kademlia DHT
         Ok(vec![])
     }
@@ -222,7 +225,8 @@ impl Default for UpdaterConfig {
     fn default() -> Self {
         Self {
             release_cid: "QmYourReleaseCIDHere".to_string(),
-            public_key: "0000000000000000000000000000000000000000000000000000000000000000".to_string(),
+            public_key: "0000000000000000000000000000000000000000000000000000000000000000"
+                .to_string(),
             ipfs_enabled: true,
             mirrors_enabled: true,
             auto_download: false,
@@ -254,7 +258,7 @@ mod tests {
     async fn test_updater_creation() {
         let public_key_hex = "0000000000000000000000000000000000000000000000000000000000000000";
         let updater = IpfsUpdater::new(public_key_hex, "0.2.0");
-        
+
         assert!(updater.is_ok());
     }
 }

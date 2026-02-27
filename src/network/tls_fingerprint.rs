@@ -2,7 +2,7 @@
 //!
 //! Подмена TLS отпечатка для обхода DPI систем
 
-use anyhow::{Result, Context};
+use anyhow::{Context, Result};
 use std::sync::Arc;
 
 /// TLS Fingerprint эвейшн
@@ -88,23 +88,25 @@ impl TlsFingerprint {
     /// Генерация JA3 отпечатка
     pub fn generate_ja3(&self) -> String {
         let mut ja3 = String::new();
-        
+
         // TLS версии
         ja3.push_str("771,");
-        
+
         // Cipher suites
-        let ciphers: Vec<String> = self.cipher_suites.iter()
+        let ciphers: Vec<String> = self
+            .cipher_suites
+            .iter()
             .map(|c| format!("{:04x}", c))
             .collect();
         ja3.push_str(&ciphers.join("-"));
         ja3.push(',');
-        
+
         // Extensions
         ja3.push_str("0-23-65281-10-11-35-16-5-13-51-45-43-27-17513,");
-        
+
         // Elliptic curves
         ja3.push_str("29-23-24,0");
-        
+
         ja3
     }
 

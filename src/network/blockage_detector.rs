@@ -6,7 +6,7 @@
 //! - TLS блокировка (handshake failure)
 //! - DPI детектирование по времени ответа
 
-use anyhow::{Result, Context};
+use anyhow::{Context, Result};
 use std::collections::HashMap;
 use std::time::{Duration, Instant};
 use tokio::net::TcpStream;
@@ -67,10 +67,7 @@ impl BlockageDetector {
                 "cloudflare.com".to_string(),
                 "github.com".to_string(),
             ],
-            test_ips: vec![
-                "8.8.8.8".to_string(),
-                "1.1.1.1".to_string(),
-            ],
+            test_ips: vec!["8.8.8.8".to_string(), "1.1.1.1".to_string()],
             doh_endpoints: vec![
                 "https://cloudflare-dns.com/dns-query".to_string(),
                 "https://dns.google/dns-query".to_string(),
@@ -92,21 +89,24 @@ impl BlockageDetector {
         // 1. Проверка DNS
         let dns_result = self.check_dns_blockage(target).await;
         if dns_result.blockage_type != BlockageType::None {
-            self.cache.insert(target.to_string(), (dns_result.clone(), Instant::now()));
+            self.cache
+                .insert(target.to_string(), (dns_result.clone(), Instant::now()));
             return Ok(dns_result);
         }
 
         // 2. Проверка TCP подключения
         let tcp_result = self.check_tcp_blockage(target).await;
         if tcp_result.blockage_type != BlockageType::None {
-            self.cache.insert(target.to_string(), (tcp_result.clone(), Instant::now()));
+            self.cache
+                .insert(target.to_string(), (tcp_result.clone(), Instant::now()));
             return Ok(tcp_result);
         }
 
         // 3. Проверка TLS handshake
         let tls_result = self.check_tls_blockage(target).await;
         if tls_result.blockage_type != BlockageType::None {
-            self.cache.insert(target.to_string(), (tls_result.clone(), Instant::now()));
+            self.cache
+                .insert(target.to_string(), (tls_result.clone(), Instant::now()));
             return Ok(tls_result);
         }
 
@@ -114,7 +114,8 @@ impl BlockageDetector {
         let dpi_result = self.check_dpi_detection(target).await;
 
         let check_time = start.elapsed();
-        self.cache.insert(target.to_string(), (dpi_result.clone(), Instant::now()));
+        self.cache
+            .insert(target.to_string(), (dpi_result.clone(), Instant::now()));
 
         Ok(dpi_result)
     }
@@ -125,7 +126,12 @@ impl BlockageDetector {
 
         // Извлечение домена из target (если это URL)
         let domain = if target.starts_with("http") {
-            target.trim_start_matches("http://").trim_start_matches("https://").split('/').next().unwrap_or(target)
+            target
+                .trim_start_matches("http://")
+                .trim_start_matches("https://")
+                .split('/')
+                .next()
+                .unwrap_or(target)
         } else {
             target.split(':').next().unwrap_or(target)
         };
@@ -179,10 +185,7 @@ impl BlockageDetector {
         let start = Instant::now();
 
         // Попытка подключения к целевому хосту
-        let direct_connect = timeout(
-            Duration::from_secs(5),
-            TcpStream::connect(target)
-        ).await;
+        let direct_connect = timeout(Duration::from_secs(5), TcpStream::connect(target)).await;
 
         let check_time = start.elapsed();
 
@@ -197,7 +200,7 @@ impl BlockageDetector {
             }
             Ok(Err(e)) => {
                 let err_str = e.to_string();
-                
+
                 // Проверка на TCP RST
                 if err_str.contains("Connection reset") || err_str.contains("ECONNRESET") {
                     BlockageResult {
@@ -237,7 +240,12 @@ impl BlockageDetector {
 
         // Извлечение домена
         let domain = if target.starts_with("http") {
-            target.trim_start_matches("http://").trim_start_matches("https://").split('/').next().unwrap_or(target)
+            target
+                .trim_start_matches("http://")
+                .trim_start_matches("https://")
+                .split('/')
+                .next()
+                .unwrap_or(target)
         } else {
             target.split(':').next().unwrap_or(target)
         };
@@ -248,16 +256,14 @@ impl BlockageDetector {
         let check_time = start.elapsed();
 
         match tls_result {
-            Ok(_) => {
-                BlockageResult {
-                    blockage_type: BlockageType::None,
-                    check_time,
-                    details: "TLS handshake успешен".to_string(),
-                }
-            }
+            Ok(_) => BlockageResult {
+                blockage_type: BlockageType::None,
+                check_time,
+                details: "TLS handshake успешен".to_string(),
+            },
             Err(e) => {
                 let err_str = e.to_string();
-                
+
                 if err_str.contains("handshake") || err_str.contains("certificate") {
                     BlockageResult {
                         blockage_type: BlockageType::TlsHandshake,
@@ -286,10 +292,7 @@ impl BlockageDetector {
 
         for _ in 0..3 {
             let conn_start = Instant::now();
-            let connect_result = timeout(
-                Duration::from_secs(3),
-                TcpStream::connect(target)
-            ).await;
+            let connect_result = timeout(Duration::from_secs(3), TcpStream::connect(target)).await;
 
             match connect_result {
                 Ok(Ok(_)) => {
@@ -334,13 +337,16 @@ impl BlockageDetector {
 
         for endpoint in &self.doh_endpoints {
             let url = format!("{}?name={}&type=A", endpoint, domain);
-            
+
             match timeout(
                 Duration::from_secs(3),
-                client.get(&url)
+                client
+                    .get(&url)
                     .header("Accept", "application/dns-json")
-                    .send()
-            ).await {
+                    .send(),
+            )
+            .await
+            {
                 Ok(Ok(response)) => {
                     if response.status().is_success() {
                         if let Ok(json) = response.json::<serde_json::Value>().await {
@@ -369,12 +375,9 @@ impl BlockageDetector {
     async fn try_tls_handshake(&self, domain: &str, port: u16) -> Result<()> {
         // Упрощённая реализация без полноценного TLS
         // В реальной версии использовать tokio-rustls
-        
+
         let addr = format!("{}:{}", domain, port);
-        let _stream = timeout(
-            Duration::from_secs(5),
-            TcpStream::connect(&addr)
-        ).await??;
+        let _stream = timeout(Duration::from_secs(5), TcpStream::connect(&addr)).await??;
 
         // Заглушка - всегда Ok
         Ok(())
@@ -444,11 +447,12 @@ impl BlockageManager {
 
         // Проверка транспорта
         let result = self.detector.check_all(transport).await;
-        
+
         match result {
             Ok(r) => {
                 if r.blockage_type != BlockageType::None {
-                    self.blocked_transports.insert(transport.to_string(), Instant::now());
+                    self.blocked_transports
+                        .insert(transport.to_string(), Instant::now());
                     true
                 } else {
                     false
@@ -460,7 +464,8 @@ impl BlockageManager {
 
     /// Отметка транспорта как заблокированного
     pub fn mark_transport_blocked(&mut self, transport: &str) {
-        self.blocked_transports.insert(transport.to_string(), Instant::now());
+        self.blocked_transports
+            .insert(transport.to_string(), Instant::now());
     }
 }
 
@@ -484,19 +489,22 @@ mod tests {
     async fn test_dns_check() {
         let mut detector = BlockageDetector::new();
         let result = detector.check_dns_blockage("google.com").await;
-        
+
         // Google обычно доступен
-        assert!(result.blockage_type == BlockageType::None || 
-                result.blockage_type == BlockageType::Dns);
+        assert!(
+            result.blockage_type == BlockageType::None || result.blockage_type == BlockageType::Dns
+        );
     }
 
     #[tokio::test]
     async fn test_tcp_check() {
         let mut detector = BlockageDetector::new();
         let result = detector.check_tcp_blockage("8.8.8.8:53").await;
-        
+
         // Google DNS обычно доступен
-        assert!(result.blockage_type == BlockageType::None ||
-                result.blockage_type == BlockageType::IpBan);
+        assert!(
+            result.blockage_type == BlockageType::None
+                || result.blockage_type == BlockageType::IpBan
+        );
     }
 }

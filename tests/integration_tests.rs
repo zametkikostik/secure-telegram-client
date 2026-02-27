@@ -1,9 +1,9 @@
 //! Интеграционные тесты для Secure Telegram Client
 
-use secure_telegram_client::crypto::xchacha;
 use secure_telegram_client::crypto::dh;
+use secure_telegram_client::crypto::xchacha;
 use secure_telegram_client::obfs::obfs4::Obfs4Transformer;
-use secure_telegram_client::stego::lsb::{LsbSteganography, generate_test_image};
+use secure_telegram_client::stego::lsb::{generate_test_image, LsbSteganography};
 
 /// Тест полного цикла шифрования/расшифрования
 #[test]

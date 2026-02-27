@@ -13,7 +13,7 @@
 //!           Авто-переключение при блокировке
 //! ```
 
-use anyhow::{Result, Context, anyhow};
+use anyhow::{anyhow, Context, Result};
 use serde::{Deserialize, Serialize};
 use std::net::SocketAddr;
 use std::time::Duration;
@@ -124,12 +124,16 @@ impl TransportManager {
                 }
                 Err(e) => {
                     log::warn!("Транспорт {:?} не удался: {}", transport.transport_type, e);
-                    
+
                     // Проверка на блокировку
-                    if self.blockage_detector.is_blocked(&transport.transport_type).await {
+                    if self
+                        .blockage_detector
+                        .is_blocked(&transport.transport_type)
+                        .await
+                    {
                         log::warn!("Транспорт заблокирован, пробуем следующий");
                     }
-                    
+
                     last_error = Some(e);
                 }
             }
@@ -154,7 +158,11 @@ impl TransportManager {
                 Box::new(tcp_stream)
             }
 
-            TransportType::Socks5 { proxy_addr, username, password } => {
+            TransportType::Socks5 {
+                proxy_addr,
+                username,
+                password,
+            } => {
                 let socks_stream = if username.is_some() && password.is_some() {
                     tokio::time::timeout(
                         timeout,
@@ -175,7 +183,11 @@ impl TransportManager {
                 Box::new(ProxyStream::Socks5(socks_stream))
             }
 
-            TransportType::Shadowsocks { server_addr, method, password } => {
+            TransportType::Shadowsocks {
+                server_addr,
+                method,
+                password,
+            } => {
                 // В реальной реализации здесь будет подключение через shadowsocks-crypto
                 log::warn!("Shadowsocks транспорт требует дополнительной реализации");
                 return Err(anyhow!("Shadowsocks не реализован"));
@@ -187,13 +199,16 @@ impl TransportManager {
                 return Err(anyhow!("MTProto не реализован"));
             }
 
-            TransportType::Obfs4 { bridge_addr, public_key } => {
+            TransportType::Obfs4 {
+                bridge_addr,
+                public_key,
+            } => {
                 // obfs4 обфускация
                 let mut obfs4_client = crate::network::obfs4::Obfs4Client::new(
                     bridge_addr.clone(),
                     public_key.clone(),
                 )?;
-                
+
                 let stream = obfs4_client.connect().await?;
                 Box::new(ProxyStream::Obfs4(stream))
             }
@@ -230,12 +245,18 @@ impl TransportManager {
     }
 
     /// Тестирование всех транспортов
-    pub async fn test_all_transports(&mut self, test_url: &str) -> Vec<(TransportType, bool, Duration)> {
+    pub async fn test_all_transports(
+        &mut self,
+        test_url: &str,
+    ) -> Vec<(TransportType, bool, Duration)> {
         let mut results = Vec::new();
 
         for transport in &self.transports {
             let start = std::time::Instant::now();
-            let success = self.connect_via_transport(transport, test_url).await.is_ok();
+            let success = self
+                .connect_via_transport(transport, test_url)
+                .await
+                .is_ok();
             let duration = start.elapsed();
 
             results.push((transport.transport_type.clone(), success, duration));
@@ -332,7 +353,8 @@ impl BlockageDetector {
 
     /// Отметка транспорта как заблокированного
     pub fn mark_as_blocked(&mut self, transport: TransportType) {
-        self.blocked_cache.insert(transport, std::time::Instant::now());
+        self.blocked_cache
+            .insert(transport, std::time::Instant::now());
     }
 
     /// Анализ типа блокировки

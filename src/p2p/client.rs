@@ -41,12 +41,12 @@ impl P2PClient {
     /// Запуск P2P клиента
     pub async fn run(&mut self) -> Result<()> {
         log::warn!("P2P функционал требует реализации");
-        
+
         // В реальной реализации здесь будет:
         // 1. Инициализация libp2p swarm
         // 2. Подключение к bootstrap пирам
         // 3. Обработка gossipsub сообщений
-        
+
         Ok(())
     }
 
@@ -55,7 +55,7 @@ impl P2PClient {
         if !self.enabled {
             return Err(anyhow::anyhow!("P2P клиент не включен"));
         }
-        
+
         log::warn!("Отправка сообщения требует реализации");
         Ok(())
     }

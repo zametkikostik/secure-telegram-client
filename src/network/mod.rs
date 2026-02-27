@@ -7,23 +7,23 @@
 //! - DNS over HTTPS
 //! - Менеджер прокси
 
-pub mod transport;
-pub mod proxy_manager;
 pub mod blockage_detector;
+pub mod dns_over_https;
 pub mod dns_resolver;
 pub mod obfs4;
+pub mod proxy_manager;
 pub mod shadowsocks;
 pub mod tls_fingerprint;
-pub mod dns_over_https;
+pub mod transport;
 
-pub use transport::{TransportManager, TransportConfig, TransportType};
-pub use proxy_manager::ProxyManager;
-pub use blockage_detector::{BlockageDetector, BlockageManager, BlockageType, BlockageResult};
+pub use blockage_detector::{BlockageDetector, BlockageManager, BlockageResult, BlockageType};
+pub use dns_over_https::{DnsBlockageDetector, DohClient};
 pub use dns_resolver::DnsResolver;
-pub use obfs4::{Obfs4Client, Obfs4Stream, Obfs4Bridge};
-pub use shadowsocks::{ShadowsocksTransport, ShadowsocksStream};
+pub use obfs4::{Obfs4Bridge, Obfs4Client, Obfs4Stream};
+pub use proxy_manager::ProxyManager;
+pub use shadowsocks::{ShadowsocksStream, ShadowsocksTransport};
 pub use tls_fingerprint::{TlsFingerprint, TlsFingerprintManager};
-pub use dns_over_https::{DohClient, DnsBlockageDetector};
+pub use transport::{TransportConfig, TransportManager, TransportType};
 
 use anyhow::Result;
 

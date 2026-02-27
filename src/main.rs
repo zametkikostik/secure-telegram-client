@@ -3,19 +3,19 @@
 //! Децентрализованный Telegram клиент с постквантовым шифрованием,
 //! anti-censorship и P2P fallback.
 
+mod cli;
+mod config;
 mod crypto;
+mod network;
 mod obfs;
+mod p2p;
 mod stego;
+mod storage;
 mod tdlib_wrapper;
 mod updater;
-mod config;
-mod cli;
-mod network;
-mod p2p;
-mod storage;
 
-use anyhow::{Result, Context};
-use log::{info, error, warn};
+use anyhow::{Context, Result};
+use log::{error, info, warn};
 use std::env;
 use std::sync::atomic::{AtomicBool, Ordering};
 use tokio::signal;
@@ -26,12 +26,10 @@ static SHUTDOWN: AtomicBool = AtomicBool::new(false);
 #[tokio::main]
 async fn main() -> Result<()> {
     // Инициализация логгера с форматированием
-    env_logger::Builder::from_env(
-        env_logger::Env::default().default_filter_or("info")
-    )
-    .format_timestamp_secs()
-    .format_target(true)
-    .init();
+    env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info"))
+        .format_timestamp_secs()
+        .format_target(true)
+        .init();
 
     info!("🔐 Secure Telegram Client v{}", env!("CARGO_PKG_VERSION"));
     info!("Запуск...");
@@ -47,9 +45,7 @@ async fn main() -> Result<()> {
                     .context("Ошибка проверки обновлений");
             }
             "--update" => {
-                return updater::perform_update()
-                    .await
-                    .context("Ошибка обновления");
+                return updater::perform_update().await.context("Ошибка обновления");
             }
             "--help" | "-h" => {
                 print_help();
@@ -82,51 +78,45 @@ async fn main() -> Result<()> {
     }
 
     // Загрузка конфигурации
-    let config = config::Config::load()
-        .context("Не удалось загрузить конфигурацию")?;
-    
+    let config = config::Config::load().context("Не удалось загрузить конфигурацию")?;
+
     // Валидация конфигурации
     if let Err(e) = config.validate() {
         warn!("Конфигурация невалидна: {}", e);
         warn!("Используется конфигурация по умолчанию. Отредактируйте config.json");
     }
-    
+
     info!("Конфигурация загружена");
 
     // Инициализация криптографии
-    crypto::init()
-        .context("Ошибка инициализации криптографии")?;
+    crypto::init().context("Ошибка инициализации криптографии")?;
     info!("Криптография инициализирована");
 
     // Инициализация обфускации
-    obfs::init()
-        .context("Ошибка инициализации обфускации")?;
-    
+    obfs::init().context("Ошибка инициализации обфускации")?;
+
     // Инициализация стенографии (если включена)
     if config.encryption.steganography_enabled {
-        stego::init()
-            .context("Ошибка инициализации стенографии")?;
+        stego::init().context("Ошибка инициализации стенографии")?;
     }
 
     // Инициализация сетевого модуля
-    network::init()
-        .context("Ошибка инициализации сетевого модуля")?;
+    network::init().context("Ошибка инициализации сетевого модуля")?;
     info!("Сетевой модуль инициализирован");
 
     // Инициализация P2P модуля (если включен)
     if config.p2p.enabled {
-        p2p::init()
-            .context("Ошибка инициализации P2P модуля")?;
+        p2p::init().context("Ошибка инициализации P2P модуля")?;
         info!("P2P модуль инициализирован (fallback режим)");
     }
 
     // Инициализация хранилища
-    storage::init()
-        .context("Ошибка инициализации хранилища")?;
+    storage::init().context("Ошибка инициализации хранилища")?;
     info!("Хранилище инициализировано");
 
     // Подключение к Telegram через TDLib
-    let mut client = tdlib_wrapper::client::TdClient::new(&config).await
+    let mut client = tdlib_wrapper::client::TdClient::new(&config)
+        .await
         .context("Ошибка инициализации TDLib")?;
     info!("TDLib инициализирован");
 
@@ -137,13 +127,16 @@ async fn main() -> Result<()> {
             info!("Получен сигнал завершения (Ctrl+C)");
             SHUTDOWN.store(true, Ordering::Relaxed);
             // Отправляем событие завершения
-            let _ = shutdown_sender.send(tdlib_wrapper::client::TdEvent::ConnectionState { connected: false }).await;
+            let _ = shutdown_sender
+                .send(tdlib_wrapper::client::TdEvent::ConnectionState { connected: false })
+                .await;
         }
     });
 
     // Запуск CLI
     info!("Запуск CLI...");
-    cli::run_cli(&mut client).await
+    cli::run_cli(&mut client)
+        .await
         .context("Ошибка работы CLI")?;
 
     info!("Клиент остановлен");

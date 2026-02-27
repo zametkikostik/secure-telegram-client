@@ -3,20 +3,20 @@
 //! Децентрализованный Telegram клиент с постквантовым шифрованием,
 //! anti-censorship и P2P fallback.
 
-pub mod crypto;
-pub mod obfs;
-pub mod stego;
-pub mod network;
-pub mod p2p;
-pub mod storage;
-pub mod updater;
 pub mod config;
+pub mod crypto;
+pub mod network;
+pub mod obfs;
+pub mod p2p;
+pub mod stego;
+pub mod storage;
 pub mod tdlib_wrapper;
+pub mod updater;
 
 // Re-export main modules for easier access
-pub use crypto::{kyber, xchacha, dh};
+pub use crypto::{dh, kyber, xchacha};
+pub use network::{blockage_detector, dns_resolver, proxy_manager, transport};
 pub use obfs::obfs4;
 pub use stego::lsb;
-pub use network::{transport, blockage_detector, dns_resolver, proxy_manager};
 pub use storage::message_queue;
-pub use updater::{ipfs_updater, github};
+pub use updater::{github, ipfs_updater};

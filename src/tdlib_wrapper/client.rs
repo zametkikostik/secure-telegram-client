@@ -2,15 +2,15 @@
 //!
 //! Обёртка над TDLib для работы с Telegram API.
 
-use anyhow::{Result, anyhow, Context};
 use crate::config::Config;
-use tdlib::{types, create_client, receive};
-use std::sync::Arc;
-use tokio::sync::{mpsc, Mutex, RwLock};
-use log::{info, debug, error, warn, trace};
-use std::time::Duration;
+use anyhow::{anyhow, Context, Result};
+use log::{debug, error, info, trace, warn};
 use std::ffi::CString;
-use std::os::raw::{c_int, c_char};
+use std::os::raw::{c_char, c_int};
+use std::sync::Arc;
+use std::time::Duration;
+use tdlib::{create_client, receive, types};
+use tokio::sync::{mpsc, Mutex, RwLock};
 
 /// Отправка запроса в TDLib (без ожидания ответа)
 fn td_send_request(client_id: i32, request: &str) {
@@ -23,7 +23,7 @@ fn td_send_request(client_id: i32, request: &str) {
 /// Отправка запроса в TDLib с ожиданием ответа через receive
 fn td_send_return(client_id: i32, request: &str) -> String {
     td_send_request(client_id, request);
-    
+
     // Ждём ответ
     for _ in 0..100 {
         std::thread::sleep(Duration::from_millis(10));
@@ -32,7 +32,7 @@ fn td_send_return(client_id: i32, request: &str) -> String {
             return serde_json::to_string(&update).unwrap_or_default();
         }
     }
-    
+
     String::new()
 }
 
@@ -60,7 +60,11 @@ pub enum TdEvent {
     /// Требуется пароль 2FA
     AuthorizationStateWaitPassword { hint: Option<String> },
     /// Новое сообщение
-    NewMessage { chat_id: i64, message_id: i64, text: String },
+    NewMessage {
+        chat_id: i64,
+        message_id: i64,
+        text: String,
+    },
     /// Обновление соединения
     ConnectionState { connected: bool },
     /// Ошибка
@@ -101,13 +105,18 @@ impl TdClient {
         let client_id = create_client();
 
         if client_id < 0 {
-            return Err(anyhow!("Не удалось создать TDLib клиент (код ошибки: {})", client_id));
+            return Err(anyhow!(
+                "Не удалось создать TDLib клиент (код ошибки: {})",
+                client_id
+            ));
         }
 
         info!("TDLib клиент создан (client_id: {})", client_id);
 
         // Определение пути к базе данных
-        let db_path = config.database_path.clone()
+        let db_path = config
+            .database_path
+            .clone()
             .unwrap_or_else(|| "./tdlib_data".to_string());
 
         // Настройка параметров - база данных
@@ -162,16 +171,16 @@ impl TdClient {
         let tx_clone = event_sender.clone();
         let authorized_clone = Arc::new(RwLock::new(false));
         let connected_clone = Arc::new(RwLock::new(false));
-        
+
         let authorized_inner = authorized_clone.clone();
         let connected_inner = connected_clone.clone();
-        
+
         tokio::spawn(async move {
             loop {
                 // Получение событий от TDLib (в реальном режиме)
                 // Здесь используется заглушка - в реальности нужно использовать Client::receive
                 tokio::time::sleep(Duration::from_millis(100)).await;
-                
+
                 // Проверка флага завершения
                 if tx_clone.is_closed() {
                     break;
@@ -251,8 +260,7 @@ impl TdClient {
             "code": code
         });
 
-        self.send_query(&query)
-            .context("Ошибка проверки кода")?;
+        self.send_query(&query).context("Ошибка проверки кода")?;
 
         Ok("Код принят".to_string())
     }
@@ -354,14 +362,15 @@ impl TdClient {
     /// Шифрование сообщения с помощью XChaCha20-Poly1305
     fn encrypt_message(&self, text: &str) -> Result<String> {
         use crate::crypto::xchacha::XChaChaCipher;
-        use base64::{Engine as _, engine::general_purpose};
+        use base64::{engine::general_purpose, Engine as _};
 
         // Генерация ключа из мастер-ключа (в реальности ключ должен храниться securely)
         let key = XChaChaCipher::generate_key();
         let cipher = XChaChaCipher::new(key);
 
         // Шифрование
-        let (nonce, ciphertext) = cipher.encrypt(text.as_bytes())
+        let (nonce, ciphertext) = cipher
+            .encrypt(text.as_bytes())
             .context("Ошибка шифрования сообщения")?;
 
         // Кодирование в base64 для передачи
@@ -379,21 +388,22 @@ impl TdClient {
 
         let mut transformer = Obfs4Transformer::new();
         let obfuscated = transformer.obfuscate(data.as_bytes());
-        
+
         // Base64 кодирование
-        use base64::{Engine as _, engine::general_purpose};
+        use base64::{engine::general_purpose, Engine as _};
         let encoded = general_purpose::STANDARD.encode(&obfuscated);
-        
+
         Ok(format!("[OBF:{}]", encoded))
     }
 
     /// Расшифровка сообщения
     pub fn decrypt_message(&self, encoded: &str) -> Result<String> {
         use crate::crypto::xchacha::XChaChaCipher;
-        use base64::{Engine as _, engine::general_purpose};
+        use base64::{engine::general_purpose, Engine as _};
 
         // Декодирование base64
-        let combined = general_purpose::STANDARD.decode(encoded)
+        let combined = general_purpose::STANDARD
+            .decode(encoded)
             .context("Ошибка декодирования base64")?;
 
         // Извлечение nonce и ciphertext
@@ -409,11 +419,11 @@ impl TdClient {
         let key = XChaChaCipher::generate_key();
         let cipher = XChaChaCipher::new(key);
 
-        let plaintext = cipher.decrypt(nonce, ciphertext)
+        let plaintext = cipher
+            .decrypt(nonce, ciphertext)
             .context("Ошибка расшифровки сообщения")?;
 
-        String::from_utf8(plaintext)
-            .context("Ошибка конвертации в UTF-8")
+        String::from_utf8(plaintext).context("Ошибка конвертации в UTF-8")
     }
 
     /// Получение списка чатов
@@ -432,7 +442,8 @@ impl TdClient {
             "limit": limit
         });
 
-        let response = self.send_query(&query)
+        let response = self
+            .send_query(&query)
             .context("Ошибка получения списка чатов")?;
 
         // Парсинг ответа
@@ -458,7 +469,8 @@ impl TdClient {
             "only_local": false
         });
 
-        let response = self.send_query(&query)
+        let response = self
+            .send_query(&query)
             .with_context(|| format!("Ошибка получения истории чата {}", chat_id))?;
 
         // Парсинг ответа
@@ -469,8 +481,8 @@ impl TdClient {
 
     /// Парсинг ответа с чатами
     fn parse_chats_response(&self, response: &str) -> Result<Vec<ChatInfo>> {
-        let json: serde_json::Value = serde_json::from_str(response)
-            .context("Ошибка парсинга JSON ответа")?;
+        let json: serde_json::Value =
+            serde_json::from_str(response).context("Ошибка парсинга JSON ответа")?;
 
         let mut chats = Vec::new();
 
@@ -492,8 +504,8 @@ impl TdClient {
 
     /// Парсинг ответа с сообщениями
     fn parse_messages_response(&self, response: &str, chat_id: i64) -> Result<Vec<Message>> {
-        let json: serde_json::Value = serde_json::from_str(response)
-            .context("Ошибка парсинга JSON ответа")?;
+        let json: serde_json::Value =
+            serde_json::from_str(response).context("Ошибка парсинга JSON ответа")?;
 
         let mut messages = Vec::new();
 
@@ -503,7 +515,8 @@ impl TdClient {
                     for msg in messages_array {
                         let id = msg["id"].as_i64().unwrap_or(0);
                         let from_user_id = msg["sender_id"]["user_id"].as_i64().unwrap_or(0);
-                        let text = msg["content"]["text"]["text"].as_str()
+                        let text = msg["content"]["text"]["text"]
+                            .as_str()
                             .unwrap_or("")
                             .to_string();
                         let date = msg["date"].as_u64().unwrap_or(0);
@@ -530,7 +543,7 @@ impl TdClient {
 
         *self.authorized.write().await = false;
         *self.connected.write().await = false;
-        
+
         Ok(())
     }
 
@@ -550,8 +563,8 @@ impl TdClient {
                 "authorizationStateReady" => {
                     info!("Авторизация успешна!");
                     *self.authorized.write().await = true;
-                    Some(TdEvent::AuthorizationSuccessful { 
-                        user_id: json["user_id"].as_i64().unwrap_or(0) 
+                    Some(TdEvent::AuthorizationSuccessful {
+                        user_id: json["user_id"].as_i64().unwrap_or(0),
                     })
                 }
                 "authorizationStateWaitCode" => {
@@ -569,11 +582,16 @@ impl TdClient {
                     let message = &json["message"];
                     let chat_id = message["chat_id"].as_i64()?;
                     let message_id = message["id"].as_i64()?;
-                    let text = message["content"]["text"]["text"].as_str()
+                    let text = message["content"]["text"]["text"]
+                        .as_str()
                         .unwrap_or("")
                         .to_string();
 
-                    Some(TdEvent::NewMessage { chat_id, message_id, text })
+                    Some(TdEvent::NewMessage {
+                        chat_id,
+                        message_id,
+                        text,
+                    })
                 }
                 "updateConnectionState" => {
                     let state = json["state"]["@type"].as_str()?;
@@ -593,17 +611,17 @@ impl TdClient {
                     let last_message = json["last_message"]["content"]["text"]["text"]
                         .as_str()
                         .map(|s| s.to_string());
-                    
+
                     Some(TdEvent::Other {
                         event_type: "updateChatLastMessage".to_string(),
-                        data: format!("chat_id: {}, message: {:?}", chat_id, last_message)
+                        data: format!("chat_id: {}, message: {:?}", chat_id, last_message),
                     })
                 }
                 _ => {
                     trace!("Необработанное событие: {}", event_type);
                     Some(TdEvent::Other {
                         event_type: event_type.to_string(),
-                        data: json.to_string()
+                        data: json.to_string(),
                     })
                 }
             }
