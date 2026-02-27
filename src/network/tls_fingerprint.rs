@@ -6,6 +6,7 @@ use anyhow::{Context, Result};
 use std::sync::Arc;
 
 /// TLS Fingerprint эвейшн
+#[derive(Clone)]
 pub struct TlsFingerprint {
     /// JA3 отпечаток для подмены
     ja3_fingerprint: String,
