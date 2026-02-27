@@ -109,7 +109,7 @@ path = "src/lib.rs"
 
 [dev-dependencies]
 criterion = { version = "0.5", features = ["html_reports"] }
-tempfile = "3.9"  # Ограничено для совместимости
+tempfile = "=3.15.0"  # Точно фиксированная версия без getrandom 0.4
 
 [[bench]]
 name = "crypto_bench"
