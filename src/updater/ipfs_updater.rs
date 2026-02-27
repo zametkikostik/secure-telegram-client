@@ -93,7 +93,7 @@ impl IpfsUpdater {
     }
 
     /// Проверка наличия обновлений
-    pub async fn check_for_updates(&self, release_cid: &str) -> Result<Option<ReleaseInfo>> {
+    pub async fn check_for_updates(&self, _release_cid: &str) -> Result<Option<ReleaseInfo>> {
         // Заглушка
         log::warn!("IPFS проверка обновлений требует реализации");
         Ok(None)
