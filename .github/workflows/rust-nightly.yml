@@ -1,0 +1,46 @@
+name: Rust Nightly Build
+
+on:
+  workflow_dispatch:  # Ручной запуск
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Rust nightly
+      run: |
+        rustup default nightly
+        rustup update nightly
+
+    - name: Show Rust version
+      run: |
+        rustc --version
+        cargo --version
+
+    - name: Cargo check
+      run: cargo check --all
+
+    - name: Cargo fmt
+      run: cargo fmt --all -- --check
+
+    - name: Cargo clippy
+      run: cargo clippy --all-targets --all-features -- -D warnings
+
+    - name: Cargo test
+      run: cargo test --all
+
+    - name: Build release
+      run: cargo build --release
+
+    - name: Upload binary
+      uses: actions/upload-artifact@v4
+      with:
+        name: secure-tg-linux
+        path: target/release/secure-tg
+        retention-days: 30
