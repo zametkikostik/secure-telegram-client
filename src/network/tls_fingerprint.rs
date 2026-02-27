@@ -152,7 +152,7 @@ impl TlsFingerprintManager {
         use rand::seq::SliceRandom;
         let mut rng = rand::thread_rng();
         if let Some(fp) = self.fingerprints.choose(&mut rng) {
-            self.current_fingerprint = fp.clone();
+            self.current_fingerprint = fp.to_owned();
             log::info!("TLS fingerprint ротирован");
         }
     }

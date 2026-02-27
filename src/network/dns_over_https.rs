@@ -239,10 +239,11 @@ impl DnsBlockageDetector {
     /// Тестирование всех доменов
     pub async fn test_all_domains(&mut self) -> Vec<(String, bool)> {
         let mut results = Vec::new();
+        let domains: Vec<String> = self.test_domains.clone();
 
-        for domain in &self.test_domains {
-            let is_blocked = self.is_blocked(domain).await.unwrap_or(false);
-            results.push((domain.clone(), is_blocked));
+        for domain in domains {
+            let is_blocked = self.is_blocked(&domain).await.unwrap_or(false);
+            results.push((domain, is_blocked));
         }
 
         results
