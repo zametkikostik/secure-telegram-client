@@ -5,7 +5,7 @@ edition = "2021"
 authors = ["Secure Telegram Team"]
 description = "Decentralized Telegram client with post-quantum encryption, anti-censorship and P2P fallback"
 license = "MIT"
-repository = "https://github.com/zametkikostik/secure-telegram-client"
+repository = "https://github.com/secure-telegram-team/secure-telegram-client"
 keywords = ["telegram", "privacy", "anti-censorship", "p2p", "encryption"]
 categories = ["network-programming", "cryptography", "command-line-utilities"]
 
