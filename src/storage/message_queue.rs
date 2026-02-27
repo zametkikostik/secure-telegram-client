@@ -269,6 +269,41 @@ impl MessageQueue {
         }
     }
 
+    /// Обновление состояния синхронизации
+    pub fn update_sync_state(&self, key: &str, value: &str) -> Result<bool> {
+        let now = chrono::Utc::now().timestamp();
+        
+        let rows_changed = self.conn.execute(
+            "UPDATE sync_state SET value = ?1, updated_at = ?2 WHERE key = ?3",
+            params![value, now, key],
+        )?;
+
+        Ok(rows_changed > 0)
+    }
+
+    /// Удаление состояния синхронизации
+    pub fn delete_sync_state(&self, key: &str) -> Result<()> {
+        self.conn.execute(
+            "DELETE FROM sync_state WHERE key = ?1",
+            params![key],
+        )?;
+        Ok(())
+    }
+
+    /// Получение всех состояний синхронизации
+    pub fn get_all_sync_states(&self) -> Result<Vec<(String, String, i64)>> {
+        let mut stmt = self.conn.prepare(
+            "SELECT key, value, updated_at FROM sync_state ORDER BY updated_at DESC"
+        )?;
+
+        let states = stmt.query_map([], |row| {
+            Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?, row.get::<_, i64>(2)?))
+        })?;
+
+        let result: Vec<(String, String, i64)> = states.filter_map(|r| r.ok()).collect();
+        Ok(result)
+    }
+
     fn status_to_string(status: &MessageStatus) -> &'static str {
         match status {
             MessageStatus::Pending => "pending",
