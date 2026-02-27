@@ -13,7 +13,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  RUST_VERSION: "1.80"  # Обновлено до 1.80 для поддержки edition2024
+  RUST_VERSION: "nightly"  # Nightly для поддержки edition2024
   CARGO_INCREMENTAL: 0
   CARGO_NET_RETRY: 10
   RUSTUP_MAX_RETRIES: 10
