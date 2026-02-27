@@ -11,12 +11,14 @@ pub mod proxy_manager;
 pub mod blockage_detector;
 pub mod dns_resolver;
 pub mod obfs4;
+pub mod shadowsocks;
 
 pub use transport::{TransportManager, TransportConfig, TransportType};
 pub use proxy_manager::ProxyManager;
 pub use blockage_detector::{BlockageDetector, BlockageManager, BlockageType, BlockageResult};
 pub use dns_resolver::DnsResolver;
 pub use obfs4::{Obfs4Client, Obfs4Stream, Obfs4Bridge};
+pub use shadowsocks::{ShadowsocksTransport, ShadowsocksStream};
 
 use anyhow::Result;
 
@@ -26,6 +28,7 @@ pub fn init() -> Result<()> {
     log::info!("  - Transport Manager: готов");
     log::info!("  - Blockage Detector: готов");
     log::info!("  - obfs4 транспорт: готов");
+    log::info!("  - Shadowsocks транспорт: готов");
     log::info!("  - DNS Resolver: готов");
     Ok(())
 }
