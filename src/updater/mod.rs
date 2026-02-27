@@ -86,30 +86,36 @@ pub async fn perform_update() -> Result<()> {
 
 /// Определение целевой платформы
 fn get_target() -> &'static str {
-    #[cfg(target_os = "linux")]
-    #[cfg(target_arch = "x86_64")]
-    return "x86_64-unknown-linux-gnu";
-    
-    #[cfg(target_os = "linux")]
-    #[cfg(target_arch = "aarch64")]
-    return "aarch64-unknown-linux-gnu";
-    
-    #[cfg(target_os = "macos")]
-    #[cfg(target_arch = "x86_64")]
-    return "x86_64-apple-darwin";
-    
-    #[cfg(target_os = "macos")]
-    #[cfg(target_arch = "aarch64")]
-    return "aarch64-apple-darwin";
-    
-    #[cfg(target_os = "windows")]
-    #[cfg(target_arch = "x86_64")]
-    return "x86_64-pc-windows-msvc";
-    
-    #[cfg(target_os = "windows")]
-    #[cfg(target_arch = "aarch64")]
-    return "aarch64-pc-windows-msvc";
-    
+    #[cfg(all(target_os = "linux", target_arch = "x86_64"))]
+    {
+        return "x86_64-unknown-linux-gnu";
+    }
+
+    #[cfg(all(target_os = "linux", target_arch = "aarch64"))]
+    {
+        return "aarch64-unknown-linux-gnu";
+    }
+
+    #[cfg(all(target_os = "macos", target_arch = "x86_64"))]
+    {
+        return "x86_64-apple-darwin";
+    }
+
+    #[cfg(all(target_os = "macos", target_arch = "aarch64"))]
+    {
+        return "aarch64-apple-darwin";
+    }
+
+    #[cfg(all(target_os = "windows", target_arch = "x86_64"))]
+    {
+        return "x86_64-pc-windows-msvc";
+    }
+
+    #[cfg(all(target_os = "windows", target_arch = "aarch64"))]
+    {
+        return "aarch64-pc-windows-msvc";
+    }
+
     "unknown"
 }
 

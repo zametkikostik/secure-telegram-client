@@ -41,7 +41,7 @@ async fn main() -> Result<()> {
     }
     
     // Загрузка конфигурации
-    let config = config::load()?;
+    let config = config::Config::load()?;
     info!("Конфигурация загружена");
     
     // Инициализация криптографии

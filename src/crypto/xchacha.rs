@@ -4,7 +4,8 @@
 //! Использует 256-битный ключ и 192-битный nonce.
 
 use anyhow::{Result, anyhow};
-use chacha20poly1305::{XChaCha20Poly1305, KeyInit, Nonce};
+use chacha20poly1305::{XChaCha20Poly1305, KeyInit, XNonce};
+use chacha20poly1305::aead::Aead;
 use rand::rngs::OsRng;
 use rand::RngCore;
 
@@ -25,73 +26,54 @@ impl XChaChaCipher {
     pub fn new(key: [u8; XCHACHA_KEY_SIZE]) -> Self {
         Self { key }
     }
-    
+
     /// Генерация случайного ключа
     pub fn generate_key() -> [u8; XCHACHA_KEY_SIZE] {
         let mut key = [0u8; XCHACHA_KEY_SIZE];
         OsRng.fill_bytes(&mut key);
         key
     }
-    
+
     /// Шифрование данных
     /// Возвращает (nonce, ciphertext)
     pub fn encrypt(&self, plaintext: &[u8]) -> Result<(Vec<u8>, Vec<u8>)> {
         log::debug!("Шифрование XChaCha20-Poly1305...");
-        
+
         let cipher = XChaCha20Poly1305::new_from_slice(&self.key)
             .map_err(|e| anyhow!("Ошибка инициализации шифра: {}", e))?;
-        
-        // Генерация случайного nonce
+
+        // Генерация случайного nonce (24 байта для XChaCha)
         let mut nonce_bytes = [0u8; XCHACHA_NONCE_SIZE];
         OsRng.fill_bytes(&mut nonce_bytes);
-        let nonce = Nonce::from_slice(&nonce_bytes);
-        
+        let nonce = XNonce::from_slice(&nonce_bytes);
+
         // Шифрование
         let ciphertext = cipher.encrypt(nonce, plaintext)
             .map_err(|e| anyhow!("Ошибка шифрования: {}", e))?;
-        
+
         log::debug!("Данные зашифрованы ({} байт)", ciphertext.len());
-        
+
         Ok((nonce_bytes.to_vec(), ciphertext))
     }
-    
+
     /// Расшифровка данных
     pub fn decrypt(&self, nonce: &[u8], ciphertext: &[u8]) -> Result<Vec<u8>> {
         if nonce.len() != XCHACHA_NONCE_SIZE {
             return Err(anyhow!("Неверный размер nonce"));
         }
-        
+
         log::debug!("Расшифровка XChaCha20-Poly1305...");
-        
+
         let cipher = XChaCha20Poly1305::new_from_slice(&self.key)
             .map_err(|e| anyhow!("Ошибка инициализации шифра: {}", e))?;
-        
-        let nonce = Nonce::from_slice(nonce);
-        
+
+        let nonce = XNonce::from_slice(nonce);
         let plaintext = cipher.decrypt(nonce, ciphertext.as_ref())
             .map_err(|e| anyhow!("Ошибка расшифровки: {}", e))?;
-        
+
         log::debug!("Данные расшифрованы ({} байт)", plaintext.len());
-        
+
         Ok(plaintext)
-    }
-    
-    /// Шифрование с ассоциированными данными (AEAD)
-    pub fn encrypt_with_aad(&self, plaintext: &[u8], aad: &[u8]) -> Result<(Vec<u8>, Vec<u8>)> {
-        log::debug!("Шифрование XChaCha20-Poly1305 с AAD...");
-        
-        let cipher = XChaCha20Poly1305::new_from_slice(&self.key)
-            .map_err(|e| anyhow!("Ошибка инициализации шифра: {}", e))?;
-        
-        let mut nonce_bytes = [0u8; XCHACHA_NONCE_SIZE];
-        OsRng.fill_bytes(&mut nonce_bytes);
-        let nonce = Nonce::from_slice(&nonce_bytes);
-        
-        use chacha20poly1305::Aead;
-        let ciphertext = cipher.encrypt_encrypt(nonce, plaintext, aad)
-            .map_err(|e| anyhow!("Ошибка шифрования: {}", e))?;
-        
-        Ok((nonce_bytes.to_vec(), ciphertext))
     }
 }
 

@@ -71,7 +71,7 @@ impl Client {
     }
     
     /// Отправка сообщения со стенографией
-    pub async fn send_stego_message(&self, chat_id: i64, text: &str, image_path: &str) -> Result<()> {
+    pub async fn send_stego_message(&self, chat_id: i64, _text: &str, _image_path: &str) -> Result<()> {
         if !self.authorized {
             return Err(anyhow!("Клиент не авторизован"));
         }
@@ -108,7 +108,7 @@ impl Client {
     }
     
     /// Отправка файла
-    pub async fn upload_file(&self, chat_id: i64, data: &[u8]) -> Result<()> {
+    pub async fn upload_file(&self, chat_id: i64, _data: &[u8]) -> Result<()> {
         if !self.authorized {
             return Err(anyhow!("Клиент не авторизован"));
         }
