@@ -15,6 +15,7 @@ Cargo.lock
 # Config
 config.json
 *.local
+config.example.json
 
 # Logs
 *.log
