@@ -41,16 +41,19 @@ jobs:
         sdkmanager --install "platforms;android-${{ env.ANDROID_VERSION }}"
         sdkmanager --install "build-tools;${{ env.BUILD_TOOLS_VERSION }}"
         sdkmanager --install "platform-tools"
-        sdkmanager --install "ndk;25.2.9519653"
+        echo "y" | sdkmanager --licenses || true
 
     - name: Setup Gradle
       uses: gradle/gradle-build-action@v3
 
+    - name: Make Gradle wrapper executable
+      working-directory: ./android
+      run: chmod +x gradlew
+
     - name: Build APK with Gradle
       working-directory: ./android
       run: |
-        chmod +x gradlew
-        ./gradlew assembleFdroidDebug --no-daemon
+        ./gradlew assembleFdroidDebug --no-daemon --stacktrace
 
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
@@ -91,14 +94,18 @@ jobs:
       run: |
         sdkmanager --install "platforms;android-${{ env.ANDROID_VERSION }}"
         sdkmanager --install "build-tools;${{ env.BUILD_TOOLS_VERSION }}"
+        echo "y" | sdkmanager --licenses || true
 
     - name: Setup Gradle
       uses: gradle/gradle-build-action@v3
 
+    - name: Make Gradle wrapper executable
+      working-directory: ./android
+      run: chmod +x gradlew
+
     - name: Build Release APK
       working-directory: ./android
       run: |
-        chmod +x gradlew
         ./gradlew assembleFdroidRelease --no-daemon
 
     - name: Upload Release APK
