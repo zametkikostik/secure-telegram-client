@@ -2,11 +2,9 @@
 //!
 //! Позволяет пользователю взаимодействовать с клиентом через консоль.
 
-use crate::tdlib_wrapper::client::{TdClient, TdEvent};
+use crate::tdlib_wrapper::client::TdClient;
 use anyhow::Result;
-use log::{error, info};
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
-use tokio::sync::mpsc;
 
 /// CLI команда
 #[derive(Debug, Clone)]
@@ -117,10 +115,10 @@ pub async fn run_cli(client: &mut TdClient) -> Result<()> {
     let mut reader = BufReader::new(stdin);
 
     // Получаем канал событий
-    let mut event_receiver = client.get_event_receiver().await;
+    let _event_receiver = client.get_event_receiver().await;
 
     // Отправитель событий
-    let event_sender = client.get_event_sender();
+    let _event_sender = client.get_event_sender();
 
     // Запускаем обработчик событий в фоне
     let event_handle = tokio::spawn(async move {

@@ -4,7 +4,6 @@
 
 pub mod client;
 
-pub use client::{P2PClient, P2PConfig, P2PMessage};
 
 use anyhow::Result;
 

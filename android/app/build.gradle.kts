@@ -10,7 +10,7 @@ android {
     defaultConfig {
         applicationId = "com.example.securemessenger.fdroid"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 35  // Обновлено для Android 15
         versionCode = 2
         versionName = "0.2.0"
 

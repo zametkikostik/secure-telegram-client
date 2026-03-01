@@ -5,7 +5,7 @@
 use anyhow::{Context, Result};
 use reqwest::Client;
 use serde::Deserialize;
-use std::net::{IpAddr, SocketAddr};
+use std::net::IpAddr;
 use std::time::Duration;
 
 /// DoH клиент
@@ -18,14 +18,22 @@ pub struct DohClient {
 /// DNS ответ
 #[derive(Debug, Clone, Deserialize)]
 pub struct DohResponse {
-    pub Status: u32,
-    pub TC: bool,
-    pub RD: bool,
-    pub RA: bool,
-    pub AD: bool,
-    pub CD: bool,
-    pub Question: Vec<DnsQuestion>,
-    pub Answer: Option<Vec<DnsRecord>>,
+    #[serde(rename = "Status")]
+    pub status: u32,
+    #[serde(rename = "TC")]
+    pub tc: bool,
+    #[serde(rename = "RD")]
+    pub rd: bool,
+    #[serde(rename = "RA")]
+    pub ra: bool,
+    #[serde(rename = "AD")]
+    pub ad: bool,
+    #[serde(rename = "CD")]
+    pub cd: bool,
+    #[serde(rename = "Question")]
+    pub question: Vec<DnsQuestion>,
+    #[serde(rename = "Answer")]
+    pub answer: Option<Vec<DnsRecord>>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -40,7 +48,8 @@ pub struct DnsRecord {
     pub name: String,
     #[serde(rename = "type")]
     pub rtype: u16,
-    pub TTL: u32,
+    #[serde(rename = "TTL")]
+    pub ttl: u32,
     pub data: String,
 }
 
@@ -119,13 +128,13 @@ impl DohClient {
             .context("Ошибка парсинга DoH ответа")?;
 
         // Проверка статуса
-        if doh_response.Status != 0 {
-            anyhow::bail!("DNS ошибка: статус {}", doh_response.Status);
+        if doh_response.status != 0 {
+            anyhow::bail!("DNS ошибка: статус {}", doh_response.status);
         }
 
         // Извлечение IP адресов
         let mut ips = Vec::new();
-        if let Some(answers) = &doh_response.Answer {
+        if let Some(answers) = &doh_response.answer {
             for record in answers {
                 if record.rtype == 1 {
                     // A record

@@ -15,7 +15,7 @@ mod tdlib_wrapper;
 mod updater;
 
 use anyhow::{Context, Result};
-use log::{error, info, warn};
+use log::{info, warn};
 use std::env;
 use std::sync::atomic::{AtomicBool, Ordering};
 use tokio::signal;

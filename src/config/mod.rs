@@ -374,7 +374,7 @@ mod tests {
         assert!(config.validate().is_err());
 
         // С полным конфигом
-        config.api_hash = "0123456789abcdef0123456789abcdef";
+        config.api_hash = "0123456789abcdef0123456789abcdef".to_string();
         assert!(config.validate().is_ok());
     }
 
@@ -382,7 +382,7 @@ mod tests {
     fn test_proxy_validation() {
         let mut config = Config::default();
         config.api_id = 123456;
-        config.api_hash = "0123456789abcdef0123456789abcdef";
+        config.api_hash = "0123456789abcdef0123456789abcdef".to_string();
 
         // Включенный прокси без хоста
         config.proxy.enabled = true;

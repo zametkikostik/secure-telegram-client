@@ -6,7 +6,7 @@
 //! - TLS блокировка (handshake failure)
 //! - DPI детектирование по времени ответа
 
-use anyhow::{Context, Result};
+use anyhow::Result;
 use std::collections::HashMap;
 use std::time::{Duration, Instant};
 use tokio::net::TcpStream;
@@ -113,7 +113,7 @@ impl BlockageDetector {
         // 4. Проверка на DPI по времени ответа
         let dpi_result = self.check_dpi_detection(target).await;
 
-        let check_time = start.elapsed();
+        let _check_time = start.elapsed();
         self.cache
             .insert(target.to_string(), (dpi_result.clone(), Instant::now()));
 

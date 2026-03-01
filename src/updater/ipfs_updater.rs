@@ -8,10 +8,9 @@
 
 use anyhow::{anyhow, Context, Result};
 use ed25519_dalek::{Signature, Verifier, VerifyingKey};
-use ipfs_api_backend_hyper::{IpfsApi, IpfsClient};
+use ipfs_api_backend_hyper::IpfsClient;
 use serde::{Deserialize, Serialize};
-use std::path::{Path, PathBuf};
-use std::str::FromStr;
+use std::path::Path;
 
 /// CID (Content Identifier) для IPFS
 type Cid = String;
@@ -86,7 +85,7 @@ impl IpfsUpdater {
     }
 
     /// Получение последней версии из IPFS
-    pub async fn get_latest_release(&self, release_cid: &str) -> Result<ReleaseInfo> {
+    pub async fn get_latest_release(&self, _release_cid: &str) -> Result<ReleaseInfo> {
         // Заглушка - IPFS интеграция требует дополнительной реализации
         log::warn!("IPFS загрузка требует реализации");
         Err(anyhow::anyhow!("IPFS не реализован"))
@@ -237,14 +236,16 @@ impl Default for UpdaterConfig {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ed25519_dalek::SigningKey;
-    use rand::rngs::OsRng;
+    use ed25519_dalek::{SigningKey, Signer, VerifyingKey};
+    use rand::{rngs::OsRng, RngCore};
 
     #[test]
     fn test_signature_generation() {
         // Генерация пары ключей для тестов
-        let signing_key = SigningKey::generate(&mut OsRng);
-        let verifying_key = signing_key.verifying_key();
+        let mut seed = [0u8; 32];
+        OsRng.fill_bytes(&mut seed);
+        let signing_key = SigningKey::from_bytes(&seed);
+        let verifying_key: VerifyingKey = signing_key.verifying_key();
 
         // Подпись данных
         let data = b"test release data";

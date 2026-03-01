@@ -215,15 +215,18 @@ mod tests {
         // Вывод должен быть разным из-за разных префиксов
         assert_ne!(obs1, obs2);
 
-        // Оба должны деобфусцироваться одинаково
-        let mut recv = Obfs4Transformer::with_seed(transformer.seed);
-        recv.packet_counter = transformer.packet_counter - 2;
+        // Деобфускация первого сообщения
+        let mut recv1 = Obfs4Transformer::with_seed(transformer.seed);
+        recv1.packet_counter = 0; // Первое сообщение
+        let dec1 = recv1.deobfuscate(&obs1).unwrap();
 
-        let dec1 = recv.deobfuscate(&obs1).unwrap();
-        recv.packet_counter += 1;
-        let dec2 = recv.deobfuscate(&obs2).unwrap();
+        // Деобфускация второго сообщения
+        let mut recv2 = Obfs4Transformer::with_seed(transformer.seed);
+        recv2.packet_counter = 1; // Второе сообщение
+        let dec2 = recv2.deobfuscate(&obs2).unwrap();
 
         assert_eq!(dec1, dec2);
+        assert_eq!(data.to_vec(), dec1);
     }
 
     #[test]

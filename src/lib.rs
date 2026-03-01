@@ -3,6 +3,8 @@
 //! Децентрализованный Telegram клиент с постквантовым шифрованием,
 //! anti-censorship и P2P fallback.
 
+#![allow(dead_code)] // Многие компоненты - заглушки для будущего функционала
+
 pub mod config;
 pub mod crypto;
 pub mod network;

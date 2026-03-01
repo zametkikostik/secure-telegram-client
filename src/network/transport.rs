@@ -184,16 +184,16 @@ impl TransportManager {
             }
 
             TransportType::Shadowsocks {
-                server_addr,
-                method,
-                password,
+                server_addr: _,
+                method: _,
+                password: _,
             } => {
                 // В реальной реализации здесь будет подключение через shadowsocks-crypto
                 log::warn!("Shadowsocks транспорт требует дополнительной реализации");
                 return Err(anyhow!("Shadowsocks не реализован"));
             }
 
-            TransportType::MtProto { proxy_addr, secret } => {
+            TransportType::MtProto { proxy_addr: _, secret: _ } => {
                 // В реальной реализации здесь будет подключение через mtproto-proxy
                 log::warn!("MTProto транспорт требует дополнительной реализации");
                 return Err(anyhow!("MTProto не реализован"));

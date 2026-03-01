@@ -25,7 +25,7 @@
 
 ### 2️⃣ Настройки репозитория
 
-**URL**: https://github.com/zametkikostik/secure-telegram-client/settings
+**URL**: https://github.com/secure-telegram-team/secure-telegram-client/settings
 
 **Измените:**
 
@@ -128,16 +128,16 @@ git push --force --tags origin 'refs/heads/*'
 
 После всех изменений проверьте:
 
-1. **Профиль**: https://github.com/zametkikostik
+1. **Профиль**: https://github.com/secure-telegram-team
    - ❌ Нет реального имени
    - ❌ Нет локации
    - ❌ Нет email
 
-2. **Репозиторий**: https://github.com/zametkikostik/secure-telegram-client
+2. **Репозиторий**: https://github.com/secure-telegram-team/secure-telegram-client
    - ✅ В описании нет личных данных
    - ✅ В коде нет личных данных
 
-3. **Коммиты**: https://github.com/zametkikostik/secure-telegram-client/commits/master
+3. **Коммиты**: https://github.com/secure-telegram-team/secure-telegram-client/commits/master
    - ✅ Author: `Secure Telegram Team`
    - ✅ Email: `secure-tg@users.noreply.github.com`
 

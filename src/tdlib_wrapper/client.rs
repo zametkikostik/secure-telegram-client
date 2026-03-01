@@ -9,15 +9,13 @@ use std::ffi::CString;
 use std::os::raw::{c_char, c_int};
 use std::sync::Arc;
 use std::time::Duration;
-use tdlib::{create_client, receive, types};
+use tdlib::{create_client, receive};
 use tokio::sync::{mpsc, Mutex, RwLock};
 
 /// Отправка запроса в TDLib (без ожидания ответа)
 fn td_send_request(client_id: i32, request: &str) {
     let cstring = CString::new(request).unwrap();
-    unsafe {
-        tdjson_send(client_id, cstring.as_ptr());
-    }
+    tdjson_send(client_id, cstring.as_ptr());
 }
 
 /// Отправка запроса в TDLib с ожиданием ответа через receive
@@ -172,8 +170,8 @@ impl TdClient {
         let authorized_clone = Arc::new(RwLock::new(false));
         let connected_clone = Arc::new(RwLock::new(false));
 
-        let authorized_inner = authorized_clone.clone();
-        let connected_inner = connected_clone.clone();
+        let _authorized_inner = authorized_clone.clone();
+        let _connected_inner = connected_clone.clone();
 
         tokio::spawn(async move {
             loop {

@@ -8,8 +8,7 @@
 use anyhow::{anyhow, Context, Result};
 use rand::{rngs::OsRng, RngCore};
 use sha3::{Digest, Sha3_256};
-use std::time::{Duration, Instant};
-use tokio::io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt, ReadHalf, WriteHalf};
+use tokio::io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt};
 use tokio::net::TcpStream;
 use x25519_dalek::{PublicKey, StaticSecret};
 

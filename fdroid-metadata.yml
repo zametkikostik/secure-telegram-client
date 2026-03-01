@@ -4,8 +4,8 @@ Categories:
 
 License: MIT
 AuthorName: Secure Telegram Team
-SourceCode: https://github.com/zametkikostik/secure-telegram-client
-IssueTracker: https://github.com/zametkikostik/secure-telegram-client/issues
+SourceCode: https://github.com/secure-telegram-team/secure-telegram-client
+IssueTracker: https://github.com/secure-telegram-team/secure-telegram-client/issues
 
 AutoName: Secure Telegram Client
 
@@ -27,7 +27,7 @@ Description: |-
   важной коммуникации.
 
 RepoType: git
-Repo: https://github.com/zametkikostik/secure-telegram-client
+Repo: https://github.com/secure-telegram-team/secure-telegram-client
 
 Builds:
   - versionName: 0.2.0

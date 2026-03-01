@@ -38,7 +38,7 @@ pub extern "system" fn Java_com_example_securemessenger_rust_Updater_checkForUpd
     // Заглушка - будет реализовано с IPFS
     let result = "";
     let java_string = env.new_string(result).unwrap();
-    java_string.into_inner()
+    java_string.into_raw()
 }
 
 /// Подключение через obfs4
@@ -62,7 +62,7 @@ pub extern "system" fn Java_com_example_securemessenger_rust_Transport_checkBloc
 ) -> jstring {
     let result = "ok";
     let java_string = env.new_string(result).unwrap();
-    java_string.into_inner()
+    java_string.into_raw()
 }
 
 /// Генерация пары ключей
@@ -74,7 +74,7 @@ pub extern "system" fn Java_com_example_securemessenger_rust_Crypto_generateKeyP
     // Заглушка
     let result = "placeholder_public_key:placeholder_secret_key";
     let java_string = env.new_string(result).unwrap();
-    java_string.into_inner()
+    java_string.into_raw()
 }
 
 /// Подпись сообщения
@@ -87,7 +87,7 @@ pub extern "system" fn Java_com_example_securemessenger_rust_Crypto_signMessage(
 ) -> jstring {
     let result = "placeholder_signature";
     let java_string = env.new_string(result).unwrap();
-    java_string.into_inner()
+    java_string.into_raw()
 }
 
 /// Верификация подписи

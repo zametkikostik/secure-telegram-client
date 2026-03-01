@@ -5,8 +5,8 @@
 pub mod github;
 pub mod ipfs_updater;
 
-use anyhow::{anyhow, Result};
-use log::{info, warn};
+use anyhow::Result;
+use log::info;
 
 /// Имя репозитория на GitHub
 const REPO_OWNER: &str = "YOUR_USERNAME";

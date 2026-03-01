@@ -2,8 +2,7 @@
 //!
 //! Подмена TLS отпечатка для обхода DPI систем
 
-use anyhow::{Context, Result};
-use std::sync::Arc;
+use anyhow::Result;
 
 /// TLS Fingerprint эвейшн
 #[derive(Clone)]

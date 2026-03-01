@@ -7,7 +7,6 @@
 
 pub mod message_queue;
 
-pub use message_queue::{MessageQueue, MessageQueueConfig, MessageStatus, QueuedMessage};
 
 use anyhow::Result;
 

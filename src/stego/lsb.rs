@@ -4,7 +4,7 @@
 //! Изменения незаметны для человеческого глаза.
 
 use anyhow::{anyhow, Result};
-use image::{DynamicImage, ImageBuffer, Rgb, Rgba};
+use image::{DynamicImage, ImageBuffer, Rgb};
 use std::path::Path;
 
 /// Максимальное количество бит на канал
@@ -65,6 +65,7 @@ impl LsbSteganography {
 
                 for channel in 0..CHANNELS {
                     if bit_index >= total_bits {
+                        result.put_pixel(x, y, new_pixel);
                         break 'outer;
                     }
 
@@ -77,6 +78,20 @@ impl LsbSteganography {
                 result.put_pixel(x, y, new_pixel);
             }
         }
+
+        println!("Embedded {} bits, expected {}", bit_index, total_bits);
+        println!("Last 10 embedded bits: {:?}", (0..10).map(|i| self.get_bit(&full_data, full_data.len() * 8 - 10 + i)).collect::<Vec<_>>());
+        
+        // Проверка последнего пикселя
+        let last_bit_index = total_bits - 1;
+        let last_channel = last_bit_index % 3;
+        let last_pixel_index = last_bit_index / 3;
+        let last_x = (last_pixel_index % width as usize) as u32;
+        let last_y = (last_pixel_index / width as usize) as u32;
+        let last_pixel = result.get_pixel(last_x, last_y);
+        println!("Last bit: index={}, x={}, y={}, channel={}, pixel={:?}", 
+                 last_bit_index, last_x, last_y, last_channel, last_pixel);
+        println!("Last pixel channel {} LSB: {}", last_channel, last_pixel[last_channel] & 1);
 
         log::debug!(
             "Данные встроены (использовано {} из {} байт)",
@@ -147,6 +162,9 @@ impl LsbSteganography {
                 }
             }
         }
+
+        println!("Extracted {} bits, expected {}", all_bits.len(), total_bits_to_extract);
+        println!("Last 10 bits: {:?}", &all_bits[all_bits.len().saturating_sub(10)..]);
 
         // Пропуск заголовка и конвертация в байты
         let data_bits = &all_bits[32..];
@@ -231,13 +249,24 @@ impl LsbSteganography {
                 if i * 8 + j < bits.len() {
                     byte = (byte << 1) | bits[i * 8 + j];
                 } else {
-                    byte <<= 1;
+                    byte = byte << 1; // Сдвиг с заполнением нулём
                 }
             }
             bytes.push(byte);
         }
 
         bytes
+    }
+
+    /// Конвертация байтов в биты
+    fn bytes_to_bits(&self, data: &[u8]) -> Vec<u8> {
+        let mut bits = Vec::with_capacity(data.len() * 8);
+        for &byte in data {
+            for i in 0..8 {
+                bits.push((byte >> (7 - i)) & 1);
+            }
+        }
+        bits
     }
 }
 
@@ -300,6 +329,17 @@ mod tests {
         let stego_image = stego.embed(&test_image, data).unwrap();
         let extracted = stego.extract(&stego_image).unwrap();
 
+        println!("Original: {:?}", data);
+        println!("Extracted: {:?}", extracted);
+        println!("Original last byte: {}", data[data.len() - 1]);
+        println!("Extracted last byte: {}", extracted[extracted.len() - 1]);
+        
+        // Проверка последнего бита
+        let original_last = data[data.len() - 1];
+        let extracted_last = extracted[extracted.len() - 1];
+        println!("Original last bit: {}", original_last & 1);
+        println!("Extracted last bit: {}", extracted_last & 1);
+        
         assert_eq!(data.to_vec(), extracted);
     }
 

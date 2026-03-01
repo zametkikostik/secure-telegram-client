@@ -4,7 +4,7 @@
 
 use anyhow::{Context, Result};
 use std::net::SocketAddr;
-use tokio::io::{AsyncRead, AsyncWrite, ReadHalf, WriteHalf};
+use tokio::io::{AsyncRead, AsyncWrite};
 use tokio::net::TcpStream;
 
 /// Shadowsocks транспорт
