@@ -1,5 +1,9 @@
 # 🔐 Secure Telegram Client v2.0
 
+**Организация**: Secure Telegram Team  
+**Репозиторий**: https://github.com/zametkikostik/secure-telegram-client  
+**Релиз**: v0.2.2 (1 марта 2026)
+
 Децентрализованный Telegram клиент с **постквантовым шифрованием**, **anti-censorship**, и **P2P fallback**.
 
 [![CI/CD](https://github.com/zametkikostik/secure-telegram-client/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/zametkikostik/secure-telegram-client/actions/workflows/ci-cd.yml)
@@ -354,7 +358,12 @@ MIT License — см. [LICENSE](LICENSE)
 
 ---
 
-## Контакты
+## 🔗 Контакты
 
-- GitHub: https://github.com/zametkikostik/secure-telegram-client
-- Issues: https://github.com/zametkikostik/secure-telegram-client/issues
+- **Организация**: Secure Telegram Team
+- **GitHub**: https://github.com/zametkikostik/secure-telegram-client
+- **Issues**: https://github.com/zametkikostik/secure-telegram-client/issues
+- **Email**: secure-tg@users.noreply.github.com
+
+> **Примечание**: В будущем репозиторий будет перенесён в организацию `secure-telegram-team`.  
+> Все ссылки будут обновлены. См. [ORGANIZATION_TRANSFER.md](ORGANIZATION_TRANSFER.md)
