@@ -83,25 +83,22 @@ Issues: https://github.com/secure-telegram-team/secure-telegram-client/issues
 
 ### GitHub Releases (мгновенно):
 
-```bash
-cd /home/kostik/secure-telegram-client/android
-
-# Запустите скрипт публикации
-./scripts/publish-to-github.sh app-fdroid-release-signed.apk 0.2.0
-```
-
-**Или вручную:**
-
-1. Перейдите: `https://github.com/YOUR_USERNAME/secure-telegram-client/releases/new`
-2. Tag version: `v0.2.0`
-3. Release title: `Secure Messenger v0.2.0`
-4. Прикрепите: `app-fdroid-release-signed.apk`
-5. Нажмите **Publish release**
+**Готовый релиз:**
+- **Версия**: `v0.2.2`
+- **Ссылка**: https://github.com/zametkikostik/secure-telegram-client/releases/tag/0.22
 
 **Прямая ссылка на APK:**
 ```
-https://github.com/YOUR_USERNAME/secure-telegram-client/releases/download/v0.2.0/app-fdroid-release-signed.apk
+https://github.com/zametkikostik/secure-telegram-client/releases/download/0.22/app-fdroid-release-signed.apk
 ```
+
+**Или создайте новый релиз вручную:**
+
+1. Перейдите: `https://github.com/zametkikostik/secure-telegram-client/releases/new`
+2. Tag version: `v0.2.2`
+3. Release title: `Secure Telegram Client v0.2.2`
+4. Прикрепите: `app-fdroid-release-signed.apk`
+5. Нажмите **Publish release**
 
 ---
 

@@ -46,9 +46,9 @@ cat android/fdroid-metadata.yml
 
 ---
 
-### 2️⃣ GitHub Releases + Direct Download
+### 2️⃣ GitHub Releases
 
-**Статус**: ✅ **Можно использовать прямо сейчас!**
+**Статус**: ✅ **Готовый релиз v0.2.2!**
 
 | Параметр | Значение |
 |----------|----------|
@@ -56,6 +56,16 @@ cat android/fdroid-metadata.yml
 | **Модерация** | ❌ Нет (мгновенно) |
 | **Требования** | GitHub аккаунт |
 | **Подпись** | Ваша (APK уже подписан) |
+
+**Готовая ссылка для скачивания:**
+```
+https://github.com/zametkikostik/secure-telegram-client/releases/download/0.22/app-fdroid-release-signed.apk
+```
+
+**Страница релиза:**
+```
+https://github.com/zametkikostik/secure-telegram-client/releases/tag/0.22
+```
 
 **Как опубликовать:**
 

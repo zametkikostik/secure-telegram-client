@@ -1,7 +1,8 @@
 # 📥 Скачать Secure Telegram Client
 
-**Версия**: 0.2.0  
-**Дата**: 1 марта 2026
+**Версия**: 0.2.2  
+**Дата**: 1 марта 2026  
+**Релиз**: https://github.com/zametkikostik/secure-telegram-client/releases/tag/0.22
 
 ---
 
@@ -11,8 +12,7 @@
 
 | Файл | Размер | Статус | Ссылка |
 |------|--------|--------|--------|
-| **Release (подписанный)** | 2,9 MB | ✅ Готов | `android/app-fdroid-release-signed.apk` |
-| Debug | ~5 MB | ✅ Готов | `android/app/build/outputs/apk/fdroid/debug/app-fdroid-debug.apk` |
+| **GitHub Releases** | 2,9 MB | ✅ Готов | [Скачать](https://github.com/zametkikostik/secure-telegram-client/releases/download/0.22/app-fdroid-release-signed.apk) |
 
 ### Desktop (Linux)
 
