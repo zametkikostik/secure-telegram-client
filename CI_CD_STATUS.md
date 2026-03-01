@@ -61,7 +61,7 @@ GitHub Actions должен автоматически запустить нов
 
 ### Вариант 2: Очистить кэш
 
-1. Перейдите на: https://github.com/secure-telegram-team/secure-telegram-client/actions/cache
+1. Перейдите на: https://github.com/zametkikostik/secure-telegram-client/actions/cache
 2. Удалите все кэши
 3. Запустите workflow заново
 

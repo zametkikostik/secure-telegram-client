@@ -39,9 +39,9 @@
 
 **Ссылки для публикации:**
 ```
-GitHub: https://github.com/secure-telegram-team/secure-telegram-client
-Privacy Policy: https://github.com/secure-telegram-team/secure-telegram-client/blob/master/PRIVACY_POLICY.md
-Issues: https://github.com/secure-telegram-team/secure-telegram-client/issues
+GitHub: https://github.com/zametkikostik/secure-telegram-client
+Privacy Policy: https://github.com/zametkikostik/secure-telegram-client/blob/master/PRIVACY_POLICY.md
+Issues: https://github.com/zametkikostik/secure-telegram-client/issues
 ```
 
 ### Вариант B: Создать новый аккаунт (рекомендуется)
@@ -65,7 +65,7 @@ Issues: https://github.com/secure-telegram-team/secure-telegram-client/issues
    git remote remove origin 2>/dev/null || true
    
    # Добавьте новый
-   git remote add origin git@github.com:secure-telegram-team/secure-telegram-client.git
+   git remote add origin git@github.com:zametkikostik/secure-telegram-client.git
    
    # Запушьте
    git push -u origin master --force
@@ -85,16 +85,16 @@ Issues: https://github.com/secure-telegram-team/secure-telegram-client/issues
 
 **Готовый релиз:**
 - **Версия**: `v0.2.2`
-- **Ссылка**: https://github.com/secure-telegram-team/secure-telegram-client/releases/tag/0.22
+- **Ссылка**: https://github.com/zametkikostik/secure-telegram-client/releases/tag/0.22
 
 **Прямая ссылка на APK:**
 ```
-https://github.com/secure-telegram-team/secure-telegram-client/releases/download/0.22/app-fdroid-release-signed.apk
+https://github.com/zametkikostik/secure-telegram-client/releases/download/0.22/app-fdroid-release-signed.apk
 ```
 
 **Или создайте новый релиз вручную:**
 
-1. Перейдите: `https://github.com/secure-telegram-team/secure-telegram-client/releases/new`
+1. Перейдите: `https://github.com/zametkikostik/secure-telegram-client/releases/new`
 2. Tag version: `v0.2.2`
 3. Release title: `Secure Telegram Client v0.2.2`
 4. Прикрепите: `app-fdroid-release-signed.apk`

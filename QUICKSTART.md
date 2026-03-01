@@ -43,7 +43,7 @@ vcpkg install openssl:x64-windows sqlite3:x64-windows
 
 ```bash
 # Клонируйте репозиторий
-git clone https://github.com/secure-telegram-team/secure-telegram-client.git
+git clone https://github.com/zametkikostik/secure-telegram-client.git
 cd secure-telegram-client
 
 # Сборка release версии
@@ -255,8 +255,8 @@ brew install tdlib
 
 ## 📞 Поддержка
 
-- **GitHub Issues**: https://github.com/secure-telegram-team/secure-telegram-client/issues
-- **Документация**: https://github.com/secure-telegram-team/secure-telegram-client/wiki
+- **GitHub Issues**: https://github.com/zametkikostik/secure-telegram-client/issues
+- **Документация**: https://github.com/zametkikostik/secure-telegram-client/wiki
 
 ---
 

@@ -2,7 +2,7 @@
 
 **Версия**: 0.2.2  
 **Дата**: 1 марта 2026  
-**Релиз**: https://github.com/secure-telegram-team/secure-telegram-client/releases/tag/0.22
+**Релиз**: https://github.com/zametkikostik/secure-telegram-client/releases/tag/0.22
 
 ---
 
@@ -12,7 +12,7 @@
 
 | Файл | Размер | Статус | Ссылка |
 |------|--------|--------|--------|
-| **GitHub Releases** | 2,9 MB | ✅ Готов | [Скачать](https://github.com/secure-telegram-team/secure-telegram-client/releases/download/0.22/app-fdroid-release-signed.apk) |
+| **GitHub Releases** | 2,9 MB | ✅ Готов | [Скачать](https://github.com/zametkikostik/secure-telegram-client/releases/download/0.22/app-fdroid-release-signed.apk) |
 
 ### Desktop (Linux)
 
@@ -136,10 +136,10 @@ sha256sum target/release/secure-tg
 
 ```bash
 # HTTPS
-git clone https://github.com/secure-telegram-team/secure-telegram-client.git
+git clone https://github.com/zametkikostik/secure-telegram-client.git
 
 # SSH
-git clone git@github.com:secure-telegram-team/secure-telegram-client.git
+git clone git@github.com:zametkikostik/secure-telegram-client.git
 ```
 
 ### Текущая версия
@@ -173,7 +173,7 @@ git log -1 --oneline
 
 ## 📞 Поддержка
 
-- **GitHub Issues**: https://github.com/secure-telegram-team/secure-telegram-client/issues
+- **GitHub Issues**: https://github.com/zametkikostik/secure-telegram-client/issues
 - **Лицензия**: MIT
 
 ---
