@@ -1,0 +1,98 @@
+# Docker Compose для AI Accountant KZ Tax API Service
+# Production Ready конфигурация с Redis для кэширования
+version: '3.8'
+
+services:
+  # ===== Redis для кэширования и сессий =====
+  redis:
+    image: redis:7-alpine
+    container_name: tax_api_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - tax_network
+    restart: unless-stopped
+
+  # ===== Tax API Service =====
+  tax_api:
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+    container_name: tax_api_app
+    ports:
+      - "8000:8000"
+    environment:
+      # Приложение
+      APP_NAME: "AI Accountant KZ Tax API"
+      ENVIRONMENT: ${ENVIRONMENT:-production}
+      DEBUG: ${DEBUG:-false}
+      
+      # Безопасность
+      SECRET_KEY: ${SECRET_KEY:-change-me-in-production-min-32-chars}
+      API_KEY: ${API_KEY:-change-me-api-key}
+      
+      # AI (OpenRouter)
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-qwen-plus}
+      
+      # Redis
+      REDIS_URL: redis://redis:6379/0
+      
+      # Логирование
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      LOG_FORMAT: json
+      
+      # CORS
+      CORS_ORIGINS: ${CORS_ORIGINS:-["*"]}
+      
+      # Rate Limiting
+      RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-60}
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./config:/app/config:ro
+    networks:
+      - tax_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # ===== Nginx Reverse Proxy =====
+  nginx:
+    image: nginx:alpine
+    container_name: tax_api_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx_tax.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - tax_api
+    networks:
+      - tax_network
+    restart: unless-stopped
+
+volumes:
+  redis_data:
+    driver: local
+
+networks:
+  tax_network:
+    driver: bridge

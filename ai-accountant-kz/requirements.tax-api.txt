@@ -1,0 +1,25 @@
+# AI Accountant KZ Tax API - Production Requirements
+# Минимальный набор зависимостей для Tax API сервиса
+
+# Core Framework
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+gunicorn==21.2.0
+
+# Validation & Settings
+pydantic==2.5.3
+pydantic-settings==2.1.0
+
+# Security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# HTTP Client (для внешних API)
+httpx==0.26.0
+
+# Utilities
+python-dotenv==1.0.0
+
+# Testing (опционально)
+pytest==7.4.4
+pytest-asyncio==0.23.3
