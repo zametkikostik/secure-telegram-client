@@ -147,7 +147,7 @@ ls -lh app-fdroid-release-signed.apk
 
 1. **Privacy Policy URL**:
    ```
-   https://github.com/secure-telegram-team/secure-telegram-client/blob/master/PRIVACY_POLICY.md
+   https://github.com/zametkikostik/secure-telegram-client/blob/master/PRIVACY_POLICY.md
    ```
 
 2. **Permissions**:

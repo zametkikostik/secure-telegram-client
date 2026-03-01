@@ -10,7 +10,7 @@
 
 ### 1. Откройте Actions
 
-Перейдите на: https://github.com/secure-telegram-team/secure-telegram-client/actions
+Перейдите на: https://github.com/zametkikostik/secure-telegram-client/actions
 
 ### 2. Выберите workflow
 
@@ -118,7 +118,7 @@ chmod +x gradlew
 Добавьте в README.md:
 
 ```markdown
-[![Android APK Build](https://github.com/secure-telegram-team/secure-telegram-client/actions/workflows/android-build.yml/badge.svg)](https://github.com/secure-telegram-team/secure-telegram-client/actions/workflows/android-build.yml)
+[![Android APK Build](https://github.com/zametkikostik/secure-telegram-client/actions/workflows/android-build.yml/badge.svg)](https://github.com/zametkikostik/secure-telegram-client/actions/workflows/android-build.yml)
 ```
 
 Будет отображаться:

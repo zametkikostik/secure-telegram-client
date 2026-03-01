@@ -92,14 +92,14 @@ GitHub **бесплатно** собирает APK:
 
 ### Вариант 1: GitHub Releases
 ```
-1. https://github.com/secure-telegram-team/secure-telegram-client/releases
+1. https://github.com/zametkikostik/secure-telegram-client/releases
 2. Скачать APK
 3. Установить
 ```
 
 ### Вариант 2: GitHub Actions
 ```
-1. https://github.com/secure-telegram-team/secure-telegram-client/actions
+1. https://github.com/zametkikostik/secure-telegram-client/actions
 2. Выбрать последний запуск
 3. Скачать артефакт
 4. Установить
@@ -107,7 +107,7 @@ GitHub **бесплатно** собирает APK:
 
 ### Вариант 3: Собрать самостоятельно
 ```bash
-git clone https://github.com/secure-telegram-team/secure-telegram-client.git
+git clone https://github.com/zametkikostik/secure-telegram-client.git
 cd android
 ./gradlew assembleFdroidDebug
 ```

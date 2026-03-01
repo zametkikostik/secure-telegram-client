@@ -75,7 +75,7 @@ git tag v0.2.0
 git push origin v0.2.0
 
 # 2. Создайте Release на GitHub
-# https://github.com/secure-telegram-team/secure-telegram-client/releases/new
+# https://github.com/zametkikostik/secure-telegram-client/releases/new
 
 # 3. Загрузите APK
 # app-fdroid-release-signed.apk (2,9 MB)
@@ -150,11 +150,11 @@ cd /home/kostik/secure-telegram-client/android
 ./scripts/publish-to-github.sh app-fdroid-release-signed.apk 0.2.0
 
 # 2. Или вручную перейдите на:
-# https://github.com/secure-telegram-team/secure-telegram-client/releases/new
+# https://github.com/zametkikostik/secure-telegram-client/releases/new
 ```
 
 **Ссылки для скачивания:**
-- `https://github.com/secure-telegram-team/secure-telegram-client/releases/download/v0.2.0/app-fdroid-release-signed.apk`
+- `https://github.com/zametkikostik/secure-telegram-client/releases/download/v0.2.0/app-fdroid-release-signed.apk`
 
 ---
 

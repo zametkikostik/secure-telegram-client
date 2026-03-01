@@ -23,7 +23,7 @@ Cargo (1.80.1) не поддерживает edition2024
 
 ### Вариант 2: Ручной запуск (рекомендуется)
 
-1. Перейдите на: https://github.com/secure-telegram-team/secure-telegram-client/actions
+1. Перейдите на: https://github.com/zametkikostik/secure-telegram-client/actions
 2. Нажмите **"CI/CD Pipeline"** слева
 3. Нажмите **"Run workflow"** (зелёная кнопка справа)
 4. Выберите ветку: `master`
@@ -37,7 +37,7 @@ Cargo (1.80.1) не поддерживает edition2024
 
 Если старый запуск всё ещё висит:
 
-1. Перейдите на: https://github.com/secure-telegram-team/secure-telegram-client/actions/caches
+1. Перейдите на: https://github.com/zametkikostik/secure-telegram-client/actions/caches
 2. Удалите все кэши (кнопка "..." → "Delete")
 3. Запустите workflow заново (Вариант 2)
 

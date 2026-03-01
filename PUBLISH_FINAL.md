@@ -39,9 +39,9 @@
 
 **Ссылки для публикации:**
 ```
-GitHub: https://github.com/secure-telegram-team/secure-telegram-client
-Privacy Policy: https://github.com/secure-telegram-team/secure-telegram-client/blob/master/PRIVACY_POLICY.md
-Issues: https://github.com/secure-telegram-team/secure-telegram-client/issues
+GitHub: https://github.com/zametkikostik/secure-telegram-client
+Privacy Policy: https://github.com/zametkikostik/secure-telegram-client/blob/master/PRIVACY_POLICY.md
+Issues: https://github.com/zametkikostik/secure-telegram-client/issues
 ```
 
 ### Вариант B: Создать новый аккаунт (рекомендуется)
@@ -65,7 +65,7 @@ Issues: https://github.com/secure-telegram-team/secure-telegram-client/issues
    git remote remove origin 2>/dev/null || true
    
    # Добавьте новый
-   git remote add origin git@github.com:secure-telegram-team/secure-telegram-client.git
+   git remote add origin git@github.com:zametkikostik/secure-telegram-client.git
    
    # Запушьте
    git push -u origin master --force

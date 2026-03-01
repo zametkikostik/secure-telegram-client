@@ -2,7 +2,7 @@
 
 Децентрализованный Telegram клиент с **постквантовым шифрованием**, **anti-censorship**, и **P2P fallback**.
 
-[![CI/CD](https://github.com/secure-telegram-team/secure-telegram-client/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/secure-telegram-team/secure-telegram-client/actions/workflows/ci-cd.yml)
+[![CI/CD](https://github.com/zametkikostik/secure-telegram-client/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/zametkikostik/secure-telegram-client/actions/workflows/ci-cd.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Rust Version](https://img.shields.io/badge/Rust-1.75+-orange.svg)](https://rustup.rs/)
 
@@ -148,7 +148,7 @@ brew install cmake openssl sqlite
 
 ```bash
 # Клонируйте репозиторий
-git clone https://github.com/secure-telegram-team/secure-telegram-client.git
+git clone https://github.com/zametkikostik/secure-telegram-client.git
 cd secure-telegram-client
 
 # Инициализация конфигурации
@@ -356,5 +356,5 @@ MIT License — см. [LICENSE](LICENSE)
 
 ## Контакты
 
-- GitHub: https://github.com/secure-telegram-team/secure-telegram-client
-- Issues: https://github.com/secure-telegram-team/secure-telegram-client/issues
+- GitHub: https://github.com/zametkikostik/secure-telegram-client
+- Issues: https://github.com/zametkikostik/secure-telegram-client/issues
