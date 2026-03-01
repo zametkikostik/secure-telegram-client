@@ -22,6 +22,19 @@ def set_trace_id(trace_id: str) -> None:
     trace_id_var.set(trace_id)
 
 
+class TextFormatter(logging.Formatter):
+    """Текстовый форматтер для логов в формате: [TIMESTAMP] [LEVEL] [TRACE_ID] Message"""
+    
+    def format(self, record: logging.LogRecord) -> str:
+        """Форматирование записи в текстовом виде"""
+        timestamp = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+        level = record.levelname
+        trace_id = getattr(record, 'trace_id', get_trace_id())
+        message = record.getMessage()
+        
+        return f"[{timestamp}] [{level}] [{trace_id}] {message}"
+
+
 class JSONFormatter(logging.Formatter):
     """JSON форматтер для логов"""
     
@@ -76,7 +89,7 @@ class TraceIDFilter(logging.Filter):
 
 def setup_logging(
     level: str = "INFO",
-    log_format: str = "json",
+    log_format: str = "text",
     service_name: str = "ai-accountant-kz"
 ) -> logging.Logger:
     """
@@ -84,7 +97,7 @@ def setup_logging(
     
     Args:
         level: Уровень логирования (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-        log_format: Формат логов (json, text)
+        log_format: Формат логов (json, text) - по умолчанию text для формата [TIMESTAMP] [LEVEL] [TRACE_ID]
         service_name: Имя сервиса для логов
     
     Returns:
@@ -102,10 +115,8 @@ def setup_logging(
     if log_format == "json":
         formatter = JSONFormatter(service_name)
     else:
-        formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s - trace_id=%(trace_id)s',
-            datefmt='%Y-%m-%d %H:%M:%S'
-        )
+        # Текстовый формат: [TIMESTAMP] [LEVEL] [TRACE_ID] Message
+        formatter = TextFormatter()
     
     # Добавляем фильтр trace_id
     trace_filter = TraceIDFilter()

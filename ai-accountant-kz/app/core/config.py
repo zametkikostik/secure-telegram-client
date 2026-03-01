@@ -60,7 +60,10 @@ class Settings(BaseSettings):
     LOG_FILE: str = Field(default="logs/accountant.log", description="Файл логов")
     
     # ===== CORS =====
-    CORS_ORIGINS: list = Field(default=["*"], description="Разрешенные CORS origin")
+    CORS_ORIGINS: list = Field(
+        default=["https://ai-accountant.kz", "https://www.ai-accountant.kz"],
+        description="Доверенные домены для CORS"
+    )
     
     # ===== Rate Limiting =====
     RATE_LIMIT_PER_MINUTE: int = Field(default=60, description="Лимит запросов в минуту")

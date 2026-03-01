@@ -3,22 +3,25 @@ AI Accountant KZ - Production Ready Tax API Service
 FastAPI приложение для расчета налогов ИП Казахстан 2026
 
 Endpoints:
-- POST /v1/calculate/net - расчет от суммы на руки
-- POST /v1/calculate/gross - расчет от оклада
-- GET /v1/health - health check
-- GET /v1/rates - налоговые ставки
+- POST /api/v1/calculate — основной расчет
+- GET /api/v1/health — health check
+- GET /api/v1/config — ставки МРП/МЗП
 """
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
 from contextlib import asynccontextmanager
 import time
 import logging
 import sys
-from typing import Callable
+from typing import Callable, Union
+from datetime import datetime, timezone
 
 from .core.config import settings
-from .core.logging_config import setup_logging, set_trace_id, get_trace_id, LoggingMiddleware
+from .core.logging_config import setup_logging, set_trace_id, get_trace_id
 from .api.tax import router as tax_router
+from .schemas.tax import ErrorResponse
 
 # Настройка логирования
 setup_logging(
@@ -39,9 +42,10 @@ async def lifespan(app: FastAPI):
     logger.info(f"Debug: {settings.DEBUG}")
     logger.info(f"API Version: {settings.API_VERSION}")
     logger.info(f"Rate Limit: {settings.RATE_LIMIT_PER_MINUTE} req/min")
-    
+    logger.info(f"CORS Origins: {settings.CORS_ORIGINS}")
+
     yield
-    
+
     # Shutdown
     logger.info("AI Accountant KZ останавливается")
 
@@ -57,16 +61,81 @@ app = FastAPI(
 )
 
 
+# ===== Custom Exception Handler =====
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    """
+    Глобальный обработчик исключений
+    
+    Возвращает чистый JSON с кодом ошибки вместо 500 страницы
+    """
+    trace_id = get_trace_id()
+    timestamp = datetime.now(timezone.utc).isoformat()
+    
+    logger.error(
+        f"Unhandled exception: {type(exc).__name__}: {str(exc)}",
+        exc_info=True,
+        extra={"extra_data": {"trace_id": trace_id}}
+    )
+    
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content=ErrorResponse(
+            success=False,
+            error="internal_error",
+            message="Внутренняя ошибка сервера",
+            trace_id=trace_id,
+            timestamp=timestamp
+        ).model_dump()
+    )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(
+    request: Request, 
+    exc: RequestValidationError
+) -> JSONResponse:
+    """
+    Обработчик ошибок валидации
+    
+    Возвращает детальную информацию об ошибках валидации
+    """
+    trace_id = get_trace_id()
+    timestamp = datetime.now(timezone.utc).isoformat()
+    
+    errors = []
+    for error in exc.errors():
+        errors.append({
+            "field": ".".join(str(x) for x in error.get("loc", [])),
+            "message": error.get("msg", ""),
+            "type": error.get("type", "")
+        })
+    
+    logger.warning(f"Validation error: {errors}")
+    
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content=ErrorResponse(
+            success=False,
+            error="validation_error",
+            message=f"Ошибка валидации данных: {errors[0]['message'] if errors else 'Неверные данные'}",
+            trace_id=trace_id,
+            timestamp=timestamp
+        ).model_dump()
+    )
+
+
 # ===== Middleware =====
 
 @app.middleware("http")
 async def performance_monitoring_middleware(
     request: Request,
     call_next: Callable
-) -> Response:
+) -> Union[Request, Callable]:
     """
     Middleware для мониторинга производительности
-    Логирует время выполнения каждого запроса
+    Логирует время выполнения каждого запроса с Trace-ID
     """
     # Генерируем trace_id для запроса
     import uuid
@@ -80,14 +149,10 @@ async def performance_monitoring_middleware(
     path = request.url.path
     client_host = request.client.host if request.client else "unknown"
     
+    # Формат: [TIMESTAMP] [LEVEL] [TRACE_ID] Message
     logger.info(
-        f"Request: {method} {path}",
-        extra={
-            "extra_data": {
-                "client_ip": client_host,
-                "user_agent": request.headers.get("user-agent", "unknown")
-            }
-        }
+        f"[{datetime.now(timezone.utc).isoformat()}] [INFO] [{trace_id}] "
+        f"Request: {method} {path} from {client_host}"
     )
     
     try:
@@ -97,13 +162,8 @@ async def performance_monitoring_middleware(
         duration = time.time() - start_time
         
         logger.info(
-            f"Response: {method} {path} - Status: {response.status_code} - Duration: {duration:.3f}s",
-            extra={
-                "extra_data": {
-                    "duration_ms": round(duration * 1000, 2),
-                    "status_code": response.status_code
-                }
-            }
+            f"[{datetime.now(timezone.utc).isoformat()}] [INFO] [{trace_id}] "
+            f"Response: {method} {path} - Status: {response.status_code} - Duration: {duration*1000:.2f}ms"
         )
         
         # Добавляем заголовки с timing
@@ -115,23 +175,15 @@ async def performance_monitoring_middleware(
     except Exception as e:
         duration = time.time() - start_time
         logger.error(
-            f"Error: {method} {path} - Duration: {duration:.3f}s - Error: {str(e)}",
-            exc_info=True,
-            extra={
-                "extra_data": {
-                    "duration_ms": round(duration * 1000, 2),
-                    "error_type": type(e).__name__
-                }
-            }
+            f"[{datetime.now(timezone.utc).isoformat()}] [ERROR] [{trace_id}] "
+            f"Error: {method} {path} - Duration: {duration*1000:.2f}ms - Error: {str(e)}",
+            exc_info=True
         )
         raise
 
 
 @app.middleware("http")
-async def security_headers_middleware(
-    request: Request,
-    call_next: Callable
-) -> Response:
+async def security_headers_middleware(request: Request, call_next: Callable):
     """Middleware для добавления security headers"""
     response = await call_next(request)
     
@@ -141,17 +193,32 @@ async def security_headers_middleware(
     response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
     response.headers["Content-Security-Policy"] = "default-src 'self'"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     
     return response
 
 
-# CORS Middleware
+# ===== CORS Middleware =====
+# Ограничиваем доступ только с доверенных доменов
+
+allowed_origins = settings.CORS_ORIGINS if settings.CORS_ORIGINS != ["*"] else [
+    "https://ai-accountant.kz",
+    "https://www.ai-accountant.kz",
+    "https://api.ai-accountant.kz"
+]
+
+if settings.DEBUG:
+    allowed_origins.append("http://localhost:3000")
+    allowed_origins.append("http://localhost:8000")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
+    allow_origins=allowed_origins,  # Только доверенные домены
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "X-API-Key"],
+    expose_headers=["X-Trace-ID", "X-Process-Time"],
+    max_age=3600,
 )
 
 
@@ -170,31 +237,9 @@ async def root():
         "version": "2026.03.01",
         "environment": settings.ENVIRONMENT,
         "docs": "/docs",
-        "health": "/v1/health"
-    }
-
-
-# ===== Error handlers =====
-
-@app.exception_handler(404)
-async def not_found_handler(request: Request, exc):
-    """Обработчик 404 ошибок"""
-    logger.warning(f"404 Not Found: {request.method} {request.url.path}")
-    return {
-        "error": "not_found",
-        "message": f"Endpoint не найден: {request.method} {request.url.path}",
-        "trace_id": get_trace_id()
-    }
-
-
-@app.exception_handler(500)
-async def internal_error_handler(request: Request, exc):
-    """Обработчик 500 ошибок"""
-    logger.error(f"Internal Error: {exc}", exc_info=True)
-    return {
-        "error": "internal_error",
-        "message": "Внутренняя ошибка сервера",
-        "trace_id": get_trace_id()
+        "health": "/api/v1/health",
+        "config": "/api/v1/config",
+        "calculate": "/api/v1/calculate"
     }
 
 
