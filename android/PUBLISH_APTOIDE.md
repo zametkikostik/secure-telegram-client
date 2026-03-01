@@ -147,7 +147,7 @@ ls -lh app-fdroid-release-signed.apk
 
 1. **Privacy Policy URL**:
    ```
-   https://github.com/zametkikostik/secure-telegram-client/blob/master/PRIVACY_POLICY.md
+   https://github.com/secure-telegram-team/secure-telegram-client/blob/master/PRIVACY_POLICY.md
    ```
 
 2. **Permissions**:
@@ -339,11 +339,11 @@ apksigner verify app-fdroid-release-signed.apk
 
 | Платформа | URL |
 |-----------|-----|
-| **GitHub** | https://github.com/zametkikostik/secure-telegram-client |
+| **GitHub** | https://github.com/secure-telegram-team/secure-telegram-client |
 | **Telegram** | https://t.me/secure_messenger_app (создать) |
 | **Twitter** | https://twitter.com/SecureMessengerApp (создать) |
-| **Privacy Policy** | https://github.com/zametkikostik/secure-telegram-client/blob/master/PRIVACY_POLICY.md |
-| **Download APK** | https://github.com/zametkikostik/secure-telegram-client/releases/download/0.22/app-fdroid-release-signed.apk |
+| **Privacy Policy** | https://github.com/secure-telegram-team/secure-telegram-client/blob/master/PRIVACY_POLICY.md |
+| **Download APK** | https://github.com/secure-telegram-team/secure-telegram-client/releases/download/0.22/app-fdroid-release-signed.apk |
 
 **Полный список**: [SOCIAL_NETWORKS.md](../SOCIAL_NETWORKS.md)
 

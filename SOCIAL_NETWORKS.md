@@ -10,7 +10,7 @@
 
 | Платформа | URL | Статус |
 |-----------|-----|--------|
-| **GitHub (основной)** | `https://github.com/zametkikostik/secure-telegram-client` | ✅ Активен |
+| **GitHub (основной)** | `https://github.com/secure-telegram-team/secure-telegram-client` | ✅ Активен |
 | **GitHub (команда)** | `https://github.com/secure-telegram-team` | ⚠️ Зарезервировано |
 | **Codeberg (ЕС, зеркало)** | `https://codeberg.org/secure-telegram-team/secure-telegram-client` | ⚠️ План |
 | **GitFlic (РФ, зеркало)** | `https://gitflic.ru/project/secure-telegram-team/secure-telegram-client` | ⚠️ План |
@@ -19,7 +19,7 @@
 
 | Платформа | URL | Статус |
 |-----------|-----|--------|
-| **GitHub Releases** | `https://github.com/zametkikostik/secure-telegram-client/releases` | ✅ Готово |
+| **GitHub Releases** | `https://github.com/secure-telegram-team/secure-telegram-client/releases` | ✅ Готово |
 | **F-Droid** | `https://f-droid.org/packages/com.example.securemessenger.fdroid/` | ⏳ На модерации |
 | **IzzyOnDroid** | `https://apt.izzysoft.de/fdroid/index/apk/com.example.securemessenger.fdroid` | ⏳ План |
 | **Aptoide** | `https://secure-messenger.aptoide.com/` | ⏳ План |
@@ -81,7 +81,7 @@
    - Username: `@SecureMessengerApp`
    - Bio: **Decentralized messenger with post-quantum encryption. Open source. Privacy-first.**
    - Location: **Decentralized**
-   - Website: `https://github.com/zametkikostik/secure-telegram-client`
+   - Website: `https://github.com/secure-telegram-team/secure-telegram-client`
 3. Добавьте аватар и header image
 4. Опубликуйте первый твит с ссылкой на GitHub
 
@@ -98,7 +98,7 @@
    - Username: `@secure_messenger@mastodon.social`
    - Display Name: **Secure Messenger**
    - Bio: **🔐 Decentralized messenger with post-quantum encryption. Open source (MIT). Privacy-first.**
-   - Website: `https://github.com/zametkikostik/secure-telegram-client`
+   - Website: `https://github.com/secure-telegram-team/secure-telegram-client`
 3. Добавьте аватар
 4. Опубликуйте первый пост
 
@@ -186,12 +186,12 @@
 
 **Homepage:**
 ```
-https://github.com/zametkikostik/secure-telegram-client
+https://github.com/secure-telegram-team/secure-telegram-client
 ```
 
 **Support/Issues:**
 ```
-https://github.com/zametkikostik/secure-telegram-client/issues
+https://github.com/secure-telegram-team/secure-telegram-client/issues
 ```
 
 **Telegram (после создания):**

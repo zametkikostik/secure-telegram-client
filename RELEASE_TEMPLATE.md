@@ -45,7 +45,7 @@
 
 ```bash
 # Сборка из исходников
-git clone https://github.com/zametkikostik/secure-telegram-client.git
+git clone https://github.com/secure-telegram-team/secure-telegram-client.git
 cd secure-telegram-client
 cargo build --release
 ./target/release/secure-tg
@@ -65,9 +65,9 @@ cargo build --release
 
 ## 📚 Документация
 
-- [README](https://github.com/zametkikostik/secure-telegram-client#readme)
-- [QUICKSTART](https://github.com/zametkikostik/secure-telegram-client/blob/master/QUICKSTART.md)
-- [ARCHITECTURE](https://github.com/zametkikostik/secure-telegram-client/blob/master/ARCHITECTURE.md)
+- [README](https://github.com/secure-telegram-team/secure-telegram-client#readme)
+- [QUICKSTART](https://github.com/secure-telegram-team/secure-telegram-client/blob/master/QUICKSTART.md)
+- [ARCHITECTURE](https://github.com/secure-telegram-team/secure-telegram-client/blob/master/ARCHITECTURE.md)
 
 ---
 
@@ -75,7 +75,7 @@ cargo build --release
 
 **Это исследовательский проект!** Не используйте для критически важной коммуникации.
 
-См. [DISCLAIMER.md](https://github.com/zametkikostik/secure-telegram-client/blob/master/DISCLAIMER.md)
+См. [DISCLAIMER.md](https://github.com/secure-telegram-team/secure-telegram-client/blob/master/DISCLAIMER.md)
 
 ---
 
@@ -84,7 +84,7 @@ cargo build --release
 - **Размер APK**: 5.6 MB
 - **Мин. Android**: 8.0+ (API 26)
 - **Лицензия**: MIT
-- **Репозиторий**: [GitHub](https://github.com/zametkikostik/secure-telegram-client)
+- **Репозиторий**: [GitHub](https://github.com/secure-telegram-team/secure-telegram-client)
 
 ---
 

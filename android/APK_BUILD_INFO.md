@@ -69,7 +69,7 @@ bc09fea feat(android): успешная сборка APK v0.2.0
 - ✅ APK добавлен в репозиторий
 - ✅ Запушено в GitHub
 
-**GitHub**: https://github.com/zametkikostik/secure-telegram-client
+**GitHub**: https://github.com/secure-telegram-team/secure-telegram-client
 
 ---
 
@@ -79,7 +79,7 @@ bc09fea feat(android): успешная сборка APK v0.2.0
 
 ```bash
 # Из репозитория
-git clone https://github.com/zametkikostik/secure-telegram-client.git
+git clone https://github.com/secure-telegram-team/secure-telegram-client.git
 cd secure-telegram-client/android/app/build/outputs/apk/fdroid/debug/
 
 # Или напрямую через GitHub Downloads

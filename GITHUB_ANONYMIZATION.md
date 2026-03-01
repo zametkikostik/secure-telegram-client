@@ -25,7 +25,7 @@
 
 ### 2️⃣ Настройки репозитория
 
-**URL**: https://github.com/zametkikostik/secure-telegram-client/settings
+**URL**: https://github.com/secure-telegram-team/secure-telegram-client/settings
 
 **Измените:**
 
@@ -40,7 +40,7 @@
 
 3. **Website** (опционально):
    ```
-   https://zametkikostik.github.io
+   https://secure-telegram-team.github.io
    ```
 
 ---
@@ -66,7 +66,7 @@
 
 ```bash
 cd secure-telegram-client
-git remote set-url origin git@github.com:zametkikostik/secure-telegram-client.git
+git remote set-url origin git@github.com:secure-telegram-team/secure-telegram-client.git
 git push --force
 ```
 
@@ -133,11 +133,11 @@ git push --force --tags origin 'refs/heads/*'
    - ❌ Нет локации
    - ❌ Нет email
 
-2. **Репозиторий**: https://github.com/zametkikostik/secure-telegram-client
+2. **Репозиторий**: https://github.com/secure-telegram-team/secure-telegram-client
    - ✅ В описании нет личных данных
    - ✅ В коде нет личных данных
 
-3. **Коммиты**: https://github.com/zametkikostik/secure-telegram-client/commits/master
+3. **Коммиты**: https://github.com/secure-telegram-team/secure-telegram-client/commits/master
    - ✅ Author: `Secure Telegram Team`
    - ✅ Email: `secure-tg@users.noreply.github.com`
 

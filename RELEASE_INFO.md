@@ -4,7 +4,7 @@
 
 **Прямая ссылка:**
 ```
-https://github.com/zametkikostik/secure-telegram-client/releases/download/0.22/app-fdroid-release-signed.apk
+https://github.com/secure-telegram-team/secure-telegram-client/releases/download/0.22/app-fdroid-release-signed.apk
 ```
 
 ## 📊 Информация о релизе
@@ -45,5 +45,5 @@ adb install app-fdroid-release-signed.apk
 
 ## 🔗 Ссылки
 
-- **GitHub**: https://github.com/zametkikostik/secure-telegram-client
-- **Issues**: https://github.com/zametkikostik/secure-telegram-client/issues
+- **GitHub**: https://github.com/secure-telegram-team/secure-telegram-client
+- **Issues**: https://github.com/secure-telegram-team/secure-telegram-client/issues
