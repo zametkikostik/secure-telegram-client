@@ -1,0 +1,27 @@
+{
+  "name": "AI-Бухгалтер для ИП",
+  "short_name": "AI-Бухгалтер",
+  "description": "Автоматизация бухгалтерии для ИП в Казахстане",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5f7fa",
+  "theme_color": "#667eea",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/static/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["finance", "business", "productivity"],
+  "lang": "ru",
+  "dir": "ltr"
+}

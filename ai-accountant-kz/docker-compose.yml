@@ -1,0 +1,163 @@
+version: '3.8'
+
+services:
+  # Redis for Celery
+  redis:
+    image: redis:7-alpine
+    container_name: accountant_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: accountant_db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-accountant}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme123}
+      POSTGRES_DB: ${POSTGRES_DB:-accountant}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-accountant}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      - redis
+
+  # Application
+  app:
+    build: .
+    container_name: accountant_app
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-accountant}:${POSTGRES_PASSWORD:-changeme123}@db:5432/${POSTGRES_DB:-accountant}
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY:-your-secret-key-change-in-production}
+      ENVIRONMENT: "production"
+      DEBUG: "false"
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
+      KASPI_API_KEY: ${KASPI_API_KEY:-}
+      KASPI_MERCHANT_ID: ${KASPI_MERCHANT_ID:-}
+      HALYK_API_KEY: ${HALYK_API_KEY:-}
+      HALYK_CLIENT_ID: ${HALYK_CLIENT_ID:-}
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./templates:/app/templates:ro
+      - ./static:/app/static:ro
+      - ./src/api:/app/src/api:ro
+      - ./src/services:/app/src/services:ro
+      - ./src/models:/app/src/models:ro
+      - ./src/core:/app/src/core:ro
+      - ./src/main.py:/app/src/main.py:ro
+    restart: unless-stopped
+
+  # Celery Worker
+  worker:
+    build: .
+    container_name: accountant_worker
+    command: celery -A src.tasks worker --loglevel=info --concurrency=4
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-accountant}:${POSTGRES_PASSWORD:-changeme123}@db:5432/${POSTGRES_DB:-accountant}
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY:-your-secret-key-change-in-production}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
+      KASPI_API_KEY: ${KASPI_API_KEY:-}
+      KASPI_MERCHANT_ID: ${KASPI_MERCHANT_ID:-}
+      HALYK_API_KEY: ${HALYK_API_KEY:-}
+      HALYK_CLIENT_ID: ${HALYK_CLIENT_ID:-}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./templates:/app/templates:ro
+      - ./static:/app/static:ro
+      - ./src/api:/app/src/api:ro
+      - ./src/services:/app/src/services:ro
+      - ./src/models:/app/src/models:ro
+      - ./src/core:/app/src/core:ro
+      - ./src/main.py:/app/src/main.py:ro
+    restart: unless-stopped
+
+  # Celery Beat (Scheduler)
+  beat:
+    build: .
+    container_name: accountant_beat
+    command: celery -A src.tasks beat --loglevel=info
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-accountant}:${POSTGRES_PASSWORD:-changeme123}@db:5432/${POSTGRES_DB:-accountant}
+      CELERY_BROKER_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY:-your-secret-key-change-in-production}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: accountant_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - app
+    restart: unless-stopped
+
+  # PgAdmin (optional, for development)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: accountant_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@example.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    profiles:
+      - dev
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  default:
+    name: accountant_network

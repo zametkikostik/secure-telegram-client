@@ -1,0 +1,27 @@
+{
+  "last_updated": "2026-03-01",
+  "version": "2026.03",
+  "MRP": 4325,
+  "MZP": 85000,
+  "OPVR_RATE": 0.025,
+  "DEDUCTION_14MRP_MULTIPLIER": 14,
+  "KBK_MAP": {
+    "IPN_EMPLOYEE": "101201",
+    "OPV": "183102",
+    "SO": "183101",
+    "OPVR": "183110",
+    "OSMS": "122101",
+    "IPN_910": "101202",
+    "SN_910": "103101"
+  },
+  "rates": {
+    "opv_employee": 0.10,
+    "vosms_employee": 0.02,
+    "ipn_employee": 0.10,
+    "so_employer": 0.05,
+    "oosms_employer": 0.03,
+    "opvr_employer": 0.025
+  },
+  "config_source": "local",
+  "fallback": true
+}
