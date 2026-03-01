@@ -235,7 +235,7 @@
 
 **По вопросам конфиденциальности:**
 
-- GitHub Issues: https://github.com/zametkikostik/secure-telegram-client/issues
+- GitHub Issues: https://github.com/secure-telegram-team/secure-telegram-client/issues
 - Email: (не указан, используйте GitHub Issues)
 
 ---

@@ -11,7 +11,7 @@
 
 **Текущий репозиторий**:
 ```
-https://github.com/zametkikostik/secure-telegram-client
+https://github.com/secure-telegram-team/secure-telegram-client
 ```
 
 **Целевой репозиторий**:
@@ -36,7 +36,7 @@ https://github.com/secure-telegram-team/secure-telegram-client
 ### Шаг 2: Трансфер репозитория
 
 1. Перейдите в настройки репозитория:
-   https://github.com/zametkikostik/secure-telegram-client/settings
+   https://github.com/secure-telegram-team/secure-telegram-client/settings
 
 2. Прокрутите вниз до **"Danger Zone"**
 
@@ -109,16 +109,16 @@ git remote -v
 
 ```
 Репозиторий:
-https://github.com/zametkikostik/secure-telegram-client
+https://github.com/secure-telegram-team/secure-telegram-client
 
 Releases:
-https://github.com/zametkikostik/secure-telegram-client/releases
+https://github.com/secure-telegram-team/secure-telegram-client/releases
 
 APK v0.2.2:
-https://github.com/zametkikostik/secure-telegram-client/releases/download/0.22/app-fdroid-release-signed.apk
+https://github.com/secure-telegram-team/secure-telegram-client/releases/download/0.22/app-fdroid-release-signed.apk
 
 Issues:
-https://github.com/zametkikostik/secure-telegram-client/issues
+https://github.com/secure-telegram-team/secure-telegram-client/issues
 ```
 
 ### После переноса (будет работать):

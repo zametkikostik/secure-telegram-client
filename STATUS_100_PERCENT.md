@@ -113,7 +113,7 @@ cargo build --release
 
 ```bash
 # Скачать APK из GitHub Actions
-https://github.com/zametkikostik/secure-telegram-client/actions
+https://github.com/secure-telegram-team/secure-telegram-client/actions
 
 # Или собрать самостоятельно
 cd android

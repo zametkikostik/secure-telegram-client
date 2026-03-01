@@ -118,8 +118,8 @@
 
 ## 📞 Контакты / Contacts
 
-- GitHub: https://github.com/zametkikostik/secure-telegram-client
-- Issues: https://github.com/zametkikostik/secure-telegram-client/issues
+- GitHub: https://github.com/secure-telegram-team/secure-telegram-client
+- Issues: https://github.com/secure-telegram-team/secure-telegram-client/issues
 
 ---
 

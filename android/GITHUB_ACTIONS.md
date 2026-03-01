@@ -27,14 +27,14 @@
 
 ### Через GitHub Actions
 
-1. Перейдите на вкладку **Actions**: https://github.com/zametkikostik/secure-telegram-client/actions
+1. Перейдите на вкладку **Actions**: https://github.com/secure-telegram-team/secure-telegram-client/actions
 2. Выберите последний успешный запуск
 3. В разделе **Artifacts** скачайте `secure-messenger-debug`
 4. Распакуйте ZIP — внутри будет `app-fdroid-debug.apk`
 
 ### Через Releases
 
-1. Перейдите на вкладку **Releases**: https://github.com/zametkikostik/secure-telegram-client/releases
+1. Перейдите на вкладку **Releases**: https://github.com/secure-telegram-team/secure-telegram-client/releases
 2. Скачайте APK из последнего релиза
 
 ---
@@ -71,7 +71,7 @@ env:
 
 ## 📊 Статус сборки
 
-[![Android APK Build](https://github.com/zametkikostik/secure-telegram-client/actions/workflows/android-build.yml/badge.svg)](https://github.com/zametkikostik/secure-telegram-client/actions/workflows/android-build.yml)
+[![Android APK Build](https://github.com/secure-telegram-team/secure-telegram-client/actions/workflows/android-build.yml/badge.svg)](https://github.com/secure-telegram-team/secure-telegram-client/actions/workflows/android-build.yml)
 
 ---
 
