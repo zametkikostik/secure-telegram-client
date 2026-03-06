@@ -1,0 +1,59 @@
+[package]
+name = "secure-telegram-desktop"
+version = "2.0.0"
+edition = "2021"
+authors = ["Secure Telegram Team"]
+description = "Secure Telegram Client Desktop v2.0 - Optimized for Linux Mint"
+license = "MIT"
+
+[dependencies]
+# Async runtime
+tokio = { version = "1.36", features = ["full"] }
+tokio-tungstenite = "0.21"
+futures = "0.3"
+
+# Tauri v2 Desktop
+tauri = { version = "2.0", features = ["tray-icon", "image-png"] }
+tauri-plugin-shell = "2.0"
+tauri-plugin-fs = "2.0"
+tauri-plugin-dialog = "2.0"
+tauri-plugin-notification = "2.0"
+tauri-plugin-autostart = "2.0"
+
+# P2P Network
+libp2p = { version = "0.53", features = ["tcp", "quic", "noise", "yamux", "kad", "gossipsub", "mdns"] }
+
+# Crypto
+ring = "0.17"
+aes-gcm = "0.10"
+chacha20poly1305 = "0.10"
+x25519-dalek = "2.0"
+ed25519-dalek = "2.0"
+
+# Kyber1024 Post-Quantum
+pqcrypto-kyber = "0.1"
+
+# Database
+rusqlite = { version = "0.31", features = ["bundled"] }
+sqlcipher = "0.4"
+
+# System tray
+tauri-plugin-single-instance = "2.0"
+
+# Linux Mint specific
+dirs = "5.0"
+notify-rust = "4.10"
+
+[build-dependencies]
+tauri-build = { version = "2.0", features = [] }
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]
+
+[profile.release]
+panic = "abort"
+codegen-units = 1
+lto = true
+opt-level = "s"
+strip = true

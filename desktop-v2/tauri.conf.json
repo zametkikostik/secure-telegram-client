@@ -1,0 +1,114 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Secure Telegram",
+  "version": "2.0.0",
+  "identifier": "io.secure-telegram.desktop",
+  "build": {
+    "frontendDist": "../frontend/dist",
+    "devUrl": "http://localhost:3000",
+    "beforeDevCommand": "cd ../frontend && npm run dev",
+    "beforeBuildCommand": "cd ../frontend && npm run build"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "title": "Secure Telegram",
+        "width": 1200,
+        "height": 800,
+        "minWidth": 800,
+        "minHeight": 600,
+        "resizable": true,
+        "fullscreen": false,
+        "decorations": true,
+        "transparent": false,
+        "center": true,
+        "visible": true,
+        "focus": true,
+        "skipTaskbar": false,
+        "theme": "Dark",
+        "titleBarStyle": "Visible",
+        "hiddenTitle": false,
+        "acceptFirstMouse": false,
+        "tabbingIdentifier": "secure-telegram",
+        "additionalBrowserArgs": "--disable-features=WebRtcHideLocalIpsWithMdns"
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' ws: wss: https: http: localhost:*"
+    },
+    "trayIcon": {
+      "iconPath": "icons/icon.png",
+      "iconAsTemplate": false,
+      "menuOnLeftClick": false
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["deb", "rpm", "appimage"],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "resources": [],
+    "category": "Network",
+    "shortDescription": "Secure Telegram Client - Decentralized messenger with post-quantum encryption",
+    "longDescription": "Secure Telegram Client Desktop v2.0 - Приватный мессенджер с post-quantum шифрованием, P2P-сетью и полной независимостью от центральных серверов. Оптимизирован для Linux Mint.",
+    "deb": {
+      "depends": ["libgtk-3-0", "libwebkit2gtk-4.0-37", "libappindicator3-1", "librsvg2-common", "libnotify4", "libsecret-1-0"],
+      "files": {
+        "/usr/share/applications/io.secure-telegram.desktop": "scripts/io.secure-telegram.desktop",
+        "/usr/share/icons/hicolor/256x256/apps/io.secure-telegram.png": "icons/256x256.png"
+      },
+      "scripts": {
+        "preinstall": "scripts/preinstall.sh",
+        "postinstall": "scripts/postinstall.sh",
+        "preremove": "scripts/preremove.sh"
+      }
+    },
+    "rpm": {
+      "depends": ["gtk3", "webkit2gtk3", "libappindicator-gtk3", "libnotify", "libsecret"],
+      "release": "1.el8",
+      "scripts": {
+        "postinstall": "scripts/postinstall.sh"
+      }
+    },
+    "appimage": {
+      "bundleMediaFramework": true,
+      "files": {}
+    },
+    "linux": {
+      "deb": {
+        "compression": "gzip"
+      }
+    }
+  },
+  "plugins": {
+    "shell": {
+      "open": true,
+      "scope": [
+        {
+          "name": "default",
+          "allow": ["^https?://.+", "^file://.+"],
+          "sidecar": false
+        }
+      ]
+    },
+    "fs": {
+      "scope": ["$HOME/**", "$DOCUMENT/**", "$DOWNLOAD/**"]
+    },
+    "dialog": {
+      "all": true
+    },
+    "notification": {
+      "active": true
+    },
+    "autostart": {
+      "enabled": true,
+      "default": false
+    }
+  }
+}

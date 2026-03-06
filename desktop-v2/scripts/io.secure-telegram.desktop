@@ -1,0 +1,14 @@
+[Desktop Entry]
+Version=2.0
+Type=Application
+Name=Secure Telegram
+GenericName=Secure Messenger
+Comment=Приватный мессенджер с post-quantum шифрованием
+Exec=secure-telegram-desktop
+Icon=io.secure-telegram
+Terminal=false
+Categories=Network;InstantMessaging;Chat;
+Keywords=telegram;messenger;chat;secure;encrypted;p2p;
+StartupNotify=true
+StartupWMClass=secure-telegram-desktop
+MimeType=x-scheme-handler/secure-telegram;
