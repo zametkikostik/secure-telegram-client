@@ -89,6 +89,11 @@ pub fn create_router(state: AppState) -> Router {
         .route("/wallpapers", get(features::list_wallpapers))
         .route("/chats/:chat_id/auto-delete", post(features::set_auto_delete))
         .route("/chats/:chat_id/messages/auto-delete", post(features::send_auto_delete_message))
+        // Self-Destruct Timer
+        .route("/chats/:chat_id/self-destruct", get(extra::get_self_destruct_settings))
+        .route("/chats/:chat_id/self-destruct", post(extra::set_chat_self_destruct))
+        .route("/chats/:chat_id/self-destruct/disable", post(extra::disable_self_destruct))
+        .route("/chats/:chat_id/messages/self-destruct", post(extra::send_self_destruct_message))
         // Files
         .route("/files/upload", post(files::upload_file))
         .route("/files/:file_id", get(files::get_file))

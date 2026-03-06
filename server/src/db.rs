@@ -61,6 +61,7 @@ pub async fn init_database() -> anyhow::Result<DbPool> {
             owner_id TEXT REFERENCES users(id),
             wallpaper_url TEXT,
             wallpaper_sync BOOLEAN DEFAULT FALSE,
+            self_destruct_timer INTEGER DEFAULT NULL,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
@@ -90,6 +91,7 @@ pub async fn init_database() -> anyhow::Result<DbPool> {
             pinned_at DATETIME,
             pinned_by TEXT,
             scheduled_for DATETIME,
+            self_destruct_timer INTEGER DEFAULT NULL,
             auto_delete_hours INTEGER DEFAULT NULL,
             delete_at DATETIME DEFAULT NULL,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,

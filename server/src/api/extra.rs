@@ -629,6 +629,164 @@ pub async fn get_active_screen_shares(
     Ok(Json(sessions))
 }
 
+// ==================== Таймер самоуничтожения сообщений ====================
+
+#[derive(Serialize)]
+pub struct SelfDestructConfig {
+    pub chat_id: String,
+    pub timer_seconds: i64,
+    pub enabled: bool,
+}
+
+#[derive(Deserialize)]
+pub struct SetSelfDestructRequest {
+    pub timer_seconds: i64,
+}
+
+/// Установить таймер самоуничтожения для чата
+pub async fn set_chat_self_destruct(
+    State(db): State<crate::api::AppState>,
+    Path((chat_id, user_id)): Path<(String, String)>,
+    Json(req): Json<SetSelfDestructRequest>,
+) -> Result<Json<SelfDestructConfig>, StatusCode> {
+    // Проверка прав пользователя в чате
+    let is_member = sqlx::query_scalar(
+        "SELECT COUNT(*) > 0 FROM chat_members WHERE chat_id = ? AND user_id = ?"
+    )
+    .bind(&chat_id)
+    .bind(&user_id)
+    .fetch_one(&db.db)
+    .await
+    .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    if !is_member {
+        return Err(StatusCode::FORBIDDEN);
+    }
+
+    // Обновление настроек чата
+    sqlx::query(
+        "UPDATE chats SET self_destruct_timer = ? WHERE id = ?"
+    )
+    .bind(&req.timer_seconds)
+    .bind(&chat_id)
+    .execute(&db.db)
+    .await
+    .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    Ok(Json(SelfDestructConfig {
+        chat_id,
+        timer_seconds: req.timer_seconds,
+        enabled: req.timer_seconds > 0,
+    }))
+}
+
+/// Отправить сообщение с таймером самоуничтожения
+pub async fn send_self_destruct_message(
+    State(db): State<crate::api::AppState>,
+    Path(chat_id): Path<String>,
+    Json(req): Json<SendSelfDestructRequest>,
+) -> Result<Json<crate::api::messages::MessageResponse>, StatusCode> {
+    let message_id = uuid::Uuid::new_v4().to_string();
+    let sender_id = "sender-id"; // TODO: Получить из токена
+    let message_type = req.message_type.clone().unwrap_or_else(|| "text".to_string());
+    
+    // Вычисление времени удаления на основе таймера
+    let delete_at = chrono::Utc::now() + chrono::Duration::seconds(req.timer_seconds);
+
+    // Сохранение сообщения с таймером самоуничтожения
+    sqlx::query(
+        "INSERT INTO messages (id, chat_id, sender_id, content, type, file_url, reply_to_id, self_destruct_timer, delete_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    )
+    .bind(&message_id)
+    .bind(&chat_id)
+    .bind(sender_id)
+    .bind(&req.content)
+    .bind(&message_type)
+    .bind(&req.file_url)
+    .bind(&req.reply_to_id)
+    .bind(&req.timer_seconds)
+    .bind(delete_at)
+    .execute(&db.db)
+    .await
+    .map_err(|e| {
+        tracing::error!("Ошибка отправки сообщения с таймером: {}", e);
+        StatusCode::INTERNAL_SERVER_ERROR
+    })?;
+
+    // TODO: Отправка через WebSocket
+
+    Ok(Json(crate::api::messages::MessageResponse {
+        id: message_id,
+        chat_id,
+        sender_id: sender_id.to_string(),
+        content: req.content.clone(),
+        translated_content: None,
+        message_type,
+        file_url: req.file_url.clone(),
+        reply_to_id: req.reply_to_id.clone(),
+        is_edited: false,
+        created_at: chrono::Utc::now().to_rfc3339(),
+    }))
+}
+
+#[derive(Deserialize)]
+pub struct SendSelfDestructRequest {
+    pub content: String,
+    pub timer_seconds: i64,
+    pub message_type: Option<String>,
+    pub file_url: Option<String>,
+    pub reply_to_id: Option<String>,
+}
+
+/// Отключить таймер самоуничтожения для чата
+pub async fn disable_self_destruct(
+    State(db): State<crate::api::AppState>,
+    Path((chat_id, user_id)): Path<(String, String)>,
+) -> Result<StatusCode, StatusCode> {
+    // Проверка прав
+    let is_admin = sqlx::query_scalar(
+        "SELECT COUNT(*) > 0 FROM chat_members WHERE chat_id = ? AND user_id = ? AND role = 'admin'"
+    )
+    .bind(&chat_id)
+    .bind(&user_id)
+    .fetch_one(&db.db)
+    .await
+    .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    if !is_admin {
+        return Err(StatusCode::FORBIDDEN);
+    }
+
+    sqlx::query("UPDATE chats SET self_destruct_timer = NULL WHERE id = ?")
+        .bind(&chat_id)
+        .execute(&db.db)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    Ok(StatusCode::OK)
+}
+
+/// Получить настройки таймера чата
+pub async fn get_self_destruct_settings(
+    State(db): State<crate::api::AppState>,
+    Path(chat_id): Path<String>,
+) -> Result<Json<SelfDestructConfig>, StatusCode> {
+    let timer = sqlx::query_scalar(
+        "SELECT COALESCE(self_destruct_timer, 0) FROM chats WHERE id = ?"
+    )
+    .bind(&chat_id)
+    .fetch_one(&db.db)
+    .await
+    .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    Ok(Json(SelfDestructConfig {
+        chat_id,
+        timer_seconds: timer,
+        enabled: timer > 0,
+    }))
+}
+
 // ==================== Очистка отложенных сообщений ====================
 
 /// Отправить просроченные отложенные сообщения
