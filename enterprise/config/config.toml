@@ -1,0 +1,59 @@
+# Secure Telegram Enterprise - Основная конфигурация
+
+[server]
+listen_addr = "0.0.0.0:8080"
+workers = 4
+max_connections = 10000
+
+[database]
+url = "postgresql://enterprise:password@localhost/secure_telegram"
+max_connections = 100
+min_connections = 10
+
+[redis]
+url = "redis://localhost:6379"
+cluster_mode = false
+
+[jwt]
+secret = "your-jwt-secret-key-change-in-production"
+access_token_ttl_hours = 1
+refresh_token_ttl_days = 30
+
+[audit]
+enabled = true
+log_path = "/var/log/secure-telegram"
+retention_days = 365
+siem_endpoint = "https://siem.example.com/api/logs"
+
+[compliance]
+gdpr_enabled = true
+data_retention_days = 2555  # 7 лет
+export_timeout_hours = 24
+auto_delete_enabled = false
+
+[security]
+password_min_length = 12
+password_require_uppercase = true
+password_require_lowercase = true
+password_require_numbers = true
+password_require_special = true
+mfa_required = false
+session_timeout_minutes = 480
+
+[limits]
+max_message_length = 4096
+max_file_size_mb = 100
+max_chats_per_user = 500
+max_participants_per_chat = 1000
+
+[monitoring]
+prometheus_enabled = true
+prometheus_port = 9090
+otlp_endpoint = "https://otel.example.com:4317"
+
+[email]
+smtp_host = "smtp.example.com"
+smtp_port = 587
+smtp_user = "notifications@example.com"
+smtp_password = "smtp-password"
+from_address = "Secure Telegram <noreply@example.com>"

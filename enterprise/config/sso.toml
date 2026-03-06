@@ -1,0 +1,34 @@
+# Secure Telegram Enterprise - Конфигурация SSO
+
+# OAuth2 / OpenID Connect
+[oauth2]
+enabled = true
+client_id = "enterprise-client"
+client_secret = "your-client-secret"
+issuer_url = "https://auth.example.com"
+redirect_url = "https://secure-telegram.example.com/auth/callback"
+scopes = ["openid", "email", "profile", "groups"]
+
+# SAML 2.0
+[saml]
+enabled = false
+idp_metadata_url = "https://idp.example.com/metadata"
+sp_entity_id = "https://secure-telegram.example.com/saml"
+assertion_consumer_service_url = "https://secure-telegram.example.com/auth/saml/callback"
+
+# LDAP / Active Directory
+[ldap]
+enabled = true
+url = "ldap://ad.example.com:389"
+bind_dn = "CN=Service Account,OU=Services,DC=example,DC=com"
+bind_password = "service-password"
+base_dn = "DC=example,DC=com"
+user_filter = "(sAMAccountName={username})"
+group_filter = "(member={user_dn})"
+use_tls = false
+
+# Kerberos
+[kerberos]
+enabled = false
+realm = "EXAMPLE.COM"
+keytab_path = "/etc/secure-telegram/secure-telegram.keytab"

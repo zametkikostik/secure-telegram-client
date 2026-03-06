@@ -1,0 +1,30 @@
+# Build artifacts
+target/
+releases/
+debian/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+/var/log/
+
+# Environment
+.env
+.env.local
+
+# Configs with secrets
+config/*.local.toml
+config/*-secret.toml
+
+# Database
+*.db
+*.sqlite
