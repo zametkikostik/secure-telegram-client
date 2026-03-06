@@ -1,11 +1,17 @@
-# 🔐 Secure Telegram Client
+# 🔐 Secure Telegram Client v1.1.0
 
 > **Приватный мессенджер с post-quantum шифрованием, P2P-сетью и полной независимостью от центральных серверов**
+
+**🏷️ Последний релиз:** [v1.1.0](https://github.com/zametkikostik/secure-telegram-client/releases/tag/v1.1.0) (Март 2026)  
+**📊 Статус:** ✅ 100% Telegram Compatible (45/45 функций)  
+**🤖 Bots Platform:** ✅ BotFather + ManyChat аналог  
+**🛡️ Admin Panel:** ✅ Верификация с бейджами (✓)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Rust](https://img.shields.io/badge/Rust-1.75+-orange.svg)](https://www.rust-lang.org)
 [![Android](https://img.shields.io/badge/Android-8.0+-green.svg)](https://www.android.com)
 [![Web3](https://img.shields.io/badge/Web3-EVM--compatible-blue.svg)](https://ethereum.org)
+[![Release](https://img.shields.io/github/v/release/zametkikostik/secure-telegram-client)](https://github.com/zametkikostik/secure-telegram-client/releases)
 
 ---
 
@@ -49,6 +55,30 @@
 - 🤖 **AI-помощник** — перевод, саммаризация, генерация кода
 - 💰 **Web3-интеграция** — обмен криптовалют прямо в чате
 - 📱 **Кроссплатформенность** — Android, Desktop, Web
+
+---
+
+## 🏷️ Releases и Tags
+
+### Последний релиз: **v1.1.0** (Март 2026)
+
+**📦 Что нового в v1.1.0:**
+
+- ✅ **Admin Panel** — управление пользователями, верификация с бейджами (✓)
+- ✅ **Bots Platform** — BotFather + ManyChat аналог + IPFS
+- ✅ **Self-Destruct Timer** — таймер самоуничтожения сообщений
+- ✅ **100% Telegram Compatible** — все 45 функций реализованы
+
+**🔗 Releases:** https://github.com/zametkikostik/secure-telegram-client/releases
+
+**📖 Changelog:** [RELEASE_v1.0.0.md](RELEASE_v1.0.0.md)
+
+### Все релизы:
+
+| Версия | Дата | Описание |
+|--------|------|----------|
+| **v1.1.0** | Март 2026 | Admin Panel + Bots Platform + 100% совместимость |
+| **v1.0.0** | Март 2026 | Первый стабильный релиз (100% Telegram Compatible) |
 
 ---
 
@@ -361,7 +391,31 @@ secure-telegram-client/
 
 ## 📦 Установка
 
-### Требования
+### ☁️ Быстрое развёртывание в Cloudflare (24/7 в облаке)
+
+**Рекомендуемый способ!** Backend будет работать 24/7 бесплатно.
+
+```bash
+# 1. Перейдите в папку Cloudflare Worker
+cd cloudflare/worker
+
+# 2. Установите Wrangler
+npm install -g wrangler
+
+# 3. Логин в Cloudflare
+wrangler login
+
+# 4. Деплой
+wrangler deploy
+```
+
+**URL после деплоя:** `https://secure-telegram-worker.<subdomain>.workers.dev`
+
+📖 **Полная инструкция:** [QUICK_DEPLOY.md](QUICK_DEPLOY.md)
+
+### 🖥️ Локальная разработка
+
+#### Требования
 
 | Компонент | Версия | Ссылка |
 |-----------|--------|--------|
@@ -369,8 +423,6 @@ secure-telegram-client/
 | **Node.js** | 18+ | [nodejs.org](https://nodejs.org) |
 | **Android SDK** | 34+ | [developer.android.com](https://developer.android.com) |
 | **Docker** | 20+ | [docker.com](https://www.docker.com) |
-
-### Быстрый старт
 
 #### 1. Backend сервер
 
@@ -639,6 +691,20 @@ LIBERTY_UPLOAD_KEY_PASSWORD=ваш-пароль
 | Smart Contracts | ✅ | `smart-contracts/*` |
 | Cloudflare Worker | ✅ | `cloudflare/worker/*` |
 | Docker | ✅ | `self-hosting/*` |
+| Bots Platform | ✅ | `bots/*` |
+| Admin Panel | ✅ | `admin/*` |
+
+---
+
+## 📁 Проекты
+
+| Проект | Описание | Порт |
+|--------|----------|------|
+| **Backend** | REST API + WebSocket | 8008 |
+| **Frontend** | Web UI (React) | 3000 |
+| **Bots Platform** | BotFather + ManyChat | 8081 |
+| **Admin Panel** | Админ-панель с верификацией | 8082 |
+| **Cloudflare Worker** | Serverless backend | - |
 
 ---
 
@@ -646,10 +712,10 @@ LIBERTY_UPLOAD_KEY_PASSWORD=ваш-пароль
 
 | Канал | Ссылка |
 |-------|--------|
-| **Email** | support@libertyreach.io |
-| **GitHub** | [github.com/libertyreach/messenger](https://github.com/libertyreach/messenger) |
-| **Документация** | [docs.libertyreach.io](https://docs.libertyreach.io) |
-| **Telegram** | [@libertyreach](https://t.me/libertyreach) |
+| **Email** | support@secure-telegram.io |
+| **GitHub** | [github.com/zametkikostik/secure-telegram-client](https://github.com/zametkikostik/secure-telegram-client) |
+| **Releases** | [github.com/zametkikostik/secure-telegram-client/releases](https://github.com/zametkikostik/secure-telegram-client/releases) |
+| **Документация** | [QUICK_DEPLOY.md](QUICK_DEPLOY.md), [DEPLOYMENT.md](DEPLOYMENT.md) |
 
 ---
 
@@ -663,8 +729,8 @@ LIBERTY_UPLOAD_KEY_PASSWORD=ваш-пароль
 
 <div align="center">
 
-**Secure Telegram Client** — приватность без компромиссов.
+**Secure Telegram Client v1.1.0** — приватность без компромиссов.
 
-[Начать использование](#-быстрый-старт) • [Сообщить о проблеме](https://github.com/libertyreach/messenger/issues) • [Внести вклад](https://github.com/libertyreach/messenger/pulls)
+[🚀 Быстрый старт](#-быстрый-старт) • [📦 Releases](https://github.com/zametkikostik/secure-telegram-client/releases) • [🐛 Сообщить о проблеме](https://github.com/zametkikostik/secure-telegram-client/issues) • [🤝 Внести вклад](https://github.com/zametkikostik/secure-telegram-client/pulls)
 
 </div>
