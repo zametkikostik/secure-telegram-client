@@ -366,19 +366,35 @@ npm run dev
 # Откройте http://localhost:3000
 ```
 
-#### 3. Android APK
+#### 3. Android APK (Готовое подписанное)
+
+**✅ Готовое APK уже подписано и доступно!**
 
 ```bash
-cd mobile
-npm install
+# Установка на устройство
+adb install mobile/android/app/build/outputs/apk/release/app-release.apk
 
-# Debug APK
-npm run build:apk
-# APK: mobile/android/app/build/outputs/apk/debug/app-debug.apk
-
-# Release APK (нужен keystore)
-npm run build:android
+# Или скопируйте APK на телефон и установите
 ```
+
+**Сборка нового APK:**
+
+```bash
+cd mobile/android
+
+# Debug APK (для тестирования)
+./gradlew assembleDebug
+
+# Release APK (подписанный)
+./gradlew assembleRelease
+```
+
+**Keystore для подписи:**
+- Файл: `mobile/android/liberty-reach.keystore`
+- Валидность: 10 000 дней
+- Ключ: RSA 2048 bit
+
+📖 **Подробности:** [APK_INFO.md](APK_INFO.md)
 
 #### 4. Desktop (Tauri)
 
