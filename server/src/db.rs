@@ -29,6 +29,7 @@ pub async fn init_database() -> anyhow::Result<DbPool> {
             public_key TEXT NOT NULL,
             avatar_url TEXT,
             status TEXT DEFAULT 'offline',
+            family_status TEXT DEFAULT 'single',
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
@@ -55,6 +56,8 @@ pub async fn init_database() -> anyhow::Result<DbPool> {
             name TEXT,
             description TEXT,
             owner_id TEXT REFERENCES users(id),
+            wallpaper_url TEXT,
+            wallpaper_sync BOOLEAN DEFAULT FALSE,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
@@ -80,6 +83,8 @@ pub async fn init_database() -> anyhow::Result<DbPool> {
             reply_to_id TEXT REFERENCES messages(id),
             is_edited BOOLEAN DEFAULT FALSE,
             is_deleted BOOLEAN DEFAULT FALSE,
+            auto_delete_hours INTEGER DEFAULT NULL,
+            delete_at DATETIME DEFAULT NULL,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
@@ -112,11 +117,34 @@ pub async fn init_database() -> anyhow::Result<DbPool> {
             PRIMARY KEY (user_id, contact_id)
         );
 
+        -- Семейные связи
+        CREATE TABLE IF NOT EXISTS family_relations (
+            id TEXT PRIMARY KEY,
+            user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+            relative_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+            relation_type TEXT NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(user_id, relative_id)
+        );
+
+        -- Обои чата (синхронизированные)
+        CREATE TABLE IF NOT EXISTS chat_wallpapers (
+            chat_id TEXT REFERENCES chats(id) ON DELETE CASCADE,
+            user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+            wallpaper_url TEXT NOT NULL,
+            wallpaper_type TEXT DEFAULT 'custom',
+            synced BOOLEAN DEFAULT FALSE,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (chat_id, user_id)
+        );
+
         -- Индексы для производительности
         CREATE INDEX IF NOT EXISTS idx_messages_chat_id ON messages(chat_id);
         CREATE INDEX IF NOT EXISTS idx_messages_created_at ON messages(created_at);
+        CREATE INDEX IF NOT EXISTS idx_messages_delete_at ON messages(delete_at) WHERE delete_at IS NOT NULL;
         CREATE INDEX IF NOT EXISTS idx_chat_members_user ON chat_members(user_id);
         CREATE INDEX IF NOT EXISTS idx_message_reads_user ON message_reads(user_id);
+        CREATE INDEX IF NOT EXISTS idx_family_relations_user ON family_relations(user_id);
         "#,
     )
     .execute(&pool)

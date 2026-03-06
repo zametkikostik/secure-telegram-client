@@ -20,6 +20,7 @@ use tower_http::{
 };
 use std::net::SocketAddr;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+use tokio::time::{Duration, interval};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -37,6 +38,29 @@ async fn main() -> anyhow::Result<()> {
     // Инициализация базы данных
     let db = db::init_database().await?;
     tracing::info!("База данных инициализирована");
+
+    // Запуск задачи очистки просроченных сообщений
+    let db_clone = db.clone();
+    tokio::spawn(async move {
+        let mut interval = interval(Duration::from_secs(300)); // Каждые 5 минут
+        loop {
+            interval.tick().await;
+            match sqlx::query("DELETE FROM messages WHERE delete_at IS NOT NULL AND delete_at < CURRENT_TIMESTAMP")
+                .execute(&*db_clone)
+                .await
+            {
+                Ok(result) => {
+                    let count = result.rows_affected();
+                    if count > 0 {
+                        tracing::info!("Удалено {} просроченных сообщений (24h)", count);
+                    }
+                }
+                Err(e) => {
+                    tracing::error!("Ошибка очистки просроченных сообщений: {}", e);
+                }
+            }
+        }
+    });
 
     // Создание состояния приложения
     let app_state = api::AppState {
