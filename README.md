@@ -378,6 +378,8 @@ npm run build:android
 
 #### 4. Desktop (Tauri)
 
+**Desktop v1.0 (Базовая версия):**
+
 ```bash
 cd messenger
 cargo install tauri-cli
@@ -385,6 +387,27 @@ cargo tauri dev
 # или
 cargo tauri build
 ```
+
+**Desktop v2.0 (Linux Mint — оптимизировано):**
+
+```bash
+# Установка зависимостей
+sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev \
+    libappindicator3-dev librsvg2-dev libnotify-dev libsecret-1-dev
+
+# Сборка
+cd desktop-v2
+chmod +x scripts/build.sh
+./scripts/build.sh
+
+# Установка .deb пакета
+sudo dpkg -i ../releases/secure-telegram-desktop_2.0.0_amd64.deb
+
+# Запуск
+secure-telegram-desktop
+```
+
+📖 **Документация:** [desktop-v2/README.md](desktop-v2/README.md)
 
 #### 5. Self-Hosting (Docker)
 
