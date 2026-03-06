@@ -1,0 +1,224 @@
+# Liberty Reach — Глобальный .gitignore
+
+# ===========================================
+# КРИТИЧЕСКИЕ ФАЙЛЫ (никогда не коммитить!)
+# ===========================================
+
+# Секреты и ключи
+.env
+.env.local
+.env.*.local
+*.env
+.secrets
+secrets/
+*.pem
+*.key
+*.crt
+*.p12
+*.jks
+*.keystore
+*password*
+*secret*
+*token*
+firebase-config.json
+google-services.json
+
+# Личные данные
+.ssh/
+.gnupg/
+credentials/
+
+# ===========================================
+# Rust
+# ===========================================
+/target/
+**/target/
+Cargo.lock
+**/*.rs.bk
+*.pdb
+
+# Cargo registry (содержит git репозитории)
+.cargo/
+
+# ===========================================
+# Node.js / JavaScript / TypeScript
+# ===========================================
+node_modules/
+npm-debug.log
+yarn-error.log
+yarn.lock
+package-lock.json
+pnpm-lock.yaml
+.npm
+.eslintcache
+*.tsbuildinfo
+
+# ===========================================
+# Python
+# ===========================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.venv/
+ENV/
+*.egg-info/
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+*.ipynb_checkpoints
+
+# ===========================================
+# Solidity / Hardhat
+# ===========================================
+artifacts/
+cache/
+coverage/
+coverage.json
+*.log
+typechain/
+typechain-types/
+
+# ===========================================
+# Java / Android / Gradle
+# ===========================================
+*.iml
+.gradle/
+build/
+**/build/
+*.keystore
+*.jks
+*.keystore.properties
+local.properties
+**/gen/
+**/out/
+*.apk
+*.aab
+*.dex
+*.class
+*.hprof
+
+# ===========================================
+# IDE и редакторы
+# ===========================================
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+*.sublime-*
+.project
+.settings/
+*.hprof
+
+# ===========================================
+# Логи и временные файлы
+# ===========================================
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+*.bak
+*.swp
+
+# ===========================================
+# Загрузки и файлы пользователей
+# ===========================================
+uploads/
+**/uploads/
+data/
+*.db
+*.sqlite
+*.sqlite3
+liberty_reach.db
+
+# ===========================================
+# Docker
+# ===========================================
+*.tar
+.docker/
+docker-compose.override.yml
+
+# ===========================================
+# Тесты
+# ===========================================
+*.test
+*.spec
+*.snap
+.nyc_output/
+jest-results/
+
+# ===========================================
+# Сборка и дистрибутивы
+# ===========================================
+dist/
+build/
+out/
+*.bundle
+*.jar
+*.war
+*.ear
+
+# ===========================================
+# ОС
+# ===========================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ===========================================
+# Специфичные для проекта
+# ===========================================
+
+# Ключи шифрования
+**/keys/
+**/certs/
+
+# Базы данных (кроме миграций)
+*.db-shm
+*.db-wal
+
+# Временные конфиги
+*.local.json
+*.local.yaml
+*.local.yml
+
+# Локальные конфиги Tauri
+tauri.local.conf.json
+
+# Android keystores
+**/*.keystore
+**/*.jks
+keystore.properties
+
+# Firebase
+google-services.json
+**/google-services.json
+
+# ===========================================
+# Исключения (что МОЖНО коммитить)
+# ===========================================
+
+# Примеры .env файлов
+!.env.example
+!.env.local.example
+!.env.sample
+
+# Публичные ключи (не приватные!)
+!*.pub
+
+# Шаблоны конфигов
+*.example
+*.template
+*.dist

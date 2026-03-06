@@ -1,0 +1,39 @@
+# ===========================================
+# .gitignore для mobile/
+# ===========================================
+
+# Dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Build outputs
+android/app/build/
+android/build/
+build/
+*.apk
+*.aab
+*.keystore
+*.jks
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets
+google-services.json
+*.keystore.properties
+local.properties
+
+# Logs
+*.log
+logs/
+
+# Temporary
+tmp/
+temp/

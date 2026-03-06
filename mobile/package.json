@@ -1,0 +1,42 @@
+{
+  "name": "liberty-reach-mobile",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
+    "start": "react-native start",
+    "build:android": "cd android && ./gradlew assembleRelease",
+    "build:apk": "cd android && ./gradlew assembleDebug",
+    "clean": "cd android && ./gradlew clean",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "react": "18.2.0",
+    "react-native": "0.73.0",
+    "@react-navigation/native": "^6.1.0",
+    "@react-navigation/stack": "^6.3.0",
+    "react-native-gesture-handler": "^2.14.0",
+    "react-native-safe-area-context": "^4.8.0",
+    "react-native-screens": "^3.29.0",
+    "react-native-webrtc": "^118.0.0",
+    "react-native-audio-recorder-player": "^3.6.0",
+    "@react-native-async-storage/async-storage": "^1.21.0",
+    "axios": "^1.6.0",
+    "@react-native-firebase/app": "^19.0.0",
+    "@react-native-firebase/messaging": "^19.0.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.23.0",
+    "@babel/preset-env": "^7.23.0",
+    "@babel/runtime": "^7.23.0",
+    "@react-native/babel-preset": "^0.73.0",
+    "@react-native/metro-config": "^0.73.0",
+    "@react-native/eslint-config": "^0.73.0",
+    "@types/react": "^18.2.0",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

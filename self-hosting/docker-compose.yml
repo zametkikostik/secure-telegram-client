@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  liberty-reach-server:
+    image: libertyreach/server:latest
+    build:
+      context: ..
+      dockerfile: self-hosting/Dockerfile
+    ports:
+      - "8008:8008"
+    volumes:
+      - ./data:/app/data
+      - ./uploads:/app/uploads
+    environment:
+      - SERVER_ADDR=0.0.0.0:8008
+      - DATABASE_URL=sqlite:/app/data/liberty_reach.db
+      - JWT_SECRET=${JWT_SECRET:-change-me-in-production}
+      - UPLOADS_DIR=/app/uploads
+      - ADMIN_WALLET=${ADMIN_WALLET:-0x0000000000000000000000000000000000000000}
+      - QWEN_API_KEY=${QWEN_API_KEY:-}
+      - RUST_LOG=${RUST_LOG:-info}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8008/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

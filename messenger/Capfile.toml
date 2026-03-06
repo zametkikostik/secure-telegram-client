@@ -1,0 +1,27 @@
+[profile]
+app_name = "Liberty Reach"
+identifier = "io.libertyreach.messenger"
+version = "1.0.0"
+
+[build]
+frontend_dist = "../frontend/dist"
+
+[bundle]
+active = true
+icon = [
+    "icons/32x32.png",
+    "icons/128x128.png",
+    "icons/128x128@2x.png",
+    "icons/icon.icns",
+    "icons/icon.ico"
+]
+
+[bundle.android]
+min_sdk_version = 24
+target_sdk_version = 34
+
+[bundle.android.signing]
+keystore_path = "../android-keystore.jks"
+keystore_password = "liberty123"
+key_alias = "liberty"
+key_password = "liberty123"

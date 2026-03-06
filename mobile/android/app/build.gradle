@@ -1,0 +1,80 @@
+apply plugin: "com.android.application"
+apply plugin: "org.jetbrains.kotlin.android"
+
+def enableProguardInReleaseBuilds = false
+
+android {
+    ndkVersion rootProject.ext.ndkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+    compileSdk rootProject.ext.compileSdkVersion
+
+    namespace "io.libertyreach"
+    defaultConfig {
+        applicationId "io.libertyreach.messenger"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 1
+        versionName "1.0.0"
+    }
+    
+    signingConfigs {
+        debug {
+            storeFile file('debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+        release {
+            // Keystore для production сборки
+            // 1. Создать: keytool -genkey -v -keystore liberty-reach.keystore -alias liberty -keyalg RSA -keysize 2048 -validity 10000
+            // 2. Добавить в gradle.properties:
+            //    LIBERTY_UPLOAD_STORE_FILE=liberty-reach.keystore
+            //    LIBERTY_UPLOAD_STORE_PASSWORD=your-password
+            //    LIBERTY_UPLOAD_KEY_ALIAS=liberty
+            //    LIBERTY_UPLOAD_KEY_PASSWORD=your-password
+            if (project.hasProperty('LIBERTY_UPLOAD_STORE_FILE')) {
+                storeFile file(LIBERTY_UPLOAD_STORE_FILE)
+                storePassword LIBERTY_UPLOAD_STORE_PASSWORD
+                keyAlias LIBERTY_UPLOAD_KEY_ALIAS
+                keyPassword LIBERTY_UPLOAD_KEY_PASSWORD
+            } else {
+                // Fallback на debug keystore (только для тестирования!)
+                storeFile file('debug.keystore')
+                storePassword 'android'
+                keyAlias 'androiddebugkey'
+                keyPassword 'android'
+            }
+        }
+    }
+    
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+        }
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled enableProguardInReleaseBuilds
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    // React Native
+    implementation("com.facebook.react:react-android")
+    implementation("com.facebook.react:hermes-android")
+    
+    // Firebase
+    implementation platform("com.google.firebase:firebase-bom:32.7.0")
+    implementation("com.google.firebase:firebase-messaging")
+    implementation("com.google.firebase:firebase-analytics")
+    
+    // WebRTC для звонков
+    implementation("com.webrtc:google-webrtc:1.0.32006")
+    
+    // WebSocket
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    
+    // Crypto
+    implementation("org.bouncycastle:bcprov-jdk15on:1.70")
+}

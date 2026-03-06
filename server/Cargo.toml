@@ -1,0 +1,71 @@
+[package]
+name = "liberty-reach-server"
+version = "1.0.0"
+edition = "2021"
+authors = ["Liberty Reach Team"]
+description = "Backend server for Liberty Reach messenger"
+
+[lib]
+name = "liberty_reach_server"
+path = "src/lib.rs"
+
+[[bin]]
+name = "liberty-reach-server"
+path = "src/main.rs"
+
+[dependencies]
+# Async
+tokio = { version = "1.36", features = ["full"] }
+tokio-tungstenite = "0.21"
+futures = "0.3"
+
+# Web framework
+axum = { version = "0.7", features = ["ws", "multipart"] }
+tower = "0.4"
+tower-http = { version = "0.5", features = ["cors", "fs", "trace"] }
+
+# Database
+sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "sqlite", "postgres"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Crypto & Auth
+ed25519-dalek = "2.1"
+jsonwebtoken = "9.2"
+argon2 = "0.5"
+rand = "0.8"
+hex = "0.4"
+
+# File handling
+uuid = { version = "1.7", features = ["v4"] }
+mime_guess = "2.0"
+
+# HTTP client
+reqwest = { version = "0.12", features = ["json", "rustls-tls"] }
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Time
+chrono = { version = "0.4", features = ["serde"] }
+
+# Environment
+dotenvy = "0.15"
+
+[dev-dependencies]
+# Тесты
+tokio = { version = "1.36", features = ["full", "test-util"] }
+axum-test = "14.0"
+fake = { version = "2.9", features = ["derive"] }
+
+[profile.release]
+opt-level = 3
+lto = true
+strip = true

@@ -1,0 +1,38 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  group_by: ['alertname']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 1h
+  receiver: 'default-receiver'
+
+receivers:
+  - name: 'default-receiver'
+    # Email notifications
+    email_configs:
+      - to: 'admin@libertyreach.io'
+        from: 'alertmanager@libertyreach.io'
+        smarthost: 'smtp.gmail.com:587'
+        auth_username: 'your-email@gmail.com'
+        auth_password: 'your-app-password'
+        send_resolved: true
+    
+    # Slack notifications (optional)
+    # slack_configs:
+    #   - api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+    #     channel: '#alerts'
+    #     send_resolved: true
+    
+    # Telegram notifications (optional)
+    # telegram_configs:
+    #   - bot_token: 'YOUR_BOT_TOKEN'
+    #     chat_id: YOUR_CHAT_ID
+
+inhibit_rules:
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'instance']

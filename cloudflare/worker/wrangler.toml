@@ -1,0 +1,14 @@
+name = "liberty-reach-worker"
+main = "src/worker.ts"
+compatibility_date = "2024-01-01"
+
+[[kv_namespaces]]
+binding = "PUSH_STORE"
+id = "9c0651f314b64b49bc215fc5f56163f4"
+
+[[kv_namespaces]]
+binding = "CALL_STORE"
+id = "CALL_STORE_ID_HERE"  # Заменить на реальный ID после создания KV namespace в Cloudflare
+
+[vars]
+MATRIX_URL = "https://matrix.libertyreach.io"

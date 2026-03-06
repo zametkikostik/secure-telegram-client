@@ -1,0 +1,188 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_VERSION: 1.75
+  NODE_VERSION: 18
+
+jobs:
+  # Тесты Backend (Rust)
+  backend-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install Rust
+      uses: dtolnay/rust-action@stable
+      with:
+        toolchain: ${{ env.RUST_VERSION }}
+        components: rustfmt, clippy
+    
+    - name: Cache Cargo
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libssl-dev pkg-config libsqlite3-dev
+    
+    - name: Check format
+      run: cargo fmt --all -- --check
+      working-directory: server
+    
+    - name: Run Clippy
+      run: cargo clippy -- -D warnings
+      working-directory: server
+    
+    - name: Build
+      run: cargo build --release
+      working-directory: server
+    
+    - name: Run tests
+      run: cargo test --release
+      working-directory: server
+    
+    - name: Run tests with coverage
+      run: cargo tarpaulin --out Xml
+      working-directory: server
+      continue-on-error: true
+
+  # Тесты Frontend (React)
+  frontend-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+    
+    - name: Cache Node modules
+      uses: actions/cache@v3
+      with:
+        path: |
+          frontend/node_modules
+          ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('frontend/package-lock.json') }}
+    
+    - name: Install dependencies
+      run: npm ci
+      working-directory: frontend
+    
+    - name: Run linter
+      run: npm run lint
+      working-directory: frontend
+    
+    - name: Run tests
+      run: npm test -- --coverage
+      working-directory: frontend
+    
+    - name: Build
+      run: npm run build
+      working-directory: frontend
+
+  # Сборка Android APK
+  android-build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+    
+    - name: Install dependencies
+      run: npm ci
+      working-directory: mobile
+    
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v2
+    
+    - name: Build Debug APK
+      run: |
+        npm run build:apk
+      working-directory: mobile
+    
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: app-debug.apk
+        path: mobile/android/app/build/outputs/apk/debug/app-debug.apk
+
+  # Сборка Docker образа
+  docker-build:
+    runs-on: ubuntu-latest
+    needs: [backend-test]
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+    
+    - name: Build Docker image
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        file: self-hosting/Dockerfile
+        push: false
+        tags: libertyreach/server:latest
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  # Деплой на production (только для main ветки)
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [backend-test, frontend-test, docker-build]
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Deploy to production
+      run: |
+        echo "Deploying to production..."
+        # Здесь можно добавить деплой на VPS, Vercel, Railway и т.д.
+      env:
+        DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+
+  # Создание релиза (только для тегов)
+  release:
+    runs-on: ubuntu-latest
+    needs: [backend-test, frontend-test, android-build]
+    if: startsWith(github.ref, 'refs/tags/')
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          mobile/android/app/build/outputs/apk/debug/app-debug.apk
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
