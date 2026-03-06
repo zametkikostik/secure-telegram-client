@@ -10,6 +10,7 @@ pub mod web3;
 pub mod ai;
 pub mod nodes;
 pub mod features;
+pub mod extra;
 
 use axum::{Router, routing::{get, post}};
 use sqlx::SqlitePool;
@@ -45,12 +46,41 @@ pub fn create_router(state: AppState) -> Router {
         // Users
         .route("/users/me", get(users::get_current_user))
         .route("/users/:id", get(users::get_user))
+        .route("/users/:user_id/bio", get(features::get_family_status))
+        .route("/users/:user_id/bio", post(features::set_family_status))
         // Chats
         .route("/chats", get(chats::list_chats))
         .route("/chats", post(chats::create_chat))
         .route("/chats/:chat_id", get(chats::get_chat))
         .route("/chats/:chat_id/messages", get(messages::list_messages))
         .route("/chats/:chat_id/messages", post(messages::send_message))
+        // Pinned Messages
+        .route("/chats/:chat_id/pinned", get(extra::get_pinned_messages))
+        .route("/chats/:chat_id/pin", post(extra::pin_message))
+        .route("/chats/:chat_id/unpin/:message_id", post(extra::unpin_message))
+        // Saved Messages (Favorites/Notes)
+        .route("/users/:user_id/saved", get(extra::get_saved_messages))
+        .route("/users/:user_id/saved", post(extra::save_message))
+        .route("/users/:user_id/saved/:message_id", delete(extra::delete_saved_message))
+        // Scheduled Messages
+        .route("/chats/:chat_id/scheduled", get(extra::get_scheduled_messages))
+        .route("/chats/:chat_id/schedule", post(extra::schedule_message))
+        .route("/chats/:chat_id/scheduled/:message_id", post(extra::cancel_scheduled_message))
+        // Stickers & GIFs
+        .route("/stickers", get(extra::list_stickers))
+        .route("/sticker-packs", get(extra::list_sticker_packs))
+        .route("/gifs", get(extra::list_gifs))
+        // Reactions
+        .route("/messages/:message_id/reactions", get(extra::get_reactions))
+        .route("/messages/:message_id/reactions", post(extra::add_reaction))
+        // Themes
+        .route("/themes", get(extra::list_themes))
+        .route("/users/:user_id/theme/:theme", post(extra::set_user_theme))
+        .route("/users/:user_id/night-mode/:enabled", post(extra::set_night_mode))
+        // Screen Share
+        .route("/screen-share", post(extra::start_screen_share))
+        .route("/screen-share/:session_id", post(extra::stop_screen_share))
+        .route("/chats/:chat_id/screen-share", get(extra::get_active_screen_shares))
         // New Features
         .route("/users/:user_id/family-status", get(features::get_family_status))
         .route("/users/:user_id/family-status", post(features::set_family_status))
@@ -77,3 +107,5 @@ pub fn create_router(state: AppState) -> Router {
         .layer(TraceLayer::new_for_http())
         .with_state(state)
 }
+
+use axum::routing::delete;

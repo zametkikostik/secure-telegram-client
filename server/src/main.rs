@@ -62,6 +62,25 @@ async fn main() -> anyhow::Result<()> {
         }
     });
 
+    // Запуск задачи отправки отложенных сообщений
+    let db_clone = db.clone();
+    tokio::spawn(async move {
+        let mut interval = interval(Duration::from_secs(60)); // Каждую минуту
+        loop {
+            interval.tick().await;
+            match crate::api::extra::send_scheduled_messages(&*db_clone).await {
+                Ok(count) => {
+                    if count > 0 {
+                        tracing::info!("Отправлено {} отложенных сообщений", count);
+                    }
+                }
+                Err(e) => {
+                    tracing::error!("Ошибка отправки отложенных сообщений: {}", e);
+                }
+            }
+        }
+    });
+
     // Создание состояния приложения
     let app_state = api::AppState {
         db: db.clone(),
