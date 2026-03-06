@@ -109,6 +109,15 @@
 - 🔊 **Text-to-Speech** — Qwen TTS, естественный голос
 - 🎯 **Голосовые команды** — управление без рук
 
+### 🤖 Bots Platform
+
+- 👨‍💼 **BotFather** — создание и управление ботами
+- 🏗️ **ManyChat конструктор** — визуальный конструктор ботов
+- 🎯 **Триггеры и блоки** — сообщения, кнопки, условия, API
+- 🔗 **Webhooks** — интеграция с внешними сервисами
+- 🌐 **IPFS (Pinata.cloud)** — загрузка файлов на IPFS
+- 📊 **Статистика ботов** — подписчики, сообщения, flow
+
 ### 📲 Миграция из других мессенджеров
 
 | Источник | Формат | AI перевод |
@@ -469,7 +478,33 @@ sudo systemctl enable secure-telegram-enterprise
 
 📖 **Документация:** [enterprise/README.md](enterprise/README.md)
 
-#### 6. Self-Hosting (Docker)
+#### 6. Bots Platform (BotFather + ManyChat)
+
+```bash
+# Установка зависимостей
+cd bots
+cargo build --release
+
+# Настройка переменных окружения
+export BOTS_ADDR="0.0.0.0:8081"
+export PINATA_API_KEY="your-pinata-api-key"
+export PINATA_SECRET_KEY="your-pinata-secret-key"
+
+# Запуск
+cargo run --release
+```
+
+**Создание бота:**
+
+```bash
+curl -X POST http://localhost:8081/api/v1/bots \
+  -H "Content-Type: application/json" \
+  -d '{"username": "my_bot", "name": "My Bot"}'
+```
+
+📖 **Документация:** [bots/README.md](bots/README.md)
+
+#### 7. Self-Hosting (Docker)
 
 ```bash
 cd self-hosting
