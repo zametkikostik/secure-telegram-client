@@ -128,7 +128,9 @@
 
 | Платформа | Статус | Технологии |
 |-----------|--------|------------|
-| **Desktop** | ✅ | Tauri (Windows, Mac, Linux) |
+| **Desktop v1.0** | ✅ | Tauri (Windows, Mac, Linux) |
+| **Desktop v2.0** | ✅ | Tauri v2 (Linux Mint оптимизировано) |
+| **Enterprise** | ✅ | Axum + Tauri (SSO, аудит, compliance) |
 | **Android** | ✅ | React Native (APK) |
 | **Web** | ✅ | React + TypeScript |
 | **iOS** | ⏳ | В разработке |
@@ -145,11 +147,13 @@
 - ✅ Docker Compose
 - ✅ One-click install скрипт
 
-### 🌐 Децентрализация
+### 🏢 Enterprise версия
 
-- ✅ **IPFS хранение** — децентрализованное хранение файлов
-- ✅ **Мультиязычность** — поддержка 50+ языков интерфейса
-- ✅ **P2P сеть** — прямые соединения между клиентами
+- 🔐 **SSO** — OAuth2, SAML, LDAP, Kerberos
+- 📊 **Аудит** — централизованное логирование, SIEM экспорт
+- 👥 **Админ-панель** — управление пользователями и группами
+- 🛡️ **Compliance** — GDPR, DLP, политики безопасности
+- 📈 **Мониторинг** — Prometheus, Grafana, OpenTelemetry
 
 ---
 
@@ -409,7 +413,33 @@ secure-telegram-desktop
 
 📖 **Документация:** [desktop-v2/README.md](desktop-v2/README.md)
 
-#### 5. Self-Hosting (Docker)
+#### 5. Enterprise версия (SSO, аудит, compliance)
+
+```bash
+# Установка зависимостей
+sudo apt-get install -y libssl-dev pkg-config libpq-dev \
+    libldap2-dev libsasl2-dev cmake build-essential
+
+# Сборка
+cd enterprise
+chmod +x scripts/build.sh
+./scripts/build.sh
+
+# Установка .deb пакета
+sudo dpkg -i ../releases/secure-telegram-enterprise_1.0.0_amd64.deb
+
+# Настройка
+sudo nano /etc/secure-telegram/config.toml
+sudo nano /etc/secure-telegram/sso.toml
+
+# Запуск
+sudo systemctl start secure-telegram-enterprise
+sudo systemctl enable secure-telegram-enterprise
+```
+
+📖 **Документация:** [enterprise/README.md](enterprise/README.md)
+
+#### 6. Self-Hosting (Docker)
 
 ```bash
 cd self-hosting
@@ -485,13 +515,13 @@ LIBERTY_UPLOAD_KEY_PASSWORD=ваш-пароль
 ├── ✅ P2P сеть             ├── ✅ AI функции           ├── ✅ Мультиязычность
 │   (январь-март)           │   (апрель-июнь)           │   (июль-сентябрь)
 │                           │                           │
-├── ✅ Android APK          ├── ✅ Smart contracts      ├── 🎯 iOS приложение
+├── ✅ Android APK          ├── ✅ Smart contracts      ├── ✅ Desktop v2.0 (Linux Mint)
 │   (январь-март)           │   (апрель-июнь)           │   (октябрь-декабрь)
 │                           │                           │
-├── ✅ Web frontend         ├── ✅ Миграция из TG/WA    ├── ✅ Desktop v2.0 (Linux Mint)
+├── ✅ Web frontend         ├── ✅ Миграция из TG/WA    ├── ✅ Enterprise версия
 │   (январь-март)           │   (апрель-июнь)           │   (октябрь-декабрь)
 │                           │                           │
-└── ✅ Self-hosting         └── ✅ Монетизация          └── 🎯 Enterprise версия
+└── ✅ Self-hosting         └── ✅ Монетизация          └── 🎯 iOS приложение
     (январь-март)               (апрель-июнь)               (октябрь-декабрь)
 ```
 
@@ -504,6 +534,7 @@ LIBERTY_UPLOAD_KEY_PASSWORD=ваш-пароль
 | **Android APK** | ✅ Завершено | 100% |
 | **Desktop (Tauri)** | ✅ Завершено | 100% |
 | **Desktop v2.0 (Linux Mint)** | ✅ Завершено | 100% |
+| **Enterprise (SSO, аудит)** | ✅ Завершено | 100% |
 | **P2P сеть** | ✅ Завершено | 100% |
 | **Web3 интеграции** | ✅ Завершено | 100% |
 | **AI функции** | ✅ Завершено | 100% |
@@ -517,7 +548,6 @@ LIBERTY_UPLOAD_KEY_PASSWORD=ваш-пароль
 
 - [ ] **iOS приложение** — нативное приложение для iPhone/iPad
 - [ ] **AR/VR интеграция** — виртуальные комнаты для встреч
-- [ ] **Enterprise версия** — корпоративные функции, SSO, аудит
 - [ ] **DAO управление** — голосование токенами за развитие
 
 ---
