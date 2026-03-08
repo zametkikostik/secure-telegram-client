@@ -222,3 +222,8 @@ google-services.json
 *.example
 *.template
 *.dist
+
+# APK files
+*.apk
+*.aab
+releases/*.apk
