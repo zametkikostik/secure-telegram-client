@@ -1,0 +1,86 @@
+name: liberty_reach
+description: Liberty Reach Messenger v2.0 - Universal Resilient Edition
+publish_to: 'none'
+version: 2.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # FFI для Rust ядра
+  flutter_rust_bridge: ^2.0.0
+  ffigen: ^9.0.0
+  
+  # HTTP и API
+  http: ^1.1.0
+  dio: ^5.3.0
+  
+  # Состояние
+  provider: ^6.0.5
+  get_it: ^7.6.0
+  
+  # Локальное хранилище
+  shared_preferences: ^2.2.0
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  
+  # UI компоненты
+  cupertino_icons: ^1.0.6
+  flutter_slidable: ^3.0.0
+  cached_network_image: ^3.3.0
+  photo_view: ^0.14.0
+  
+  # Звонки и медиа
+  webrtc: ^0.9.0
+  flutter_webrtc: ^0.9.0
+  
+  # Аудио
+  audioplayers: ^5.1.0
+  record: ^5.0.0
+  
+  # Уведомления
+  firebase_core: ^2.24.0
+  firebase_messaging: ^14.7.0
+  flutter_local_notifications: ^16.1.0
+  
+  # Криптография (дополнительно к Rust)
+  encrypt: ^5.0.3
+  pointycastle: ^3.7.3
+  
+  # Утилиты
+  uuid: ^4.2.1
+  intl: ^0.18.1
+  path_provider: ^2.1.1
+  permission_handler: ^11.0.0
+  connectivity_plus: ^5.0.2
+  package_info_plus: ^5.0.1
+  url_launcher: ^6.2.1
+  image_picker: ^1.0.4
+  file_picker: ^6.1.1
+  share_plus: ^7.2.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  build_runner: ^2.4.6
+  freezed: ^2.4.5
+  json_serializable: ^6.7.0
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/images/
+    - assets/sounds/
+    - assets/stickers/
+  
+  fonts:
+    - family: LibertyReach
+      fonts:
+        - asset: assets/fonts/LibertyReach-Regular.ttf
+        - asset: assets/fonts/LibertyReach-Bold.ttf
+          weight: 700
