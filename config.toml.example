@@ -1,0 +1,105 @@
+# Liberty Reach Messenger v2.0
+# Configuration File
+# Скопируйте этот файл в config.toml и заполните своими API ключами
+
+app_name = "Liberty Reach Messenger"
+version = "2.0.0"
+debug_mode = true
+
+# =============================================================================
+# DATABASE CONFIGURATION
+# =============================================================================
+[database]
+path = "liberty_reach.db"
+encryption_key = "GENERATE_RANDOM_32_BYTE_KEY_HERE"
+max_connections = 10
+
+# =============================================================================
+# API KEYS - CRYPTOCURRENCY
+# =============================================================================
+
+# Bitget API - Покупка криптовалюты
+# Получить: https://www.bitget.com → Profile → API Management
+[api_keys.bitget]
+api_key = "bg_befc915eaaec1e55da20fae6c528b801"
+secret_key = "4922cf754a16e7826605e466ac8166650924128081f7d7a36921f7cfed7b2059"
+passphrase = "LibertyReach2026"
+testnet = true  # false для production
+
+# 0x Protocol - DEX обмен токенов
+# Получить: https://0x.org → Dashboard → API Keys
+[api_keys.zeroex]
+api_key = "YOUR_0X_API_KEY"  # Опционально
+chain_id = 1  # 1=Ethereum, 137=Polygon, 56=BSC
+
+# ABCEX - Платёжный шлюз
+# Получить: https://abcex.com/merchant → Settings → API
+[api_keys.abcex]
+api_key = "YOUR_ABCEX_API_KEY"
+merchant_id = "YOUR_MERCHANT_ID"
+testnet = true  # false для production
+
+# =============================================================================
+# API KEYS - AI SERVICES
+# =============================================================================
+
+# Qwen API - AI перевод, генерация, TTS
+# Получить: https://dashscope.console.aliyun.com/
+[api_keys.qwen]
+api_key = "YOUR_QWEN_DASHSCOPE_API_KEY"
+model = "qwen-max"
+max_tokens = 2000
+
+# =============================================================================
+# API KEYS - WEB3 INFRASTRUCTURE
+# =============================================================================
+
+# Infura - Ethereum/Polygon узлы
+# Получить: https://infura.io → Create Project
+[api_keys.infura]
+project_id = "YOUR_INFURA_PROJECT_ID"
+project_secret = "YOUR_INFURA_PROJECT_SECRET"  # Опционально
+
+# =============================================================================
+# WEB3 CONFIGURATION
+# =============================================================================
+[web3]
+default_chain_id = 1  # 1=Ethereum, 137=Polygon, 56=BSC
+gas_price_multiplier = 1.2  # Увеличить для быстрых транзакций
+
+# =============================================================================
+# AI CONFIGURATION
+# =============================================================================
+[ai]
+enabled = true
+provider = "qwen"
+default_language = "ru"
+auto_translate = false  # Автоматически переводить сообщения
+
+# =============================================================================
+# P2P CONFIGURATION
+# =============================================================================
+[p2p]
+bootstrap_nodes = [
+    "/ip4/192.168.1.1/tcp/4001",
+    "/ip4/192.168.1.2/tcp/4001/quic-v1"
+]
+enable_quic = true
+enable_obfuscation = false
+
+# =============================================================================
+# SIP CONFIGURATION (VoIP)
+# =============================================================================
+[sip]
+server = "sip.example.com:5060"
+username = "YOUR_SIP_USERNAME"
+password = "YOUR_SIP_PASSWORD"
+domain = "example.com"
+
+# =============================================================================
+# PUSH NOTIFICATIONS
+# =============================================================================
+[push]
+enabled = true
+firebase_project_id = "YOUR_FIREBASE_PROJECT_ID"
+firebase_credentials = "path/to/firebase_credentials.json"

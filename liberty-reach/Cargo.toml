@@ -1,0 +1,21 @@
+[package]
+name = "liberty-reach"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "Liberty Reach Messenger - Main Application"
+
+[[bin]]
+name = "liberty-reach-cli"
+path = "src/main.rs"
+
+[dependencies]
+liberty-reach-core = { path = "../liberty-reach-core" }
+tokio.workspace = true
+anyhow.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+clap = { version = "4.4", features = ["derive"] }
+rand = "0.8"
+hex = "0.4"

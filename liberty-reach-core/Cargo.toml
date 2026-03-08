@@ -1,0 +1,81 @@
+[package]
+name = "liberty-reach-core"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "Liberty Reach Messenger - Core Rust Library"
+
+[lib]
+name = "liberty_reach_core"
+crate-type = ["lib", "cdylib"]
+
+[dependencies]
+# Async
+tokio.workspace = true
+futures.workspace = true
+
+# Cryptography
+aes-gcm.workspace = true
+chacha20poly1305.workspace = true
+aes.workspace = true
+sha2.workspace = true
+sha3 = "0.10"
+blake3.workspace = true
+argon2.workspace = true
+hmac.workspace = true
+hkdf.workspace = true
+pbkdf2.workspace = true
+rand.workspace = true
+ed25519-dalek.workspace = true
+x25519-dalek.workspace = true
+pqcrypto-kyber = "0.7"
+pqcrypto-traits = "0.3"
+
+# Database
+rusqlite.workspace = true
+
+# Serialization
+serde.workspace = true
+serde_json.workspace = true
+bincode.workspace = true
+toml = "0.8"
+dotenv = "0.15"
+uuid.workspace = true
+base64.workspace = true
+hex.workspace = true
+
+# FFI
+flutter_rust_bridge.workspace = true
+
+# Logging
+tracing.workspace = true
+tracing-subscriber.workspace = true
+anyhow.workspace = true
+thiserror.workspace = true
+
+# Network
+reqwest.workspace = true
+
+# Image
+image.workspace = true
+
+# Platform
+dirs.workspace = true
+whoami.workspace = true
+
+# Compression
+flate2.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+tokio-test.workspace = true
+
+[build-dependencies]
+flutter_rust_bridge.workspace = true
+cbindgen = "0.26"
+
+[features]
+default = ["full"]
+full = []
+flutter = []
