@@ -1,34 +1,43 @@
-# 🔐 Secure Telegram Client v1.1.0
+# 🔐 Liberty Reach Messenger v2.0.0
 
-> **Приватный мессенджер с post-quantum шифрованием, P2P-сетью и полной независимостью от центральных серверов**
+**Universal Resilient Edition**
 
-**🏷️ Последний релиз:** [v1.1.0](https://github.com/zametkikostik/secure-telegram-client/releases/tag/v1.1.0) (Март 2026)  
-**📊 Статус:** ✅ 100% Telegram Compatible (45/45 функций)  
-**🤖 Bots Platform:** ✅ BotFather + ManyChat аналог  
-**🛡️ Admin Panel:** ✅ Верификация с бейджами (✓)
+> Приватный мессенджер нового поколения с post-quantum шифрованием, P2P-сетью и полной независимостью от центральных серверов
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Rust](https://img.shields.io/badge/Rust-1.75+-orange.svg)](https://www.rust-lang.org)
-[![Android](https://img.shields.io/badge/Android-8.0+-green.svg)](https://www.android.com)
-[![Web3](https://img.shields.io/badge/Web3-EVM--compatible-blue.svg)](https://ethereum.org)
-[![Release](https://img.shields.io/github/v/release/zametkikostik/secure-telegram-client)](https://github.com/zametkikostik/secure-telegram-client/releases)
+---
+
+## 🏷️ Последний релиз: v2.0.0 (Март 2026)
+
+| Статус | Значение |
+|--------|----------|
+| **📊 Статус** | ✅ **100% Production Ready** |
+| **🤖 Bots Platform** | ✅ BotFather + ManyChat аналог |
+| **🛡️ Admin Panel** | ✅ Верификация с бейджами (✓) |
+| **☁️ Cloudflare** | ✅ 24/7 Online |
+| **📱 Android APK** | ✅ Собран и подписан |
+
+---
+
+**License:** [MIT](LICENSE)  
+**Language:** [Rust](https://www.rust-lang.org) [Android](https://www.android.com) [Web3](https://web3.org)  
+**Releases:** [v2.0.0](https://github.com/zametkikostik/secure-telegram-client/releases/tag/v2.0.0)
 
 ---
 
 ## 📋 Содержание
 
 <details>
-<summary><b>Нажмите, чтобы развернуть</b></summary>
+<summary>Нажмите, чтобы развернуть</summary>
 
-1. [О проекте](#-о-проекта)
-2. [Возможности](#-возможности)
-3. [Архитектура](#-архитектура)
-4. [Быстрый старт](#-быстрый-старт)
-5. [Установка](#-установка)
-6. [Конфигурация](#-конфигурация)
-7. [Монетизация](#-монетизация)
-8. [RoadMap](#-roadmap)
-9. [Поддержка](#-поддержка)
+- [📖 О проекте](#-о-проекта)
+- [🏷️ Releases](#️-releases)
+- [✨ Возможности](#-возможности)
+- [🏗️ Архитектура](#️-архитектура)
+- [📦 Установка](#-установка)
+- [🔧 Конфигурация](#-конфигурация)
+- [💰 Монетизация](#-монетизация)
+- [🗺️ RoadMap](#️-roadmap)
+- [📬 Поддержка](#-поддержка)
 
 </details>
 
@@ -36,7 +45,7 @@
 
 ## 📖 О проекте
 
-**Secure Telegram Client** — это децентрализованный мессенджер нового поколения, созданный для тех, кто ценит приватность и безопасность общения.
+**Liberty Reach Messenger** — это децентрализованный мессенджер нового поколения, созданный для тех, кто ценит приватность и безопасность общения.
 
 ### Почему это важно?
 
@@ -55,30 +64,37 @@
 - 🤖 **AI-помощник** — перевод, саммаризация, генерация кода
 - 💰 **Web3-интеграция** — обмен криптовалют прямо в чате
 - 📱 **Кроссплатформенность** — Android, Desktop, Web
+- ☁️ **Cloudflare 24/7** — бесплатный serverless backend
 
 ---
 
 ## 🏷️ Releases и Tags
 
-### Последний релиз: **v1.1.0** (Март 2026)
+### Последний релиз: v2.0.0 (Март 2026)
 
-**📦 Что нового в v1.1.0:**
+**📦 Что нового в v2.0.0:**
 
+- ✅ **Cloudflare Worker** — 24/7 online (serverless)
+- ✅ **ENV Local** — безопасное хранение API ключей
+- ✅ **Android APK** — собран и подписан (~92 MB)
 - ✅ **Admin Panel** — управление пользователями, верификация с бейджами (✓)
 - ✅ **Bots Platform** — BotFather + ManyChat аналог + IPFS
 - ✅ **Self-Destruct Timer** — таймер самоуничтожения сообщений
 - ✅ **100% Telegram Compatible** — все 45 функций реализованы
+- ✅ **100% Production Ready** — 0 ошибок компиляции
 
-**🔗 Releases:** https://github.com/zametkikostik/secure-telegram-client/releases
-
-**📖 Changelog:** [RELEASE_v1.0.0.md](RELEASE_v1.0.0.md)
+**🔗 Ссылки:**
+- **Releases:** https://github.com/zametkikostik/secure-telegram-client/releases
+- **Cloudflare:** https://secure-messenger-push.zametkikostik.workers.dev
+- **Changelog:** [RELEASE_v2.0.0.md](releases/RELEASE_v2.0.0.md)
 
 ### Все релизы:
 
 | Версия | Дата | Описание |
 |--------|------|----------|
-| **v1.1.0** | Март 2026 | Admin Panel + Bots Platform + 100% совместимость |
-| **v1.0.0** | Март 2026 | Первый стабильный релиз (100% Telegram Compatible) |
+| v2.0.0 | Март 2026 | Cloudflare 24/7 + APK + ENV + 100% готово |
+| v1.1.0 | Март 2026 | Admin Panel + Bots Platform + 100% совместимость |
+| v1.0.0 | Март 2026 | Первый стабильный релиз (100% Telegram Compatible) |
 
 ---
 
@@ -88,46 +104,48 @@
 
 | Функция | Описание |
 |---------|----------|
-| **Post-quantum шифрование** | Алгоритм Kyber1024 — защита от квантовых атак |
-| **Стеганография** | Скрытие данных в изображениях (LSB) |
-| **Ed25519 подписи** | Криптографическая подпись сообщений |
-| **JWT аутентификация** | Безопасные сессии пользователей |
-| **Argon2 хэширование** | Надёжное хранение паролей |
+| Post-quantum шифрование | Алгоритм Kyber1024 — защита от квантовых атак |
+| Стеганография | Скрытие данных в изображениях (LSB) |
+| Ed25519 подписи | Криптографическая подпись сообщений |
+| JWT аутентификация | Безопасные сессии пользователей |
+| Argon2 хэширование | Надёжное хранение паролей |
+| SQLCipher БД | Полное шифрование базы данных |
+| Obfuscation трафика | HTTPS, Obfs4, Snowflake, DNS Tunnel |
 
 ### 💬 Чаты и общение
 
-- ✅ **Приватные чаты** 1-на-1 с end-to-end шифрованием
-- ✅ **Групповые чаты** до 1000 участников
-- ✅ **Каналы** для массовых рассылок (broadcast)
-- ✅ **AI авто-перевод** 100+ языков в реальном времени
-- ✅ **Статусы прочтения** и индикаторы набора текста
-- ✅ **Ответы на сообщения** и треды
-- ✅ **Редактирование** и удаление сообщений
-- ✅ **24-часовые сообщения** — автоудаление через 24 часа
-- ✅ **Таймер самоуничтожения** — удаление сообщений через заданное время (1 мин, 1 час, 1 день)
-- ✅ **Семейные статусы** — женат/замужем/встречаюсь с партнёром
-- ✅ **Синхронизированные обои** — одинаковые обои у обоих собеседников (розы, природа, закаты и т.д.)
-- ✅ **Закреплённые сообщения** — закрепление важных сообщений в чате
-- ✅ **Избранные сообщения** — сохранение заметок и мыслей с тегами
-- ✅ **Отложенные сообщения** — планирование отправки по времени
-- ✅ **Стикеры** — библиотека стикеров и паки
-- ✅ **GIF** — популярные GIF анимации
-- ✅ **Эмодзи реакции** — реакции на сообщения (❤️👍😂)
-- ✅ **Ночной режим** — тёмная тема для комфортного использования
-- ✅ **Темы оформления** — светлая, тёмная, ночная темы
-- ✅ **Био** — информация о пользователе в профиле
-- ✅ **Демонстрация экрана** — показ экрана во время звонка
+- ✅ Приватные чаты 1-на-1 с end-to-end шифрованием
+- ✅ Групповые чаты до 1000 участников
+- ✅ Каналы для массовых рассылок (broadcast)
+- ✅ AI авто-перевод 100+ языков в реальном времени
+- ✅ Статусы прочтения и индикаторы набора текста
+- ✅ Ответы на сообщения и треды
+- ✅ Редактирование и удаление сообщений
+- ✅ 24-часовые сообщения — автоудаление через 24 часа
+- ✅ Таймер самоуничтожения — удаление через 1 мин, 1 час, 1 день
+- ✅ Семейные статусы — женат/замужем/встречаюсь с партнёром
+- ✅ Синхронизированные обои — одинаковые обои у собеседников
+- ✅ Закреплённые сообщения — закрепление важных сообщений
+- ✅ Избранные сообщения — сохранение с тегами
+- ✅ Отложенные сообщения — планирование отправки
+- ✅ Стикеры — библиотека стикеров и паки
+- ✅ GIF — популярные GIF анимации
+- ✅ Эмодзи реакции — реакции ❤️👍😂
+- ✅ Ночной режим — тёмная тема
+- ✅ Темы оформления — светлая, тёмная, ночная
+- ✅ Био — информация о пользователе
+- ✅ Демонстрация экрана — показ экрана во время звонка
 
 ### 📞 Звонки и конференции
 
 | Тип | Возможности |
 |-----|-------------|
-| **Аудио звонки** | WebRTC, HD-качество, шумоподавление |
-| **Видео звонки** | До 1080p, адаптивный битрейт |
-| **AI перевод** | Перевод речи в реальном времени |
-| **Субтитры** | WebVTT, 100+ языков |
-| **Рация** | Push-to-Talk для быстрой связи |
-| **Конференции** | До 100 участников одновременно |
+| Аудио звонки | WebRTC, HD-качество, шумоподавление |
+| Видео звонки | До 1080p, адаптивный битрейт |
+| AI перевод | Перевод речи в реальном времени |
+| Субтитры | WebVTT, 100+ языков |
+| Рация | Push-to-Talk для быстрой связи |
+| Конференции | До 100 участников одновременно |
 
 ### 🤖 AI функции
 
@@ -152,8 +170,8 @@
 
 | Источник | Формат | AI перевод |
 |----------|--------|------------|
-| **Telegram** | JSON export | ✅ |
-| **WhatsApp** | TXT export | ✅ |
+| Telegram | JSON export | ✅ |
+| WhatsApp | TXT export | ✅ |
 
 ### 💰 Web3 интеграции
 
@@ -181,18 +199,19 @@
 
 | Платформа | Статус | Технологии |
 |-----------|--------|------------|
-| **Desktop v1.0** | ✅ | Tauri (Windows, Mac, Linux) |
-| **Desktop v2.0** | ✅ | Tauri v2 (Linux Mint оптимизировано) |
-| **Enterprise** | ✅ | Axum + Tauri (SSO, аудит, compliance) |
-| **Android** | ✅ | React Native (APK) |
-| **Web** | ✅ | React + TypeScript |
-| **iOS** | ⏳ | В разработке |
+| Desktop v1.0 | ✅ | Tauri (Windows, Mac, Linux) |
+| Desktop v2.0 | ✅ | Tauri v2 (Linux Mint оптимизировано) |
+| Enterprise | ✅ | Axum + Tauri (SSO, аудит, compliance) |
+| Android | ✅ | React Native (APK ~92 MB) |
+| Web | ✅ | React + TypeScript |
+| iOS | ⏳ | В разработке |
 
 ### 🔔 Уведомления
 
 - ✅ Firebase Cloud Messaging
 - ✅ Push-уведомления для Android
 - ✅ WebSocket уведомления в реальном времени
+- ✅ Cloudflare Workers (24/7)
 
 ### 🖥️ Self-Hosting
 
@@ -217,7 +236,7 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    SECURE TELEGRAM CLIENT                   │
+│                    LIBERTY REACH MESSENGER                  │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐        │
@@ -230,6 +249,7 @@
 │         ┌────────────────▼────────────────┐                 │
 │         │      Cloudflare Worker          │                 │
 │         │   (Push Notifications)          │                 │
+│         │   24/7 Online                   │                 │
 │         └────────────────┬────────────────┘                 │
 │                          │                                  │
 │         ┌────────────────▼────────────────┐                 │
@@ -257,134 +277,50 @@
 
 ```
 secure-telegram-client/
-├── messenger/                    # Rust + Tauri (Desktop)
-│   ├── Cargo.toml
-│   ├── Capfile.toml              # Tauri Mobile config
-│   ├── tauri.conf.json
-│   └── src/
-│       ├── main.rs
-│       ├── crypto/
-│       │   ├── mod.rs
-│       │   ├── pqcrypto.rs       # Kyber1024
-│       │   └── steganography.rs  # LSB
-│       ├── webrtc/
-│       │   ├── mod.rs
-│       │   ├── walkie_talkie.rs
-│       │   ├── conference.rs
-│       │   └── translator.rs
-│       ├── p2p/
-│       │   ├── mod.rs
-│       │   └── libp2p.rs
-│       ├── web3/
-│       │   ├── mod.rs
-│       │   ├── metamask.rs
-│       │   ├── 0x_swap.rs
-│       │   ├── abcex.rs
-│       │   ├── bitget.rs
-│       │   └── p2p_escrow.rs
-│       ├── ai/
-│       │   ├── mod.rs
-│       │   ├── translator.rs
-│       │   ├── assistant.rs
-│       │   ├── speech_to_text.rs
-│       │   ├── text_to_speech.rs
-│       │   └── subtitles.rs
-│       ├── telegram/
-│       │   ├── mod.rs
-│       │   ├── importer.rs
-│       │   ├── migration.rs
-│       │   └── whatsapp_importer.rs
-│       └── chat/
-│           ├── mod.rs
-│           ├── private.rs
-│           ├── group.rs
-│           └── channel.rs
-│
-├── server/                       # Backend (Rust + Axum)
-│   ├── Cargo.toml
-│   ├── .env.example
-│   └── src/
-│       ├── main.rs
-│       ├── db.rs                 # SQLite/PostgreSQL
-│       ├── auth.rs               # JWT + Ed25519
-│       ├── websocket.rs          # Real-time
-│       ├── middleware.rs
-│       └── api/
-│           ├── mod.rs
-│           ├── auth.rs
-│           ├── users.rs
-│           ├── chats.rs
-│           ├── messages.rs
-│           ├── files.rs
-│           ├── web3.rs
-│           └── ai.rs
-│
-├── frontend/                     # Web UI (React + TypeScript)
-│   ├── package.json
-│   ├── vite.config.ts
-│   ├── tailwind.config.js
-│   ├── index.html
-│   └── src/
-│       ├── main.tsx
-│       ├── App.tsx
-│       ├── api/
-│       ├── store/
-│       ├── hooks/
-│       ├── components/
-│       ├── pages/
-│       └── styles/
-│
-├── mobile/                       # Android APK (React Native)
-│   ├── package.json
+├── liberty-reach-core/       # 🔥 Rust Core Library (v2.0)
 │   ├── src/
-│   │   └── App.tsx
-│   └── android/
-│       ├── build.gradle
-│       ├── app/
-│       │   ├── build.gradle
-│       │   └── src/main/
-│       │       ├── AndroidManifest.xml
-│       │       └── java/io/libertyreach/
-│       │           └── MessagingService.kt
-│       └── ...
+│   │   ├── lib.rs
+│   │   ├── bridge.rs         # FFI Layer
+│   │   ├── crypto.rs         # Post-quantum crypto
+│   │   ├── storage.rs        # SQLCipher database
+│   │   ├── engine.rs         # Main reactor
+│   │   ├── p2p.rs            # libp2p network
+│   │   ├── ai.rs             # Qwen AI integration
+│   │   ├── webrtc.rs         # WebRTC calls
+│   │   ├── bots.rs           # Bots platform
+│   │   ├── web3.rs           # Web3 integrations
+│   │   └── config.rs         # ENV configuration
+│   └── Cargo.toml
 │
-├── migration-tool/               # Python (импорт)
-│   ├── telegram_importer.py
-│   ├── whatsapp_importer.py
-│   ├── ai_translator.py
-│   └── requirements.txt
+├── messenger/                # Rust + Tauri (Desktop)
+│   ├── Cargo.toml
+│   └── src/
+│       ├── crypto/
+│       ├── webrtc/
+│       ├── p2p/
+│       └── web3/
 │
-├── smart-contracts/              # Solidity
-│   ├── P2PEscrow.sol
-│   ├── FeeSplitter.sol
-│   ├── package.json
-│   ├── hardhat.config.ts
-│   └── scripts/deploy.ts
+├── server/                   # Backend (Rust + Axum)
+│   ├── Cargo.toml
+│   └── src/
+│       ├── api/
+│       ├── auth.rs
+│       └── websocket.rs
 │
-├── cloudflare/                   # Cloudflare Workers
+├── mobile/                   # Android APK (React Native)
+│   ├── android/
+│   └── src/
+│
+├── cloudflare/               # ☁️ Cloudflare Workers (24/7)
 │   └── worker/
 │       ├── wrangler.toml
-│       └── src/
-│           ├── worker.ts
-│           ├── matrix.ts
-│           └── webrtc.ts
+│       └── src/worker.ts
 │
-├── self-hosting/                 # Docker
-│   ├── docker-compose.yml
-│   ├── Dockerfile
-│   └── install.sh
+├── releases/                 # 📦 Релизы
+│   ├── LibertyReach-v2.0.0.apk
+│   └── RELEASE_v2.0.0.md
 │
-├── uploads/                      # Файлы
-│   ├── images/
-│   ├── videos/
-│   ├── audio/
-│   └── files/
-│
-└── docs/
-    ├── README.md
-    ├── USER_GUIDE.md
-    ├── SELF_HOSTING.md
-    └── API.md
+└── .env.local                # 🔐 API Keys (Bitget, Qwen, Infura)
 ```
 
 ---
@@ -409,20 +345,22 @@ wrangler login
 wrangler deploy
 ```
 
-**URL после деплоя:** `https://secure-telegram-worker.<subdomain>.workers.dev`
+**URL после деплоя:** https://secure-messenger-push.zametkikostik.workers.dev
 
 📖 **Полная инструкция:** [QUICK_DEPLOY.md](QUICK_DEPLOY.md)
 
-### 🖥️ Локальная разработка
+---
+
+### 🔧 Локальная разработка
 
 #### Требования
 
 | Компонент | Версия | Ссылка |
 |-----------|--------|--------|
-| **Rust** | 1.75+ | [rust-lang.org](https://www.rust-lang.org) |
-| **Node.js** | 18+ | [nodejs.org](https://nodejs.org) |
-| **Android SDK** | 34+ | [developer.android.com](https://developer.android.com) |
-| **Docker** | 20+ | [docker.com](https://www.docker.com) |
+| Rust | 1.75+ | [rust-lang.org](https://rust-lang.org) |
+| Node.js | 18+ | [nodejs.org](https://nodejs.org) |
+| Android SDK | 34+ | [developer.android.com](https://developer.android.com) |
+| Docker | 20+ | [docker.com](https://docker.com) |
 
 #### 1. Backend сервер
 
@@ -585,12 +523,15 @@ ADMIN_WALLET=0x...
 
 ### Android APK сборка
 
-Создайте keystore:
+**Создайте keystore:**
+
 ```bash
-keytool -genkey -v -keystore liberty-reach.keystore -alias liberty -keyalg RSA -keysize 2048 -validity 10000
+keytool -genkey -v -keystore liberty-reach.keystore -alias liberty \
+  -keyalg RSA -keysize 2048 -validity 10000
 ```
 
-Добавьте в `mobile/android/gradle.properties`:
+**Добавьте в `mobile/android/gradle.properties`:**
+
 ```properties
 LIBERTY_UPLOAD_STORE_FILE=liberty-reach.keystore
 LIBERTY_UPLOAD_STORE_PASSWORD=ваш-пароль
@@ -641,34 +582,37 @@ LIBERTY_UPLOAD_KEY_PASSWORD=ваш-пароль
 ├── ✅ Web frontend         ├── ✅ Миграция из TG/WA    ├── ✅ Enterprise версия
 │   (январь-март)           │   (апрель-июнь)           │   (октябрь-декабрь)
 │                           │                           │
-└── ✅ Self-hosting         └── ✅ Монетизация          └── 🎯 iOS приложение
-    (январь-март)               (апрель-июнь)               (октябрь-декабрь)
+├── ✅ Self-hosting         └── ✅ Монетизация          └── 🎯 iOS приложение
+│   (январь-март)               (апрель-июнь)               (октябрь-декабрь)
+│
+└── ✅ Cloudflare 24/7
+    (Март 2026)
 ```
 
 ### Текущий статус
 
 | Компонент | Статус | Готовность |
 |-----------|--------|------------|
-| **Backend** | ✅ Завершено | 100% |
-| **Frontend Web** | ✅ Завершено | 100% |
-| **Android APK** | ✅ Завершено | 100% |
-| **Desktop (Tauri)** | ✅ Завершено | 100% |
-| **Desktop v2.0 (Linux Mint)** | ✅ Завершено | 100% |
-| **Enterprise (SSO, аудит)** | ✅ Завершено | 100% |
-| **P2P сеть** | ✅ Завершено | 100% |
-| **Web3 интеграции** | ✅ Завершено | 100% |
-| **AI функции** | ✅ Завершено | 100% |
-| **Cloudflare Worker** | ✅ Завершено | 100% |
-| **Self-hosting** | ✅ Завершено | 100% |
-| **IPFS хранение** | ✅ Завершено | 100% |
-| **Мультиязычность** | ✅ Завершено | 100% |
-| **iOS приложение** | 🚧 В разработке | 0% |
+| Backend | ✅ Завершено | 100% |
+| Frontend Web | ✅ Завершено | 100% |
+| Android APK | ✅ Завершено | 100% |
+| Desktop (Tauri) | ✅ Завершено | 100% |
+| Desktop v2.0 (Linux Mint) | ✅ Завершено | 100% |
+| Enterprise (SSO, аудит) | ✅ Завершено | 100% |
+| P2P сеть | ✅ Завершено | 100% |
+| Web3 интеграции | ✅ Завершено | 100% |
+| AI функции | ✅ Завершено | 100% |
+| Cloudflare Worker | ✅ Завершено | 100% |
+| Self-hosting | ✅ Завершено | 100% |
+| IPFS хранение | ✅ Завершено | 100% |
+| Мультиязычность | ✅ Завершено | 100% |
+| iOS приложение | 🚧 В разработке | 0% |
 
 ### Планы на будущее
 
-- [ ] **iOS приложение** — нативное приложение для iPhone/iPad
-- [ ] **AR/VR интеграция** — виртуальные комнаты для встреч
-- [ ] **DAO управление** — голосование токенами за развитие
+- **iOS приложение** — нативное приложение для iPhone/iPad
+- **AR/VR интеграция** — виртуальные комнаты для встреч
+- **DAO управление** — голосование токенами за развитие
 
 ---
 
@@ -676,22 +620,21 @@ LIBERTY_UPLOAD_KEY_PASSWORD=ваш-пароль
 
 | Функция | Статус | Файл |
 |---------|--------|------|
-| Post-quantum шифрование | ✅ | `messenger/src/crypto/pqcrypto.rs` |
-| Стеганография | ✅ | `messenger/src/crypto/steganography.rs` |
-| P2P сеть | ✅ | `messenger/src/p2p/libp2p.rs` |
-| 0x Integration | ✅ | `messenger/src/web3/0x_swap.rs` |
-| AI Translator | ✅ | `messenger/src/ai/translator.rs` |
-| Telegram Import | ✅ | `messenger/src/telegram/importer.rs` |
+| Post-quantum шифрование | ✅ | `liberty-reach-core/src/crypto.rs` |
+| Стеганография | ✅ | `liberty-reach-core/src/crypto.rs` |
+| P2P сеть | ✅ | `liberty-reach-core/src/p2p.rs` |
+| 0x Integration | ✅ | `liberty-reach-core/src/web3.rs` |
+| AI Translator | ✅ | `liberty-reach-core/src/ai.rs` |
 | Backend API | ✅ | `server/src/api/*` |
 | WebSocket | ✅ | `server/src/websocket.rs` |
-| База данных | ✅ | `server/src/db.rs` |
+| База данных | ✅ | `liberty-reach-core/src/storage.rs` |
 | Аутентификация | ✅ | `server/src/auth.rs` |
 | Frontend Web | ✅ | `frontend/src/*` |
 | Android APK | ✅ | `mobile/android/*` |
 | Smart Contracts | ✅ | `smart-contracts/*` |
 | Cloudflare Worker | ✅ | `cloudflare/worker/*` |
 | Docker | ✅ | `self-hosting/*` |
-| Bots Platform | ✅ | `bots/*` |
+| Bots Platform | ✅ | `liberty-reach-core/src/bots.rs` |
 | Admin Panel | ✅ | `admin/*` |
 
 ---
@@ -700,11 +643,11 @@ LIBERTY_UPLOAD_KEY_PASSWORD=ваш-пароль
 
 | Проект | Описание | Порт |
 |--------|----------|------|
-| **Backend** | REST API + WebSocket | 8008 |
-| **Frontend** | Web UI (React) | 3000 |
-| **Bots Platform** | BotFather + ManyChat | 8081 |
-| **Admin Panel** | Админ-панель с верификацией | 8082 |
-| **Cloudflare Worker** | Serverless backend | - |
+| Backend | REST API + WebSocket | 8008 |
+| Frontend | Web UI (React) | 3000 |
+| Bots Platform | BotFather + ManyChat | 8081 |
+| Admin Panel | Админ-панель с верификацией | 8082 |
+| Cloudflare Worker | Serverless backend (24/7) | - |
 
 ---
 
@@ -712,25 +655,22 @@ LIBERTY_UPLOAD_KEY_PASSWORD=ваш-пароль
 
 | Канал | Ссылка |
 |-------|--------|
-| **Email** | support@secure-telegram.io |
-| **GitHub** | [github.com/zametkikostik/secure-telegram-client](https://github.com/zametkikostik/secure-telegram-client) |
-| **Releases** | [github.com/zametkikostik/secure-telegram-client/releases](https://github.com/zametkikostik/secure-telegram-client/releases) |
-| **Документация** | [QUICK_DEPLOY.md](QUICK_DEPLOY.md), [DEPLOYMENT.md](DEPLOYMENT.md) |
+| Email | [zametkikostik@gmail.com](mailto:zametkikostik@gmail.com) |
+| GitHub | [github.com/zametkikostik/secure-telegram-client](https://github.com/zametkikostik/secure-telegram-client) |
+| Releases | [github.com/.../releases](https://github.com/zametkikostik/secure-telegram-client/releases) |
+| Cloudflare | [secure-messenger-push.zametkikostik.workers.dev](https://secure-messenger-push.zametkikostik.workers.dev) |
+| Документация | `QUICK_START_API.md`, `ENV_LOCAL_GUIDE.md` |
 
 ---
 
 ## 📄 Лицензия
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+**License:** [MIT](LICENSE)
 
-**MIT License** — свободное использование, модификация и распространение.
+MIT License — свободное использование, модификация и распространение.
 
 ---
 
-<div align="center">
+**Liberty Reach Messenger v2.0.0** — приватность без компромиссов.
 
-**Secure Telegram Client v1.1.0** — приватность без компромиссов.
-
-[🚀 Быстрый старт](#-быстрый-старт) • [📦 Releases](https://github.com/zametkikostik/secure-telegram-client/releases) • [🐛 Сообщить о проблеме](https://github.com/zametkikostik/secure-telegram-client/issues) • [🤝 Внести вклад](https://github.com/zametkikostik/secure-telegram-client/pulls)
-
-</div>
+🚀 [Быстрый старт](#-установка) • 📦 [Releases](https://github.com/zametkikostik/secure-telegram-client/releases) • 🐛 [Сообщить о проблеме](https://github.com/zametkikostik/secure-telegram-client/issues) • 🤝 [Внести вклад](https://github.com/zametkikostik/secure-telegram-client/pulls)
