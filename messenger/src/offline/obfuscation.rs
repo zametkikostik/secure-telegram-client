@@ -14,7 +14,10 @@
 
 use rand::Rng;
 
-use chacha20poly1305::{aead::{Aead, KeyInit}, ChaCha20Poly1305, Key, Nonce};
+use chacha20poly1305::{
+    aead::{Aead, KeyInit},
+    ChaCha20Poly1305, Key, Nonce,
+};
 use rand::RngCore;
 use std::time::Duration;
 use tokio::time::sleep;
@@ -64,25 +67,25 @@ impl ObfuscationProfile {
             // Fake TLS ClientHello (looks like TLS 1.3 handshake)
             ObfuscationProfile::HttpsCamouflage => vec![
                 0x16, 0x03, 0x01, // TLS record: Handshake, version 1.0
-                0x02, 0x00,       // Length
-                0x01, 0x00,       // Handshake: ClientHello
-                0x01, 0xfc,       // Length
-                0x03, 0x03,       // Version 1.2
+                0x02, 0x00, // Length
+                0x01, 0x00, // Handshake: ClientHello
+                0x01, 0xfc, // Length
+                0x03, 0x03, // Version 1.2
             ],
             // Fake DNS query header
             ObfuscationProfile::DnsOverHttps => vec![
-                0xab, 0xcd,       // Transaction ID
-                0x01, 0x00,       // Flags: standard query
-                0x00, 0x01,       // Questions: 1
-                0x00, 0x00,       // Answer RRs: 0
-                0x00, 0x00,       // Authority RRs: 0
-                0x00, 0x00,       // Additional RRs: 0
+                0xab, 0xcd, // Transaction ID
+                0x01, 0x00, // Flags: standard query
+                0x00, 0x01, // Questions: 1
+                0x00, 0x00, // Answer RRs: 0
+                0x00, 0x00, // Authority RRs: 0
+                0x00, 0x00, // Additional RRs: 0
             ],
             // WebSocket frame header
             ObfuscationProfile::WebSocketCamouflage => vec![
-                0x81,             // FIN + text frame
-                0x7e,             // Masked + payload len 126
-                0x00, 0x00,       // Extended length (placeholder)
+                0x81, // FIN + text frame
+                0x7e, // Masked + payload len 126
+                0x00, 0x00, // Extended length (placeholder)
             ],
             ObfuscationProfile::GenericStream | ObfuscationProfile::Paranoid => vec![],
         }
@@ -331,7 +334,6 @@ impl DpiObfuscator {
 mod tests {
     use super::*;
 
-
     fn test_padding_fixed_size() {
         let strategy = PaddingStrategy::FixedSize(100);
         let data = vec![1, 2, 3];
@@ -369,5 +371,4 @@ mod tests {
         let obfuscated = obfuscator.obfuscate(original).await;
         assert!(obfuscated.len() >= original.len());
     }
-
 }

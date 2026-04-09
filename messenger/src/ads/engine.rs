@@ -110,9 +110,7 @@ impl AdEngine {
         }
 
         // Sort by display priority (reward ads first, then by priority score)
-        let best = eligible
-            .into_iter()
-            .max_by_key(|ad| ad.display_priority());
+        let best = eligible.into_iter().max_by_key(|ad| ad.display_priority());
 
         best.cloned().ok_or(AdError::NoAdsAvailable)
     }
@@ -194,10 +192,7 @@ impl AdEngine {
         }
 
         // Update rate limiter (lock #5: rate_limit)
-        self.rate_limit
-            .lock()
-            .unwrap()
-            .push(chrono::Utc::now());
+        self.rate_limit.lock().unwrap().push(chrono::Utc::now());
 
         // Update lifetime stats (lock #6: lifetime_stats, then impressions)
         {
@@ -220,8 +215,7 @@ impl AdEngine {
                     .iter()
                     .map(|imp| imp.duration_secs as u64)
                     .sum();
-                stats.avg_view_duration_secs =
-                    total_duration as f64 / all_impressions.len() as f64;
+                stats.avg_view_duration_secs = total_duration as f64 / all_impressions.len() as f64;
             }
 
             let category_counts = self.category_counts();

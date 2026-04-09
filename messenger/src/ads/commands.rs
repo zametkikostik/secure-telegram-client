@@ -14,8 +14,8 @@ use std::sync::Arc;
 use tokio::sync::Mutex;
 use tracing::{debug, info, warn};
 
-use crate::AdEngine;
 use crate::ads::*;
+use crate::AdEngine;
 
 // ============================================================================
 // Ad State Management
@@ -85,7 +85,10 @@ impl AdState {
 
         *self.client_private_key.lock().await = Some(client_key);
 
-        info!("Ad state initialized: db={}, worker_url={}", db_path, worker_url);
+        info!(
+            "Ad state initialized: db={}, worker_url={}",
+            db_path, worker_url
+        );
         Ok(())
     }
 }
@@ -205,10 +208,7 @@ pub async fn cmd_fetch_ads(
             *state.last_sync.lock().await = Some(chrono::Utc::now().timestamp());
 
             // Reload ads into engine
-            let ads = storage
-                .load_ads()
-                .await
-                .map_err(|e| e.to_string())?;
+            let ads = storage.load_ads().await.map_err(|e| e.to_string())?;
 
             state.engine.load_ads(ads);
 
@@ -237,9 +237,7 @@ pub async fn cmd_select_ad(
     debug!("Selecting ad: type={:?}", request.ad_type);
 
     match state.engine.select_ad(request.ad_type) {
-        Ok(ad) => Ok(SelectAdResponse {
-            ad: Some(ad),
-        }),
+        Ok(ad) => Ok(SelectAdResponse { ad: Some(ad) }),
         Err(AdError::NoAdsAvailable) => Ok(SelectAdResponse { ad: None }),
         Err(e) => Err(e.to_string()),
     }
@@ -352,9 +350,7 @@ pub async fn cmd_record_click(
 
 /// Get ad settings and stats
 #[tauri::command]
-pub async fn cmd_get_ad_settings(
-    state: tauri::State<'_, AdState>,
-) -> Result<AdSettings, String> {
+pub async fn cmd_get_ad_settings(state: tauri::State<'_, AdState>) -> Result<AdSettings, String> {
     Ok(AdSettings {
         preferences: state.engine.get_preferences(),
         credits: state.engine.get_credits(),
@@ -408,9 +404,7 @@ pub async fn cmd_report_impressions(state: tauri::State<'_, AdState>) -> Result<
     debug!("Reporting impressions anonymously");
 
     let fetcher_guard = state.fetcher.lock().await;
-    let fetcher = fetcher_guard
-        .as_ref()
-        .ok_or("Ad fetcher not initialized")?;
+    let fetcher = fetcher_guard.as_ref().ok_or("Ad fetcher not initialized")?;
 
     let pending = state.engine.get_pending_impressions();
 
@@ -482,18 +476,17 @@ pub fn register_ad_commands(
     builder: tauri::Builder<tauri::Wry>,
     ad_state: AdState,
 ) -> tauri::Builder<tauri::Wry> {
-    builder
-        .invoke_handler(tauri::generate_handler![
-            cmd_fetch_ads,
-            cmd_select_ad,
-            cmd_record_impression,
-            cmd_record_click,
-            cmd_get_ad_settings,
-            cmd_update_ad_preferences,
-            cmd_get_ad_credits,
-            cmd_spend_ad_credits,
-            cmd_list_ads,
-            cmd_report_impressions,
-            cmd_cleanup_ads,
-        ])
+    builder.invoke_handler(tauri::generate_handler![
+        cmd_fetch_ads,
+        cmd_select_ad,
+        cmd_record_impression,
+        cmd_record_click,
+        cmd_get_ad_settings,
+        cmd_update_ad_preferences,
+        cmd_get_ad_credits,
+        cmd_spend_ad_credits,
+        cmd_list_ads,
+        cmd_report_impressions,
+        cmd_cleanup_ads,
+    ])
 }

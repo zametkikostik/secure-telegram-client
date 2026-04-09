@@ -1,6 +1,7 @@
+use crate::AppState;
 use axum::{
     extract::{
-        ws::{WebSocket, WebSocketUpgrade, Message},
+        ws::{Message, WebSocket, WebSocketUpgrade},
         State,
     },
     response::IntoResponse,
@@ -9,30 +10,78 @@ use futures::{SinkExt, StreamExt};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Arc;
-use tokio::sync::{mpsc, RwLock, Mutex};
-use tracing::{info, debug};
-use crate::AppState;
+use tokio::sync::{mpsc, Mutex, RwLock};
+use tracing::{debug, info};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type")]
 pub enum WsMessage {
-    Auth { token: String },
-    MessageReceived { id: String, chat_id: String, sender_id: String, sender_name: Option<String>, content: String, msg_type: String, created_at: String },
-    MessageEdited { id: String, chat_id: String, sender_id: String, content: String, edited_at: Option<String> },
-    MessageDeleted { id: String, chat_id: String },
-    SubscribeChat { chat_id: String },
-    PresenceUpdate { user_id: String, online: bool },
-    TypingUpdate { chat_id: String, user_id: String, username: String, is_typing: bool },
+    Auth {
+        token: String,
+    },
+    MessageReceived {
+        id: String,
+        chat_id: String,
+        sender_id: String,
+        sender_name: Option<String>,
+        content: String,
+        msg_type: String,
+        created_at: String,
+    },
+    MessageEdited {
+        id: String,
+        chat_id: String,
+        sender_id: String,
+        content: String,
+        edited_at: Option<String>,
+    },
+    MessageDeleted {
+        id: String,
+        chat_id: String,
+    },
+    SubscribeChat {
+        chat_id: String,
+    },
+    PresenceUpdate {
+        user_id: String,
+        online: bool,
+    },
+    TypingUpdate {
+        chat_id: String,
+        user_id: String,
+        username: String,
+        is_typing: bool,
+    },
     // P2P Signaling for WebRTC
-    P2POffer { target_user_id: String, call_id: String, sdp: String, candidates: Vec<IceCandidate> },
-    P2PAnswer { target_user_id: String, call_id: String, sdp: String, candidates: Vec<IceCandidate> },
-    IceCandidate { target_user_id: String, call_id: String, candidate: IceCandidate },
+    P2POffer {
+        target_user_id: String,
+        call_id: String,
+        sdp: String,
+        candidates: Vec<IceCandidate>,
+    },
+    P2PAnswer {
+        target_user_id: String,
+        call_id: String,
+        sdp: String,
+        candidates: Vec<IceCandidate>,
+    },
+    IceCandidate {
+        target_user_id: String,
+        call_id: String,
+        candidate: IceCandidate,
+    },
     // Hangup notification
-    P2PHangup { target_user_id: String, call_id: String, reason: String },
+    P2PHangup {
+        target_user_id: String,
+        call_id: String,
+        reason: String,
+    },
     // Ping/Pong
     Ping,
     Pong,
-    Error { message: String },
+    Error {
+        message: String,
+    },
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -67,8 +116,16 @@ impl WsManager {
     }
 
     pub async fn add_connection(&self, user_id: &str, tx: mpsc::UnboundedSender<Message>) {
-        self.connections.write().await.entry(user_id.to_string()).or_default().push(tx);
-        self.online_users.write().await.insert(user_id.to_string(), true);
+        self.connections
+            .write()
+            .await
+            .entry(user_id.to_string())
+            .or_default()
+            .push(tx);
+        self.online_users
+            .write()
+            .await
+            .insert(user_id.to_string(), true);
     }
 
     pub async fn remove_connection(&self, user_id: &str) {
@@ -83,14 +140,16 @@ impl WsManager {
     }
 
     pub async fn is_online(&self, user_id: &str) -> bool {
-        self.online_users.read().await.get(user_id).copied().unwrap_or(false)
+        self.online_users
+            .read()
+            .await
+            .get(user_id)
+            .copied()
+            .unwrap_or(false)
     }
 }
 
-pub async fn ws_handler(
-    ws: WebSocketUpgrade,
-    State(state): State<AppState>,
-) -> impl IntoResponse {
+pub async fn ws_handler(ws: WebSocketUpgrade, State(state): State<AppState>) -> impl IntoResponse {
     let ws_manager = state.ws_manager.clone();
     let auth = state.auth.clone();
     ws.on_upgrade(move |socket| handle_ws(socket, auth, ws_manager))
@@ -116,10 +175,15 @@ async fn handle_ws(
         }
         // Cleanup on disconnect - broadcast offline
         if let Some(uid) = user_id_clone.lock().await.clone() {
-            let presence = WsMessage::PresenceUpdate { user_id: uid.clone(), online: false };
+            let presence = WsMessage::PresenceUpdate {
+                user_id: uid.clone(),
+                online: false,
+            };
             let conns = ws_manager_clone.connections.read().await;
             for other_uid in conns.keys() {
-                ws_manager_clone.send_to_user(other_uid, presence.clone()).await;
+                ws_manager_clone
+                    .send_to_user(other_uid, presence.clone())
+                    .await;
             }
             ws_manager_clone.remove_connection(&uid).await;
             info!("WS disconnected: {}", uid);
@@ -141,7 +205,10 @@ async fn handle_ws(
                                 info!("WS authenticated: {}", uid);
 
                                 // Broadcast online status to all users
-                                let presence = WsMessage::PresenceUpdate { user_id: uid.clone(), online: true };
+                                let presence = WsMessage::PresenceUpdate {
+                                    user_id: uid.clone(),
+                                    online: true,
+                                };
                                 let conns = ws_manager.connections.read().await;
                                 for other_uid in conns.keys() {
                                     if other_uid != &uid {
@@ -150,10 +217,16 @@ async fn handle_ws(
                                 }
                             }
                         }
-                        WsMessage::PresenceUpdate { user_id: target, online } => {
+                        WsMessage::PresenceUpdate {
+                            user_id: target,
+                            online,
+                        } => {
                             // Forward presence to target user
                             if let Some(sender_id) = user_id.lock().await.clone() {
-                                let presence = WsMessage::PresenceUpdate { user_id: sender_id, online };
+                                let presence = WsMessage::PresenceUpdate {
+                                    user_id: sender_id,
+                                    online,
+                                };
                                 ws_manager.send_to_user(&target, presence).await;
                             }
                         }
@@ -161,7 +234,12 @@ async fn handle_ws(
                             debug!("Subscribe: {}", chat_id);
                         }
                         // P2P Signaling - forward to target user
-                        WsMessage::P2POffer { target_user_id, call_id, sdp, candidates } => {
+                        WsMessage::P2POffer {
+                            target_user_id,
+                            call_id,
+                            sdp,
+                            candidates,
+                        } => {
                             if let Some(sender_id) = user_id.lock().await.clone() {
                                 info!("P2P Offer: {} -> {}", sender_id, target_user_id);
                                 let forward_msg = WsMessage::P2POffer {
@@ -173,7 +251,12 @@ async fn handle_ws(
                                 ws_manager.send_to_user(&target_user_id, forward_msg).await;
                             }
                         }
-                        WsMessage::P2PAnswer { target_user_id, call_id, sdp, candidates } => {
+                        WsMessage::P2PAnswer {
+                            target_user_id,
+                            call_id,
+                            sdp,
+                            candidates,
+                        } => {
                             if let Some(sender_id) = user_id.lock().await.clone() {
                                 info!("P2P Answer: {} -> {}", sender_id, target_user_id);
                                 let forward_msg = WsMessage::P2PAnswer {
@@ -185,7 +268,11 @@ async fn handle_ws(
                                 ws_manager.send_to_user(&target_user_id, forward_msg).await;
                             }
                         }
-                        WsMessage::IceCandidate { target_user_id, call_id, candidate } => {
+                        WsMessage::IceCandidate {
+                            target_user_id,
+                            call_id,
+                            candidate,
+                        } => {
                             if let Some(sender_id) = user_id.lock().await.clone() {
                                 debug!("ICE Candidate: {} -> {}", sender_id, target_user_id);
                                 let forward_msg = WsMessage::IceCandidate {
@@ -196,9 +283,16 @@ async fn handle_ws(
                                 ws_manager.send_to_user(&target_user_id, forward_msg).await;
                             }
                         }
-                        WsMessage::P2PHangup { target_user_id, call_id, reason } => {
+                        WsMessage::P2PHangup {
+                            target_user_id,
+                            call_id,
+                            reason,
+                        } => {
                             if let Some(sender_id) = user_id.lock().await.clone() {
-                                info!("P2P Hangup: {} -> {} (reason: {})", sender_id, target_user_id, reason);
+                                info!(
+                                    "P2P Hangup: {} -> {} (reason: {})",
+                                    sender_id, target_user_id, reason
+                                );
                                 let forward_msg = WsMessage::P2PHangup {
                                     target_user_id: sender_id,
                                     call_id: call_id.clone(),
@@ -209,7 +303,7 @@ async fn handle_ws(
                         }
                         WsMessage::Ping => {
                             let _ = tx_clone.send(Message::Text(
-                                serde_json::to_string(&WsMessage::Pong).unwrap_or_default()
+                                serde_json::to_string(&WsMessage::Pong).unwrap_or_default(),
                             ));
                         }
                         _ => debug!("WS msg: {:?}", ws_msg),

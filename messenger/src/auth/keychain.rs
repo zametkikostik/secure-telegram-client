@@ -108,8 +108,8 @@ impl Keychain {
         keypair: &HybridKeypair,
         password: &str,
     ) -> Result<(), KeychainError> {
-        use argon2::{Argon2, PasswordHasher};
         use argon2::password_hash::SaltString;
+        use argon2::{Argon2, PasswordHasher};
         use base64::{engine::general_purpose::STANDARD, Engine};
         use chacha20poly1305::{
             aead::{Aead, KeyInit},
@@ -170,8 +170,11 @@ impl Keychain {
         let serialized = serde_json::to_string(&bundle)
             .map_err(|e| KeychainError::Serialization(e.to_string()))?;
 
-        let entry = Entry::new(&self.service, &format!("{}-{}", KEYPAIR_KEY_PREFIX, user_id))
-            .map_err(KeychainError::Keyring)?;
+        let entry = Entry::new(
+            &self.service,
+            &format!("{}-{}", KEYPAIR_KEY_PREFIX, user_id),
+        )
+        .map_err(KeychainError::Keyring)?;
 
         entry
             .set_password(&serialized)
@@ -196,13 +199,20 @@ impl Keychain {
     /// # Arguments
     /// * `user_id` — unique user identifier
     /// * `keypair` — the keypair to store
-    pub fn store_keypair(&self, user_id: &str, keypair: &HybridKeypair) -> Result<(), KeychainError> {
+    pub fn store_keypair(
+        &self,
+        user_id: &str,
+        keypair: &HybridKeypair,
+    ) -> Result<(), KeychainError> {
         let public_bundle = keypair.public_bundle();
         let serialized = serde_json::to_string(&public_bundle)
             .map_err(|e| KeychainError::Serialization(e.to_string()))?;
 
-        let entry = Entry::new(&self.service, &format!("{}-{}", KEYPAIR_KEY_PREFIX, user_id))
-            .map_err(KeychainError::Keyring)?;
+        let entry = Entry::new(
+            &self.service,
+            &format!("{}-{}", KEYPAIR_KEY_PREFIX, user_id),
+        )
+        .map_err(KeychainError::Keyring)?;
 
         entry
             .set_password(&serialized)
@@ -227,8 +237,8 @@ impl Keychain {
         user_id: &str,
         password: &str,
     ) -> Result<HybridKeypair, KeychainError> {
-        use argon2::{Argon2, PasswordHasher};
         use argon2::password_hash::SaltString;
+        use argon2::{Argon2, PasswordHasher};
         use base64::{engine::general_purpose::STANDARD, Engine};
         use chacha20poly1305::{
             aead::{Aead, KeyInit},
@@ -240,8 +250,11 @@ impl Keychain {
         use sha3::Sha3_256;
         use x25519_dalek::StaticSecret;
 
-        let entry = Entry::new(&self.service, &format!("{}-{}", KEYPAIR_KEY_PREFIX, user_id))
-            .map_err(KeychainError::Keyring)?;
+        let entry = Entry::new(
+            &self.service,
+            &format!("{}-{}", KEYPAIR_KEY_PREFIX, user_id),
+        )
+        .map_err(KeychainError::Keyring)?;
 
         let serialized = entry
             .get_password()
@@ -267,7 +280,9 @@ impl Keychain {
             .map_err(|_| KeychainError::InvalidPassword)?;
         let key_bytes = ph
             .hash
-            .ok_or_else(|| KeychainError::KeyGenFailed("Argon2 hash failed during load".to_string()))?
+            .ok_or_else(|| {
+                KeychainError::KeyGenFailed("Argon2 hash failed during load".to_string())
+            })?
             .to_string();
 
         let mut enc_key = [0u8; 32];
@@ -291,10 +306,10 @@ impl Keychain {
             .ok_or_else(|| KeychainError::Serialization("Missing x25519 secret".to_string()))?;
         let x25519_bytes =
             hex::decode(x25519_hex).map_err(|e| KeychainError::Serialization(e.to_string()))?;
-        let x25519_secret = StaticSecret::from(
-            <[u8; 32]>::try_from(x25519_bytes.as_slice())
-                .map_err(|_| KeychainError::Serialization("Invalid x25519 key length".to_string()))?,
-        );
+        let x25519_secret =
+            StaticSecret::from(<[u8; 32]>::try_from(x25519_bytes.as_slice()).map_err(|_| {
+                KeychainError::Serialization("Invalid x25519 key length".to_string())
+            })?);
         let x25519_public = x25519_dalek::PublicKey::from(&x25519_secret);
 
         let kyber_b64 = privates_json["kyber_secret"]
@@ -303,17 +318,23 @@ impl Keychain {
         let kyber_bytes = STANDARD
             .decode(kyber_b64)
             .map_err(|e| KeychainError::Serialization(e.to_string()))?;
-        
+
         // Reconstruct Kyber secret key from bytes
         oqs::init();
         let kyber_kem = Kem::new(Algorithm::Kyber1024)
             .map_err(|e| KeychainError::KeyGenFailed(e.to_string()))?;
-        let kyber_secret_ref = kyber_kem.secret_key_from_bytes(&kyber_bytes)
-            .ok_or_else(|| KeychainError::Serialization("Invalid Kyber secret key length".to_string()))?;
+        let kyber_secret_ref = kyber_kem
+            .secret_key_from_bytes(&kyber_bytes)
+            .ok_or_else(|| {
+                KeychainError::Serialization("Invalid Kyber secret key length".to_string())
+            })?;
         let kyber_secret = kyber_secret_ref.to_owned();
-        
-        let kyber_public_ref = kyber_kem.public_key_from_bytes(&bundle.public_bundle.kyber_public)
-            .ok_or_else(|| KeychainError::Serialization("Invalid Kyber public key length".to_string()))?;
+
+        let kyber_public_ref = kyber_kem
+            .public_key_from_bytes(&bundle.public_bundle.kyber_public)
+            .ok_or_else(|| {
+                KeychainError::Serialization("Invalid Kyber public key length".to_string())
+            })?;
         let kyber_public = kyber_public_ref.to_owned();
 
         let ed25519_hex = privates_json["ed25519_secret"]
@@ -321,10 +342,10 @@ impl Keychain {
             .ok_or_else(|| KeychainError::Serialization("Missing ed25519 secret".to_string()))?;
         let ed25519_bytes =
             hex::decode(ed25519_hex).map_err(|e| KeychainError::Serialization(e.to_string()))?;
-        let ed25519_secret = SigningKey::from_bytes(
-            &<[u8; 32]>::try_from(ed25519_bytes.as_slice())
-                .map_err(|_| KeychainError::Serialization("Invalid ed25519 key length".to_string()))?,
-        );
+        let ed25519_secret =
+            SigningKey::from_bytes(&<[u8; 32]>::try_from(ed25519_bytes.as_slice()).map_err(
+                |_| KeychainError::Serialization("Invalid ed25519 key length".to_string()),
+            )?);
         let ed25519_public = ed25519_dalek::VerifyingKey::from(&ed25519_secret);
 
         Ok(HybridKeypair {
@@ -346,8 +367,11 @@ impl Keychain {
     /// * `Ok(PublicBundle)` — the stored public keys
     /// * `Err(KeychainError)` — if key not found or corrupted
     pub fn load_public_bundle(&self, user_id: &str) -> Result<PublicBundle, KeychainError> {
-        let entry = Entry::new(&self.service, &format!("{}-{}", KEYPAIR_KEY_PREFIX, user_id))
-            .map_err(KeychainError::Keyring)?;
+        let entry = Entry::new(
+            &self.service,
+            &format!("{}-{}", KEYPAIR_KEY_PREFIX, user_id),
+        )
+        .map_err(KeychainError::Keyring)?;
 
         let serialized = entry
             .get_password()
@@ -377,9 +401,7 @@ impl Keychain {
         )
         .map_err(KeychainError::Keyring)?;
 
-        entry
-            .set_password(hash)
-            .map_err(KeychainError::Keyring)?;
+        entry.set_password(hash).map_err(KeychainError::Keyring)?;
 
         tracing::info!("Stored password hash for user: {}", user_id);
 
@@ -405,16 +427,18 @@ impl Keychain {
     /// Implements GDPR Article 17 — Right to Erasure
     pub fn delete_user_data(&self, user_id: &str) -> Result<(), KeychainError> {
         // Delete keypair
-        if let Ok(entry) =
-            Entry::new(&self.service, &format!("{}-{}", KEYPAIR_KEY_PREFIX, user_id))
-        {
+        if let Ok(entry) = Entry::new(
+            &self.service,
+            &format!("{}-{}", KEYPAIR_KEY_PREFIX, user_id),
+        ) {
             let _ = entry.delete_password();
         }
 
         // Delete password hash
-        if let Ok(entry) =
-            Entry::new(&self.service, &format!("{}-{}", PASSWORD_HASH_PREFIX, user_id))
-        {
+        if let Ok(entry) = Entry::new(
+            &self.service,
+            &format!("{}-{}", PASSWORD_HASH_PREFIX, user_id),
+        ) {
             let _ = entry.delete_password();
         }
 

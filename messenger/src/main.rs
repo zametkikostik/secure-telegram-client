@@ -9,10 +9,10 @@
 
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
+use base64::{engine::general_purpose::STANDARD, Engine};
 use std::collections::HashMap;
 use std::sync::Mutex;
-use base64::{engine::general_purpose::STANDARD, Engine};
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
 
 /// Application state shared across Tauri commands
 struct AppState {
@@ -40,12 +40,10 @@ fn init_logging() {
 async fn cmd_generate_keypair() -> Result<String, String> {
     tracing::info!("Generating new hybrid keypair");
 
-    let keypair = secure_messenger_lib::HybridKeypair::generate()
-        .map_err(|e| e.to_string())?;
+    let keypair = secure_messenger_lib::HybridKeypair::generate().map_err(|e| e.to_string())?;
 
     let bundle = keypair.public_bundle();
-    let json = serde_json::to_string(&bundle)
-        .map_err(|e| e.to_string())?;
+    let json = serde_json::to_string(&bundle).map_err(|e| e.to_string())?;
 
     Ok(json)
 }
@@ -84,9 +82,10 @@ async fn cmd_encrypt(
 
     // Reconstruct Kyber public key
     oqs::init();
-    let kyber_kem = oqs::kem::Kem::new(oqs::kem::Algorithm::Kyber1024)
-        .map_err(|e| e.to_string())?;
-    let recipient_kyber_ref = kyber_kem.public_key_from_bytes(&recipient_bundle.kyber_public)
+    let kyber_kem =
+        oqs::kem::Kem::new(oqs::kem::Algorithm::Kyber1024).map_err(|e| e.to_string())?;
+    let recipient_kyber_ref = kyber_kem
+        .public_key_from_bytes(&recipient_bundle.kyber_public)
         .ok_or_else(|| "Invalid Kyber public key length".to_string())?;
     let recipient_kyber = recipient_kyber_ref.to_owned();
 
@@ -194,14 +193,13 @@ async fn cmd_store_keypair(
         .map_err(|e| format!("Failed to store keypair: {}", e))?;
 
     // Also store password hash for login verification
-    use argon2::{Argon2, PasswordHasher};
     use argon2::password_hash::SaltString;
+    use argon2::{Argon2, PasswordHasher};
     use rand::RngCore;
 
     let mut salt_bytes = [0u8; 16];
     rand::thread_rng().fill_bytes(&mut salt_bytes);
-    let salt = SaltString::encode_b64(&salt_bytes)
-        .map_err(|e| e.to_string())?;
+    let salt = SaltString::encode_b64(&salt_bytes).map_err(|e| e.to_string())?;
 
     let argon2_inst = Argon2::default();
     let ph = argon2_inst
@@ -215,7 +213,7 @@ async fn cmd_store_keypair(
 
     // Get public bundle before moving keypair
     let bundle = keypair.public_bundle();
-    
+
     // Add to active keypairs
     {
         let mut keypairs = state.active_keypairs.lock().map_err(|e| e.to_string())?;
@@ -256,7 +254,8 @@ async fn cmd_load_keypair(
     use argon2::password_hash::PasswordHash;
     use argon2::{Argon2, PasswordVerifier};
     let argon2_inst = Argon2::default();
-    let ph = PasswordHash::new(&stored_hash).map_err(|e| format!("Invalid password hash: {}", e))?;
+    let ph =
+        PasswordHash::new(&stored_hash).map_err(|e| format!("Invalid password hash: {}", e))?;
 
     argon2_inst
         .verify_password(password.as_bytes(), &ph)
@@ -295,8 +294,12 @@ async fn cmd_init_ad_state(
     worker_url: String,
     client_public_key: String,
 ) -> Result<(), String> {
-    tracing::info!("Initializing ad state: db={}, worker_url={}", db_path, worker_url);
-    
+    tracing::info!(
+        "Initializing ad state: db={}, worker_url={}",
+        db_path,
+        worker_url
+    );
+
     state
         .init(&db_path, &worker_url, &client_public_key)
         .await
@@ -305,16 +308,12 @@ async fn cmd_init_ad_state(
 
 fn main() {
     init_logging();
-    tracing::info!(
-        "Starting Secure Messenger v{}",
-        env!("CARGO_PKG_VERSION")
-    );
+    tracing::info!("Starting Secure Messenger v{}", env!("CARGO_PKG_VERSION"));
 
     // Initialize ad state
     #[cfg(feature = "tauri-commands")]
-    let ad_state = secure_messenger_lib::AdState::new(
-        secure_messenger_lib::AdPreferences::default()
-    );
+    let ad_state =
+        secure_messenger_lib::AdState::new(secure_messenger_lib::AdPreferences::default());
 
     // Initialize application state
     let app_state = AppState {

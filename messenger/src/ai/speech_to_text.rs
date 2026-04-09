@@ -9,11 +9,7 @@ use std::path::Path;
 const OPENROUTER_WHISPER_MODEL: &str = "openai/whisper-large-v3";
 
 /// Transcribe audio bytes to text
-pub async fn transcribe(
-    client: &AiClient,
-    audio: &[u8],
-    lang: &str,
-) -> AiResult<String> {
+pub async fn transcribe(client: &AiClient, audio: &[u8], lang: &str) -> AiResult<String> {
     // Try OpenRouter Whisper first
     match transcribe_openrouter(client, audio, lang).await {
         Ok(text) => {
@@ -43,11 +39,7 @@ pub async fn transcribe(
 }
 
 /// Transcribe via OpenRouter Whisper-compatible endpoint
-async fn transcribe_openrouter(
-    client: &AiClient,
-    audio: &[u8],
-    lang: &str,
-) -> AiResult<String> {
+async fn transcribe_openrouter(client: &AiClient, audio: &[u8], lang: &str) -> AiResult<String> {
     let api_key = client
         .config
         .openrouter_key
@@ -95,10 +87,7 @@ async fn transcribe_openrouter(
             .text()
             .await
             .unwrap_or_else(|_| "Unknown error".to_string());
-        return Err(AiError::OpenRouter(format!(
-            "HTTP {}: {}",
-            status, body
-        )));
+        return Err(AiError::OpenRouter(format!("HTTP {}: {}", status, body)));
     }
 
     #[derive(serde::Deserialize)]
@@ -157,11 +146,7 @@ async fn transcribe_vosk_local(audio: &[u8], _lang: &str) -> AiResult<String> {
 }
 
 /// Transcribe from a file path
-pub async fn transcribe_file(
-    client: &AiClient,
-    file_path: &Path,
-    lang: &str,
-) -> AiResult<String> {
+pub async fn transcribe_file(client: &AiClient, file_path: &Path, lang: &str) -> AiResult<String> {
     let audio = std::fs::read(file_path)
         .map_err(|e| AiError::Http(format!("Failed to read file: {}", e)))?;
 

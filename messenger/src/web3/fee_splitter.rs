@@ -20,10 +20,10 @@
 //! - 10% → Reserve Fund
 
 use ethers::{
+    abi::Abi,
+    contract::Contract,
     core::types::{Address, TransactionReceipt, TxHash, U256},
     providers::{Middleware, Provider, ProviderError},
-    contract::Contract,
-    abi::Abi,
 };
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
@@ -116,13 +116,14 @@ impl DistributionConfig {
             + self.marketing_percent as u16
             + self.arbiters_percent as u16
             + self.reserve_percent as u16;
-        
+
         if total != 100 {
-            return Err(FeeSplitterError::InvalidPercentage(
-                format!("Shares must sum to 100, got {}", total)
-            ));
+            return Err(FeeSplitterError::InvalidPercentage(format!(
+                "Shares must sum to 100, got {}",
+                total
+            )));
         }
-        
+
         Ok(())
     }
 
@@ -173,18 +174,11 @@ where
     M::Error: 'static,
 {
     /// Create a new fee splitter client
-    pub fn new(
-        provider: Arc<M>,
-        contract_address: Address,
-        abi: &str,
-    ) -> FeeSplitterResult<Self> {
-        let abi: Abi = serde_json::from_str(abi).map_err(|e| FeeSplitterError::Abi(e.to_string()))?;
-        
-        let contract = Contract::new(
-            contract_address,
-            abi,
-            provider.clone(),
-        );
+    pub fn new(provider: Arc<M>, contract_address: Address, abi: &str) -> FeeSplitterResult<Self> {
+        let abi: Abi =
+            serde_json::from_str(abi).map_err(|e| FeeSplitterError::Abi(e.to_string()))?;
+
+        let contract = Contract::new(contract_address, abi, provider.clone());
 
         info!(
             "FeeSplitterClient initialized: address={}",
@@ -267,7 +261,9 @@ where
     }
 
     /// Get all shareholders
-    pub async fn get_shareholders(&self) -> FeeSplitterResult<(Shareholder, Shareholder, Shareholder, Shareholder)> {
+    pub async fn get_shareholders(
+        &self,
+    ) -> FeeSplitterResult<(Shareholder, Shareholder, Shareholder, Shareholder)> {
         let result = self
             .contract
             .method::<_, (
@@ -282,39 +278,39 @@ where
             .map_err(|e| FeeSplitterError::Provider(e))?;
 
         let team = Shareholder {
-            wallet: result.0.0,
-            share_percent: result.0.1,
-            role: result.0.2,
-            is_active: result.0.3,
-            total_received: result.0.4,
-            last_claimed_at: result.0.5,
+            wallet: result.0 .0,
+            share_percent: result.0 .1,
+            role: result.0 .2,
+            is_active: result.0 .3,
+            total_received: result.0 .4,
+            last_claimed_at: result.0 .5,
         };
 
         let treasury = Shareholder {
-            wallet: result.1.0,
-            share_percent: result.1.1,
-            role: result.1.2,
-            is_active: result.1.3,
-            total_received: result.1.4,
-            last_claimed_at: result.1.5,
+            wallet: result.1 .0,
+            share_percent: result.1 .1,
+            role: result.1 .2,
+            is_active: result.1 .3,
+            total_received: result.1 .4,
+            last_claimed_at: result.1 .5,
         };
 
         let marketing = Shareholder {
-            wallet: result.2.0,
-            share_percent: result.2.1,
-            role: result.2.2,
-            is_active: result.2.3,
-            total_received: result.2.4,
-            last_claimed_at: result.2.5,
+            wallet: result.2 .0,
+            share_percent: result.2 .1,
+            role: result.2 .2,
+            is_active: result.2 .3,
+            total_received: result.2 .4,
+            last_claimed_at: result.2 .5,
         };
 
         let reserve = Shareholder {
-            wallet: result.3.0,
-            share_percent: result.3.1,
-            role: result.3.2,
-            is_active: result.3.3,
-            total_received: result.3.4,
-            last_claimed_at: result.3.5,
+            wallet: result.3 .0,
+            share_percent: result.3 .1,
+            role: result.3 .2,
+            is_active: result.3 .3,
+            total_received: result.3 .4,
+            last_claimed_at: result.3 .5,
         };
 
         Ok((team, treasury, marketing, reserve))
@@ -388,8 +384,11 @@ where
             .method::<_, ()>("distribute", ())
             .map_err(|e| FeeSplitterError::Contract(e.to_string()))?;
 
-        let pending_tx = tx.send().await.map_err(|e| FeeSplitterError::TxFailed(e.to_string()))?;
-        
+        let pending_tx = tx
+            .send()
+            .await
+            .map_err(|e| FeeSplitterError::TxFailed(e.to_string()))?;
+
         let receipt = pending_tx
             .await
             .map_err(|e| FeeSplitterError::TxFailed(e.to_string()))?
@@ -403,7 +402,10 @@ where
     }
 
     /// Distribute ERC-20 tokens
-    pub async fn distribute_token(&self, token_address: Address) -> FeeSplitterResult<FeeSplitterTxReceipt> {
+    pub async fn distribute_token(
+        &self,
+        token_address: Address,
+    ) -> FeeSplitterResult<FeeSplitterTxReceipt> {
         info!("Distributing tokens: {}", token_address);
 
         let tx = self
@@ -411,8 +413,11 @@ where
             .method::<_, ()>("distributeToken", token_address)
             .map_err(|e| FeeSplitterError::Contract(e.to_string()))?;
 
-        let pending_tx = tx.send().await.map_err(|e| FeeSplitterError::TxFailed(e.to_string()))?;
-        
+        let pending_tx = tx
+            .send()
+            .await
+            .map_err(|e| FeeSplitterError::TxFailed(e.to_string()))?;
+
         let receipt = pending_tx
             .await
             .map_err(|e| FeeSplitterError::TxFailed(e.to_string()))?
@@ -426,9 +431,12 @@ where
     }
 
     /// Update distribution shares (owner only)
-    pub async fn update_shares(&self, config: DistributionConfig) -> FeeSplitterResult<FeeSplitterTxReceipt> {
+    pub async fn update_shares(
+        &self,
+        config: DistributionConfig,
+    ) -> FeeSplitterResult<FeeSplitterTxReceipt> {
         config.validate()?;
-        
+
         info!("Updating shares: {:?}", config);
 
         let tx = self
@@ -445,8 +453,11 @@ where
             )
             .map_err(|e| FeeSplitterError::Contract(e.to_string()))?;
 
-        let pending_tx = tx.send().await.map_err(|e| FeeSplitterError::TxFailed(e.to_string()))?;
-        
+        let pending_tx = tx
+            .send()
+            .await
+            .map_err(|e| FeeSplitterError::TxFailed(e.to_string()))?;
+
         let receipt = pending_tx
             .await
             .map_err(|e| FeeSplitterError::TxFailed(e.to_string()))?
@@ -460,7 +471,11 @@ where
     }
 
     /// Update shareholder wallet (owner only)
-    pub async fn update_shareholder_wallet(&self, role: String, new_wallet: Address) -> FeeSplitterResult<FeeSplitterTxReceipt> {
+    pub async fn update_shareholder_wallet(
+        &self,
+        role: String,
+        new_wallet: Address,
+    ) -> FeeSplitterResult<FeeSplitterTxReceipt> {
         info!("Updating {} wallet to {}", role, new_wallet);
 
         let tx = self
@@ -468,8 +483,11 @@ where
             .method::<_, ()>("updateShareholderWallet", (role, new_wallet))
             .map_err(|e| FeeSplitterError::Contract(e.to_string()))?;
 
-        let pending_tx = tx.send().await.map_err(|e| FeeSplitterError::TxFailed(e.to_string()))?;
-        
+        let pending_tx = tx
+            .send()
+            .await
+            .map_err(|e| FeeSplitterError::TxFailed(e.to_string()))?;
+
         let receipt = pending_tx
             .await
             .map_err(|e| FeeSplitterError::TxFailed(e.to_string()))?
@@ -481,7 +499,11 @@ where
     }
 
     /// Add arbiter to pool (owner only)
-    pub async fn add_arbiter(&self, arbiter: Address, share: U256) -> FeeSplitterResult<FeeSplitterTxReceipt> {
+    pub async fn add_arbiter(
+        &self,
+        arbiter: Address,
+        share: U256,
+    ) -> FeeSplitterResult<FeeSplitterTxReceipt> {
         info!("Adding arbiter: {}, share: {}", arbiter, share);
 
         let tx = self
@@ -489,8 +511,11 @@ where
             .method::<_, ()>("addArbiter", (arbiter, share))
             .map_err(|e| FeeSplitterError::Contract(e.to_string()))?;
 
-        let pending_tx = tx.send().await.map_err(|e| FeeSplitterError::TxFailed(e.to_string()))?;
-        
+        let pending_tx = tx
+            .send()
+            .await
+            .map_err(|e| FeeSplitterError::TxFailed(e.to_string()))?;
+
         let receipt = pending_tx
             .await
             .map_err(|e| FeeSplitterError::TxFailed(e.to_string()))?
@@ -502,7 +527,10 @@ where
     }
 
     /// Remove arbiter from pool (owner only)
-    pub async fn remove_arbiter(&self, arbiter: Address) -> FeeSplitterResult<FeeSplitterTxReceipt> {
+    pub async fn remove_arbiter(
+        &self,
+        arbiter: Address,
+    ) -> FeeSplitterResult<FeeSplitterTxReceipt> {
         info!("Removing arbiter: {}", arbiter);
 
         let tx = self
@@ -510,8 +538,11 @@ where
             .method::<_, ()>("removeArbiter", arbiter)
             .map_err(|e| FeeSplitterError::Contract(e.to_string()))?;
 
-        let pending_tx = tx.send().await.map_err(|e| FeeSplitterError::TxFailed(e.to_string()))?;
-        
+        let pending_tx = tx
+            .send()
+            .await
+            .map_err(|e| FeeSplitterError::TxFailed(e.to_string()))?;
+
         let receipt = pending_tx
             .await
             .map_err(|e| FeeSplitterError::TxFailed(e.to_string()))?
@@ -531,8 +562,11 @@ where
             .method::<_, ()>("arbiterWithdraw", ())
             .map_err(|e| FeeSplitterError::Contract(e.to_string()))?;
 
-        let pending_tx = tx.send().await.map_err(|e| FeeSplitterError::TxFailed(e.to_string()))?;
-        
+        let pending_tx = tx
+            .send()
+            .await
+            .map_err(|e| FeeSplitterError::TxFailed(e.to_string()))?;
+
         let receipt = pending_tx
             .await
             .map_err(|e| FeeSplitterError::TxFailed(e.to_string()))?
@@ -552,8 +586,11 @@ where
             .method::<_, ()>("togglePause", ())
             .map_err(|e| FeeSplitterError::Contract(e.to_string()))?;
 
-        let pending_tx = tx.send().await.map_err(|e| FeeSplitterError::TxFailed(e.to_string()))?;
-        
+        let pending_tx = tx
+            .send()
+            .await
+            .map_err(|e| FeeSplitterError::TxFailed(e.to_string()))?;
+
         let receipt = pending_tx
             .await
             .map_err(|e| FeeSplitterError::TxFailed(e.to_string()))?
@@ -565,7 +602,10 @@ where
     }
 
     /// Transfer ownership (owner only)
-    pub async fn transfer_ownership(&self, new_owner: Address) -> FeeSplitterResult<FeeSplitterTxReceipt> {
+    pub async fn transfer_ownership(
+        &self,
+        new_owner: Address,
+    ) -> FeeSplitterResult<FeeSplitterTxReceipt> {
         info!("Transferring ownership to {}", new_owner);
 
         let tx = self
@@ -573,8 +613,11 @@ where
             .method::<_, ()>("transferOwnership", new_owner)
             .map_err(|e| FeeSplitterError::Contract(e.to_string()))?;
 
-        let pending_tx = tx.send().await.map_err(|e| FeeSplitterError::TxFailed(e.to_string()))?;
-        
+        let pending_tx = tx
+            .send()
+            .await
+            .map_err(|e| FeeSplitterError::TxFailed(e.to_string()))?;
+
         let receipt = pending_tx
             .await
             .map_err(|e| FeeSplitterError::TxFailed(e.to_string()))?
@@ -617,7 +660,7 @@ mod tests {
     #[test]
     fn test_default_config() {
         let config = DistributionConfig::default_config();
-        
+
         assert_eq!(config.team_percent, 40);
         assert_eq!(config.treasury_percent, 25);
         assert_eq!(config.marketing_percent, 15);
@@ -634,7 +677,7 @@ mod tests {
             arbiters_percent: 10,
             reserve_percent: 10,
         };
-        
+
         assert!(config.validate().is_ok());
     }
 
@@ -647,7 +690,7 @@ mod tests {
             arbiters_percent: 10,
             reserve_percent: 10, // Sum = 120
         };
-        
+
         assert!(config.validate().is_err());
     }
 

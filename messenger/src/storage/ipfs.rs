@@ -181,27 +181,42 @@ impl IpfsStorage {
         is_encrypted: bool,
     ) -> IpfsResult<String> {
         let size = data.len() as u64;
-        let mime_type = mime_guess::from_path(filename).first_or_octet_stream().to_string();
+        let mime_type = mime_guess::from_path(filename)
+            .first_or_octet_stream()
+            .to_string();
 
         // Create multipart form data
         let form = reqwest::multipart::Form::new()
-            .text("pinataMetadata", serde_json::json!({
-                "name": filename,
-                "keyvalues": {
-                    "owner_id": owner_id,
-                    "is_encrypted": is_encrypted.to_string(),
-                    "upload_date": chrono::Utc::now().to_rfc3339(),
-                }
-            }).to_string())
-            .text("pinataOptions", serde_json::json!({
-                "cidVersion": 1,
-                "wrapWithDirectory": false,
-            }).to_string())
-            .part("file", reqwest::multipart::Part::bytes(data)
-                .file_name(filename.to_string())
-                .mime_str(&mime_type).map_err(|e| IpfsError::UploadFailed(e.to_string()))?);
+            .text(
+                "pinataMetadata",
+                serde_json::json!({
+                    "name": filename,
+                    "keyvalues": {
+                        "owner_id": owner_id,
+                        "is_encrypted": is_encrypted.to_string(),
+                        "upload_date": chrono::Utc::now().to_rfc3339(),
+                    }
+                })
+                .to_string(),
+            )
+            .text(
+                "pinataOptions",
+                serde_json::json!({
+                    "cidVersion": 1,
+                    "wrapWithDirectory": false,
+                })
+                .to_string(),
+            )
+            .part(
+                "file",
+                reqwest::multipart::Part::bytes(data)
+                    .file_name(filename.to_string())
+                    .mime_str(&mime_type)
+                    .map_err(|e| IpfsError::UploadFailed(e.to_string()))?,
+            );
 
-        let response = self.http_client
+        let response = self
+            .http_client
             .post(&format!("{}/pinning/pinFileToIPFS", self.pinata_api_url))
             .header("Authorization", format!("Bearer {}", self.pinata_jwt))
             .multipart(form)
@@ -210,8 +225,12 @@ impl IpfsStorage {
             .map_err(|e| IpfsError::UploadFailed(e.to_string()))?;
 
         if !response.status().is_success() {
-            let status = response.status(); let body = response.text().await.unwrap_or_default();
-            return Err(IpfsError::UploadFailed(format!("HTTP {}: {}", status, body)));
+            let status = response.status();
+            let body = response.text().await.unwrap_or_default();
+            return Err(IpfsError::UploadFailed(format!(
+                "HTTP {}: {}",
+                status, body
+            )));
         }
 
         let upload_response: PinataUploadResponse = response
@@ -238,9 +257,15 @@ impl IpfsStorage {
             },
         };
 
-        self.metadata_cache.write().await.insert(metadata.cid.clone(), metadata);
+        self.metadata_cache
+            .write()
+            .await
+            .insert(metadata.cid.clone(), metadata);
 
-        info!("Uploaded file to IPFS: {} ({})", filename, upload_response.ipfs_hash);
+        info!(
+            "Uploaded file to IPFS: {} ({})",
+            filename, upload_response.ipfs_hash
+        );
         Ok(upload_response.ipfs_hash)
     }
 
@@ -253,7 +278,8 @@ impl IpfsStorage {
         // Try Pinata gateway first
         let url = format!("https://{}/ipfs/{}", self.pinata_gateway, cid);
 
-        let response = self.http_client
+        let response = self
+            .http_client
             .get(&url)
             .header("Authorization", format!("Bearer {}", self.pinata_jwt))
             .send()
@@ -262,7 +288,9 @@ impl IpfsStorage {
 
         if !response.status().is_success() {
             return Err(IpfsError::DownloadFailed(format!(
-                "HTTP {}: {}", response.status(), response.text().await.unwrap_or_default()
+                "HTTP {}: {}",
+                response.status(),
+                response.text().await.unwrap_or_default()
             )));
         }
 
@@ -294,7 +322,8 @@ impl IpfsStorage {
 
     /// Pin a file to keep it on IPFS
     pub async fn pin_file(&self, cid: &str, filename: &str) -> IpfsResult<String> {
-        let response = self.http_client
+        let response = self
+            .http_client
             .post(&format!("{}/pinning/pinByHash", self.pinata_api_url))
             .header("Authorization", format!("Bearer {}", self.pinata_jwt))
             .json(&serde_json::json!({
@@ -306,7 +335,8 @@ impl IpfsStorage {
             .map_err(|e| IpfsError::PinFailed(e.to_string()))?;
 
         if !response.status().is_success() {
-            let status = response.status(); let body = response.text().await.unwrap_or_default();
+            let status = response.status();
+            let body = response.text().await.unwrap_or_default();
             return Err(IpfsError::PinFailed(format!("HTTP {}: {}", status, body)));
         }
 
@@ -316,7 +346,8 @@ impl IpfsStorage {
 
     /// Unpin a file (may be garbage collected by IPFS)
     pub async fn unpin_file(&self, cid: &str) -> IpfsResult<()> {
-        let response = self.http_client
+        let response = self
+            .http_client
             .delete(&format!("{}/pinning/unpin/{}", self.pinata_api_url, cid))
             .header("Authorization", format!("Bearer {}", self.pinata_jwt))
             .send()
@@ -324,7 +355,8 @@ impl IpfsStorage {
             .map_err(|e| IpfsError::UnpinFailed(e.to_string()))?;
 
         if !response.status().is_success() {
-            let status = response.status(); let body = response.text().await.unwrap_or_default();
+            let status = response.status();
+            let body = response.text().await.unwrap_or_default();
             return Err(IpfsError::UnpinFailed(format!("HTTP {}: {}", status, body)));
         }
 
@@ -335,7 +367,8 @@ impl IpfsStorage {
 
     /// List all pinned files
     pub async fn list_pins(&self) -> IpfsResult<Vec<PinataPinResponse>> {
-        let response = self.http_client
+        let response = self
+            .http_client
             .get(&format!("{}/data/pinList", self.pinata_api_url))
             .header("Authorization", format!("Bearer {}", self.pinata_jwt))
             .query(&[("status", "active"), ("limit", "100")])
@@ -417,7 +450,8 @@ impl Default for LocalIpfsConfig {
             port: 5001,
             swarm_port: 4001,
             bootstrap_nodes: vec![
-                "/dnsaddr/bootstrap.libp2p.io/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN".to_string(),
+                "/dnsaddr/bootstrap.libp2p.io/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN"
+                    .to_string(),
             ],
             max_storage_gb: 10,
         }

@@ -5,9 +5,7 @@
 use serde::{Deserialize, Serialize};
 use tauri::State;
 
-use super::abcex::{
-    AbcexClient, BuyQuoteRequest, PaymentMethod,
-};
+use super::abcex::{AbcexClient, BuyQuoteRequest, PaymentMethod};
 use super::types::Web3Error;
 
 // ============================================================================
@@ -133,16 +131,8 @@ pub struct AbcexState {
 }
 
 impl AbcexState {
-    pub fn new(
-        api_key: Option<String>,
-        api_secret: Option<String>,
-        fee_bps: u64,
-    ) -> Self {
-        let client = AbcexClient::with_fee(
-            api_key.clone(),
-            api_secret.clone(),
-            fee_bps,
-        );
+    pub fn new(api_key: Option<String>, api_secret: Option<String>, fee_bps: u64) -> Self {
+        let client = AbcexClient::with_fee(api_key.clone(), api_secret.clone(), fee_bps);
 
         Self {
             client,
@@ -211,15 +201,24 @@ pub async fn abcex_create_order(
         "bank_transfer" => PaymentMethod::BankTransfer,
         "apple_pay" => PaymentMethod::ApplePay,
         "google_pay" => PaymentMethod::GooglePay,
-        _ => return Err(format!("Invalid payment method: {}", request.payment_method)),
+        _ => {
+            return Err(format!(
+                "Invalid payment method: {}",
+                request.payment_method
+            ))
+        }
     };
 
-    match state.client.create_buy_order(
-        request.quote_id,
-        request.deposit_address,
-        payment_method,
-        request.user_email,
-    ).await {
+    match state
+        .client
+        .create_buy_order(
+            request.quote_id,
+            request.deposit_address,
+            payment_method,
+            request.user_email,
+        )
+        .await
+    {
         Ok(order) => Ok(AbcexOrderResponse {
             success: true,
             order: Some(AbcexOrderData {
@@ -313,7 +312,8 @@ pub async fn abcex_check_kyc(
 pub async fn abcex_get_supported_cryptos(
     state: State<'_, AbcexState>,
 ) -> Result<Vec<String>, String> {
-    state.client
+    state
+        .client
         .get_supported_cryptos()
         .await
         .map_err(|e| e.to_string())
@@ -367,7 +367,8 @@ pub async fn abcex_quick_quote(
         country,
     };
 
-    state.client
+    state
+        .client
         .get_buy_quote(request)
         .await
         .map(|q| serde_json::to_string_pretty(&q).unwrap_or_default())
@@ -381,8 +382,7 @@ pub fn abcex_calculate_fee(
     fee_bps: u64,
     state: State<'_, AbcexState>,
 ) -> Result<String, String> {
-    super::abcex::calculate_fee(&amount, fee_bps)
-        .map_err(|e: Web3Error| e.to_string())
+    super::abcex::calculate_fee(&amount, fee_bps).map_err(|e: Web3Error| e.to_string())
 }
 
 // ============================================================================

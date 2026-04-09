@@ -110,35 +110,35 @@ pub struct RatchetCiphertext {
 pub struct RatchetSession {
     /// Are we the initiator?
     pub is_initiator: bool,
-    
+
     /// Current root key (32 bytes)
     pub root_key: Vec<u8>,
-    
+
     /// Sending chain key (32 bytes)
     pub sending_chain_key: Option<Vec<u8>>,
     /// Sending chain message counter
     pub sending_chain_index: u64,
-    
+
     /// Receiving chain key (32 bytes)
     pub receiving_chain_key: Option<Vec<u8>>,
     /// Receiving chain message counter
     pub receiving_chain_index: u64,
-    
+
     /// Our current DH ratchet keypair (serialized)
     pub dh_secret: Option<Vec<u8>>,
     /// Their current DH ratchet public key
     pub dh_remote_public: Option<[u8; X25519_KEY_SIZE]>,
-    
+
     /// Remote X25519 public key (static)
     pub remote_static_public: [u8; X25519_KEY_SIZE],
     /// Remote Ed25519 verifying key (for signature verification)
     pub remote_ed25519_public: [u8; 32],
     /// Our Ed25519 signing key (for signing)
     pub local_ed25519_secret: [u8; 32],
-    
+
     /// Skipped message keys (for out-of-order delivery)
     pub skipped_keys: Vec<SkippedKey>,
-    
+
     /// Total messages encrypted/decrypted
     pub message_count: u64,
 }
@@ -258,7 +258,10 @@ impl DoubleRatchetSession {
     /// The chain key is then ratcheted forward for forward secrecy.
     pub fn encrypt_message(&mut self, plaintext: &[u8]) -> Result<RatchetCiphertext, RatchetError> {
         // Derive message key from chain key
-        let chain_key = self.session.sending_chain_key.as_mut()
+        let chain_key = self
+            .session
+            .sending_chain_key
+            .as_mut()
             .ok_or_else(|| RatchetError::EncryptionFailed("No sending chain".to_string()))?;
 
         let mut message_key = [0u8; 32];
@@ -281,7 +284,8 @@ impl DoubleRatchetSession {
         let key = Key::from_slice(&message_key);
         let cipher = ChaCha20Poly1305::new(key);
         let nonce = Nonce::from_slice(&nonce_bytes);
-        let ciphertext = cipher.encrypt(nonce, plaintext)
+        let ciphertext = cipher
+            .encrypt(nonce, plaintext)
             .map_err(|e| RatchetError::EncryptionFailed(e.to_string()))?;
 
         let message_index = self.session.sending_chain_index;
@@ -297,18 +301,32 @@ impl DoubleRatchetSession {
     }
 
     /// Decrypt a message
-    pub fn decrypt_message(&mut self, ciphertext: &RatchetCiphertext) -> Result<Vec<u8>, RatchetError> {
+    pub fn decrypt_message(
+        &mut self,
+        ciphertext: &RatchetCiphertext,
+    ) -> Result<Vec<u8>, RatchetError> {
         // Check for duplicate
-        if self.session.skipped_keys.iter().any(|sk| sk.message_index == ciphertext.message_index) {
+        if self
+            .session
+            .skipped_keys
+            .iter()
+            .any(|sk| sk.message_index == ciphertext.message_index)
+        {
             return Err(RatchetError::DuplicateMessage);
         }
 
         // Check if we have the message key (out-of-order)
-        let chain_key = self.session.receiving_chain_key.as_mut()
+        let chain_key = self
+            .session
+            .receiving_chain_key
+            .as_mut()
             .ok_or_else(|| RatchetError::DecryptionFailed("No receiving chain".to_string()))?;
 
         // Try to find skipped key
-        let skipped_idx = self.session.skipped_keys.iter()
+        let skipped_idx = self
+            .session
+            .skipped_keys
+            .iter()
             .position(|sk| sk.message_index == ciphertext.message_index);
 
         let message_key = if let Some(idx) = skipped_idx {
@@ -318,11 +336,11 @@ impl DoubleRatchetSession {
             // Derive message key and ratchet forward
             // Handle out-of-order by generating skipped keys
             let current_index = self.session.receiving_chain_index;
-            
+
             if ciphertext.message_index < current_index {
                 return Err(RatchetError::MessageTooOld);
             }
-            
+
             let skip_count = (ciphertext.message_index - current_index) as usize;
             if skip_count > MAX_SKIP_WINDOW {
                 return Err(RatchetError::SkipLimitExceeded);
@@ -331,7 +349,7 @@ impl DoubleRatchetSession {
             // Generate and store skipped keys, then derive the needed key
             let mut temp_chain_key = chain_key.clone();
             let mut final_msg_key = None;
-            
+
             for i in 0..=skip_count {
                 let mut msg_key = [0u8; 32];
                 let hk = Hkdf::<Sha3_256>::new(Some(&temp_chain_key), HKDF_MESSAGE_KEY_INFO);
@@ -350,24 +368,29 @@ impl DoubleRatchetSession {
                     // This is the key we need now - save it
                     final_msg_key = Some(msg_key);
                 }
-                
+
                 // Ratchet chain key forward for next iteration
                 let hk = Hkdf::<Sha3_256>::new(Some(&temp_chain_key), HKDF_CHAIN_KEY_INFO);
                 hk.expand(b"chain-ratchet", &mut temp_chain_key)
                     .map_err(|e| RatchetError::DecryptionFailed(e.to_string()))?;
             }
-            
+
             *chain_key = temp_chain_key;
             self.session.receiving_chain_index = ciphertext.message_index + 1;
 
-            final_msg_key.ok_or_else(|| RatchetError::DecryptionFailed("Failed to derive message key".to_string()))?.to_vec()
+            final_msg_key
+                .ok_or_else(|| {
+                    RatchetError::DecryptionFailed("Failed to derive message key".to_string())
+                })?
+                .to_vec()
         };
 
         // Decrypt
         let key = Key::from_slice(&message_key);
         let cipher = ChaCha20Poly1305::new(key);
         let nonce = Nonce::from_slice(&ciphertext.nonce);
-        let plaintext = cipher.decrypt(nonce, ciphertext.ciphertext.as_ref())
+        let plaintext = cipher
+            .decrypt(nonce, ciphertext.ciphertext.as_ref())
             .map_err(|e| RatchetError::DecryptionFailed(e.to_string()))?;
 
         self.session.message_count += 1;
@@ -419,18 +442,18 @@ mod tests {
     #[test]
     fn test_double_ratchet_init() {
         use rand::rngs::OsRng;
-        
+
         // Create keypairs
         let alice_x = StaticSecret::random_from_rng(OsRng);
         let alice_e = SigningKey::generate(&mut OsRng);
         let bob_x = StaticSecret::random_from_rng(OsRng);
         let bob_e = SigningKey::generate(&mut OsRng);
-        
+
         let alice_pub = x25519_dalek::PublicKey::from(&alice_x);
         let bob_pub = x25519_dalek::PublicKey::from(&bob_x);
         let shared = alice_x.diffie_hellman(&bob_pub);
         let alice_ed_bytes = alice_e.verifying_key().to_bytes();
-        
+
         // Initialize ratchet sessions
         let alice_ratchet = DoubleRatchetSession::init_as_initiator(
             shared.as_bytes(),
@@ -439,9 +462,9 @@ mod tests {
             bob_e.verifying_key().to_bytes(),
             alice_e,
         );
-        
+
         assert!(alice_ratchet.is_ok());
-        
+
         let bob_ratchet = DoubleRatchetSession::init_as_responder(
             shared.as_bytes(),
             bob_x,
@@ -449,23 +472,23 @@ mod tests {
             alice_ed_bytes,
             bob_e,
         );
-        
+
         assert!(bob_ratchet.is_ok());
     }
 
     #[test]
     fn test_encrypt_decrypt_roundtrip() {
         use rand::rngs::OsRng;
-        
+
         let alice_x = StaticSecret::random_from_rng(OsRng);
         let alice_e = SigningKey::generate(&mut OsRng);
         let bob_x = StaticSecret::random_from_rng(OsRng);
         let bob_e = SigningKey::generate(&mut OsRng);
-        
+
         let alice_pub = x25519_dalek::PublicKey::from(&alice_x);
         let bob_pub = x25519_dalek::PublicKey::from(&bob_x);
         let shared = alice_x.diffie_hellman(&bob_pub);
-        
+
         let alice_ed_bytes = alice_e.verifying_key().to_bytes();
         let mut alice_ratchet = DoubleRatchetSession::init_as_initiator(
             shared.as_bytes(),
@@ -473,24 +496,26 @@ mod tests {
             bob_pub,
             bob_e.verifying_key().to_bytes(),
             alice_e,
-        ).unwrap();
-        
+        )
+        .unwrap();
+
         let mut bob_ratchet = DoubleRatchetSession::init_as_responder(
             shared.as_bytes(),
             bob_x,
             alice_pub,
             alice_ed_bytes,
             bob_e,
-        ).unwrap();
-        
+        )
+        .unwrap();
+
         // Alice encrypts first message
         let msg1 = b"Hello with forward secrecy!";
         let ct1 = alice_ratchet.encrypt_message(msg1).unwrap();
-        
+
         // Bob decrypts
         let pt1 = bob_ratchet.decrypt_message(&ct1).unwrap();
         assert_eq!(msg1.to_vec(), pt1);
-        
+
         // Alice sends second message
         let msg2 = b"Second message";
         let ct2 = alice_ratchet.encrypt_message(msg2).unwrap();
@@ -501,15 +526,15 @@ mod tests {
     #[test]
     fn test_session_serialization() {
         use rand::rngs::OsRng;
-        
+
         let alice_x = StaticSecret::random_from_rng(OsRng);
         let alice_e = SigningKey::generate(&mut OsRng);
         let bob_x = StaticSecret::random_from_rng(OsRng);
         let bob_e = SigningKey::generate(&mut OsRng);
-        
+
         let bob_pub = x25519_dalek::PublicKey::from(&bob_x);
         let shared = alice_x.diffie_hellman(&bob_pub);
-        
+
         let _alice_ed_bytes = alice_e.verifying_key().to_bytes();
         let alice_ratchet = DoubleRatchetSession::init_as_initiator(
             shared.as_bytes(),
@@ -517,16 +542,17 @@ mod tests {
             bob_pub,
             bob_e.verifying_key().to_bytes(),
             alice_e,
-        ).unwrap();
+        )
+        .unwrap();
 
         // Serialize
         let session = alice_ratchet.to_session();
         let serialized = serde_json::to_string(&session).unwrap();
-        
+
         // Deserialize
         let restored_session: RatchetSession = serde_json::from_str(&serialized).unwrap();
         let _restored_ratchet = DoubleRatchetSession::from_session(restored_session);
-        
+
         assert_eq!(session.message_count, 0);
     }
 }

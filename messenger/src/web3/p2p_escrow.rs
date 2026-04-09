@@ -16,11 +16,11 @@
 //! - Post-quantum ready (hybrid signatures)
 
 use ethers::{
+    abi::{Abi, Detokenize, Token},
+    contract::Contract,
     core::types::{Address, Bytes, TransactionReceipt, TxHash, U256},
     providers::{Middleware, Provider, ProviderError},
     types::{Filter, Log},
-    abi::{Abi, Token, Detokenize},
-    contract::Contract,
 };
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
@@ -258,23 +258,12 @@ where
     /// # Returns
     /// * `Ok(P2PEscrowClient)` - Initialized client
     /// * `Err(EscrowError)` - If initialization fails
-    pub fn new(
-        provider: Arc<M>,
-        contract_address: Address,
-        abi: &str,
-    ) -> EscrowResult<Self> {
+    pub fn new(provider: Arc<M>, contract_address: Address, abi: &str) -> EscrowResult<Self> {
         let abi: Abi = serde_json::from_str(abi).map_err(|e| EscrowError::Abi(e.to_string()))?;
-        
-        let contract = Contract::new(
-            contract_address,
-            abi,
-            provider.clone(),
-        );
 
-        info!(
-            "P2PEscrowClient initialized: address={}",
-            contract_address
-        );
+        let contract = Contract::new(contract_address, abi, provider.clone());
+
+        info!("P2PEscrowClient initialized: address={}", contract_address);
 
         Ok(Self {
             contract,
@@ -293,10 +282,22 @@ where
 
         let result = self
             .contract
-            .method::<_, (U256, u8, Address, Address, Address, U256, U256, Address, u8, u64, u64, u64, [u8; 32], String)>(
-                "deals",
-                deal_id,
-            )
+            .method::<_, (
+                U256,
+                u8,
+                Address,
+                Address,
+                Address,
+                U256,
+                U256,
+                Address,
+                u8,
+                u64,
+                u64,
+                u64,
+                [u8; 32],
+                String,
+            )>("deals", deal_id)
             .map_err(|e| EscrowError::Contract(e.to_string()))?
             .call()
             .await
@@ -397,10 +398,7 @@ where
     // ========================================================================
 
     /// Create a new deal
-    pub async fn create_deal(
-        &self,
-        params: CreateDealParams,
-    ) -> EscrowResult<EscrowTxReceipt> {
+    pub async fn create_deal(&self, params: CreateDealParams) -> EscrowResult<EscrowTxReceipt> {
         info!(
             "Creating deal: seller={}, type={}",
             params.seller, params.deal_type
@@ -420,8 +418,11 @@ where
             )
             .map_err(|e| EscrowError::Contract(e.to_string()))?;
 
-        let pending_tx = tx.send().await.map_err(|e| EscrowError::TxFailed(e.to_string()))?;
-        
+        let pending_tx = tx
+            .send()
+            .await
+            .map_err(|e| EscrowError::TxFailed(e.to_string()))?;
+
         let receipt = pending_tx
             .await
             .map_err(|e| EscrowError::TxFailed(e.to_string()))?
@@ -464,8 +465,11 @@ where
             .map_err(|e| EscrowError::Contract(e.to_string()))?
             .value(amount);
 
-        let pending_tx = tx.send().await.map_err(|e| EscrowError::TxFailed(e.to_string()))?;
-        
+        let pending_tx = tx
+            .send()
+            .await
+            .map_err(|e| EscrowError::TxFailed(e.to_string()))?;
+
         let receipt = pending_tx
             .await
             .map_err(|e| EscrowError::TxFailed(e.to_string()))?
@@ -484,7 +488,10 @@ where
 
     /// Fund an existing deal with ETH
     pub async fn fund_deal(&self, params: FundDealParams) -> EscrowResult<EscrowTxReceipt> {
-        info!("Funding deal: id={}, amount={}", params.deal_id, params.amount);
+        info!(
+            "Funding deal: id={}, amount={}",
+            params.deal_id, params.amount
+        );
 
         let tx = self
             .contract
@@ -492,8 +499,11 @@ where
             .map_err(|e| EscrowError::Contract(e.to_string()))?
             .value(params.amount);
 
-        let pending_tx = tx.send().await.map_err(|e| EscrowError::TxFailed(e.to_string()))?;
-        
+        let pending_tx = tx
+            .send()
+            .await
+            .map_err(|e| EscrowError::TxFailed(e.to_string()))?;
+
         let receipt = pending_tx
             .await
             .map_err(|e| EscrowError::TxFailed(e.to_string()))?
@@ -515,8 +525,11 @@ where
             .method::<_, ()>("confirmDelivery", deal_id)
             .map_err(|e| EscrowError::Contract(e.to_string()))?;
 
-        let pending_tx = tx.send().await.map_err(|e| EscrowError::TxFailed(e.to_string()))?;
-        
+        let pending_tx = tx
+            .send()
+            .await
+            .map_err(|e| EscrowError::TxFailed(e.to_string()))?;
+
         let receipt = pending_tx
             .await
             .map_err(|e| EscrowError::TxFailed(e.to_string()))?
@@ -538,8 +551,11 @@ where
             .method::<_, ()>("completeDeal", deal_id)
             .map_err(|e| EscrowError::Contract(e.to_string()))?;
 
-        let pending_tx = tx.send().await.map_err(|e| EscrowError::TxFailed(e.to_string()))?;
-        
+        let pending_tx = tx
+            .send()
+            .await
+            .map_err(|e| EscrowError::TxFailed(e.to_string()))?;
+
         let receipt = pending_tx
             .await
             .map_err(|e| EscrowError::TxFailed(e.to_string()))?
@@ -561,8 +577,11 @@ where
             .method::<_, ()>("refundAfterDeadline", deal_id)
             .map_err(|e| EscrowError::Contract(e.to_string()))?;
 
-        let pending_tx = tx.send().await.map_err(|e| EscrowError::TxFailed(e.to_string()))?;
-        
+        let pending_tx = tx
+            .send()
+            .await
+            .map_err(|e| EscrowError::TxFailed(e.to_string()))?;
+
         let receipt = pending_tx
             .await
             .map_err(|e| EscrowError::TxFailed(e.to_string()))?
@@ -576,10 +595,7 @@ where
     }
 
     /// Open dispute
-    pub async fn open_dispute(
-        &self,
-        params: DisputeParams,
-    ) -> EscrowResult<EscrowTxReceipt> {
+    pub async fn open_dispute(&self, params: DisputeParams) -> EscrowResult<EscrowTxReceipt> {
         info!("Opening dispute: deal_id={}", params.deal_id);
 
         let tx = self
@@ -587,8 +603,11 @@ where
             .method::<_, ()>("openDispute", (params.deal_id, params.reason))
             .map_err(|e| EscrowError::Contract(e.to_string()))?;
 
-        let pending_tx = tx.send().await.map_err(|e| EscrowError::TxFailed(e.to_string()))?;
-        
+        let pending_tx = tx
+            .send()
+            .await
+            .map_err(|e| EscrowError::TxFailed(e.to_string()))?;
+
         let receipt = pending_tx
             .await
             .map_err(|e| EscrowError::TxFailed(e.to_string()))?
@@ -619,8 +638,11 @@ where
             )
             .map_err(|e| EscrowError::Contract(e.to_string()))?;
 
-        let pending_tx = tx.send().await.map_err(|e| EscrowError::TxFailed(e.to_string()))?;
-        
+        let pending_tx = tx
+            .send()
+            .await
+            .map_err(|e| EscrowError::TxFailed(e.to_string()))?;
+
         let receipt = pending_tx
             .await
             .map_err(|e| EscrowError::TxFailed(e.to_string()))?
@@ -642,8 +664,11 @@ where
             .method::<_, ()>("cancelDeal", deal_id)
             .map_err(|e| EscrowError::Contract(e.to_string()))?;
 
-        let pending_tx = tx.send().await.map_err(|e| EscrowError::TxFailed(e.to_string()))?;
-        
+        let pending_tx = tx
+            .send()
+            .await
+            .map_err(|e| EscrowError::TxFailed(e.to_string()))?;
+
         let receipt = pending_tx
             .await
             .map_err(|e| EscrowError::TxFailed(e.to_string()))?
@@ -677,7 +702,9 @@ where
 
         for log in logs {
             if let Some(deal_id) = log.topics.get(1) {
-                let deal = self.get_deal(U256::from_big_endian(deal_id.as_bytes())).await?;
+                let deal = self
+                    .get_deal(U256::from_big_endian(deal_id.as_bytes()))
+                    .await?;
                 callback(deal);
             }
         }
@@ -696,7 +723,7 @@ where
         event_name: &str,
     ) -> EscrowResult<EscrowTxReceipt> {
         let deal_id = self.extract_deal_id_from_logs(&receipt.logs);
-        
+
         let events = vec![event_name.to_string()];
 
         Ok(EscrowTxReceipt {

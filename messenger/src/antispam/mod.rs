@@ -59,7 +59,10 @@ impl RateLimiter {
         let requests = self.limits.entry(key.to_string()).or_default();
 
         // Remove old requests
-        while requests.front().map_or(false, |t| now.duration_since(*t) > window) {
+        while requests
+            .front()
+            .map_or(false, |t| now.duration_since(*t) > window)
+        {
             requests.pop_front();
         }
 
@@ -154,7 +157,12 @@ impl ReputationSystem {
 
     /// Get user reputation score
     pub async fn get_score(&self, user_id: &str) -> f32 {
-        self.scores.read().await.get(user_id).copied().unwrap_or(50.0) // Default: 50
+        self.scores
+            .read()
+            .await
+            .get(user_id)
+            .copied()
+            .unwrap_or(50.0) // Default: 50
     }
 
     /// Increase reputation (good behavior)
@@ -269,7 +277,13 @@ impl AntiSpamEngine {
     pub async fn get_stats(&self, user_id: &str) -> (f32, u32, bool) {
         (
             self.reputation.get_score(user_id).await,
-            self.reputation.penalties.read().await.get(user_id).copied().unwrap_or(0),
+            self.reputation
+                .penalties
+                .read()
+                .await
+                .get(user_id)
+                .copied()
+                .unwrap_or(0),
             self.is_banned(user_id).await,
         )
     }
@@ -300,7 +314,10 @@ mod tests {
     #[test]
     fn test_content_filter_clean() {
         let filter = ContentFilter::new();
-        assert!(matches!(filter.check("Hello, how are you?"), SpamVerdict::Clean));
+        assert!(matches!(
+            filter.check("Hello, how are you?"),
+            SpamVerdict::Clean
+        ));
     }
 
     #[test]
@@ -309,7 +326,10 @@ mod tests {
             max_message_length: 10,
             ..ContentFilter::new()
         };
-        assert!(matches!(filter.check("This is a very long message"), SpamVerdict::Blocked));
+        assert!(matches!(
+            filter.check("This is a very long message"),
+            SpamVerdict::Blocked
+        ));
     }
 
     #[test]

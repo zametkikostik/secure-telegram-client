@@ -20,54 +20,60 @@
 //! - Balance queries
 
 #[cfg(feature = "web3")]
-pub mod metamask;
-#[cfg(feature = "web3")]
-pub mod wallet;
-#[cfg(feature = "web3")]
-pub mod transactions;
-#[cfg(feature = "web3")]
-pub mod tokens;
-#[cfg(feature = "web3")]
-pub mod ens;
-#[cfg(feature = "web3")]
-pub mod swap_commands;
-#[cfg(feature = "web3")]
 pub mod abcex;
-#[cfg(feature = "web3")]
-pub mod bitget;
-#[cfg(feature = "web3")]
-pub mod zerox_swap;
 #[cfg(feature = "web3")]
 pub mod abcex_commands;
 #[cfg(feature = "web3")]
+pub mod bitget;
+#[cfg(feature = "web3")]
 pub mod bitget_commands;
 #[cfg(feature = "web3")]
-pub mod transaction_commands;
+pub mod ens;
+#[cfg(feature = "web3")]
+pub mod fee_splitter;
+#[cfg(feature = "web3")]
+pub mod fee_splitter_commands;
+#[cfg(feature = "web3")]
+pub mod metamask;
 #[cfg(feature = "web3")]
 pub mod p2p_escrow;
 #[cfg(feature = "web3")]
 pub mod p2p_escrow_commands;
 #[cfg(feature = "web3")]
-pub mod fee_splitter;
+pub mod swap_commands;
 #[cfg(feature = "web3")]
-pub mod fee_splitter_commands;
+pub mod tokens;
+#[cfg(feature = "web3")]
+pub mod transaction_commands;
+#[cfg(feature = "web3")]
+pub mod transactions;
+#[cfg(feature = "web3")]
+pub mod wallet;
+#[cfg(feature = "web3")]
+pub mod zerox_swap;
 
 // Re-export types (available even without web3 feature for UI compatibility)
-pub use types::*;
-pub use types::Web3Error;
 #[cfg(feature = "web3")]
 pub use swap_commands::*;
+pub use types::Web3Error;
+pub use types::*;
 // Re-export specific types from abcex and bitget to avoid name conflicts
 #[cfg(feature = "web3")]
-pub use abcex::{AbcexClient, BuyQuoteRequest, BuyQuoteResponse, BuyOrder, BuyOrderStatus, PaymentMethod, FiatCurrency, KycStatus, KycLimits, BuyQuoteBuilder};
-#[cfg(feature = "web3")]
-pub use bitget::{BitgetClient, BuyRequest, BuyResponse, AccountInfo, MarketPrice, OrderType, OrderSide, BitgetOrderStatus, BuyRequestBuilder};
-#[cfg(feature = "web3")]
-pub use zerox_swap::*;
+pub use abcex::{
+    AbcexClient, BuyOrder, BuyOrderStatus, BuyQuoteBuilder, BuyQuoteRequest, BuyQuoteResponse,
+    FiatCurrency, KycLimits, KycStatus, PaymentMethod,
+};
 #[cfg(feature = "web3")]
 pub use abcex_commands::*;
 #[cfg(feature = "web3")]
+pub use bitget::{
+    AccountInfo, BitgetClient, BitgetOrderStatus, BuyRequest, BuyRequestBuilder, BuyResponse,
+    MarketPrice, OrderSide, OrderType,
+};
+#[cfg(feature = "web3")]
 pub use bitget_commands::*;
+#[cfg(feature = "web3")]
+pub use zerox_swap::*;
 
 /// Web3-specific types (always compiled for type compatibility)
 mod types {
@@ -220,8 +226,8 @@ mod types {
         pub token_name: String,
         pub token_symbol: String,
         pub decimals: u8,
-        pub balance: String,       // formatted string (e.g., "1.5")
-        pub balance_raw: String,   // raw wei value
+        pub balance: String,     // formatted string (e.g., "1.5")
+        pub balance_raw: String, // raw wei value
         pub chain: Chain,
     }
 
@@ -230,8 +236,8 @@ mod types {
     pub struct NativeBalance {
         pub chain: Chain,
         pub address: String,
-        pub balance: String,       // formatted
-        pub balance_wei: String,   // raw wei
+        pub balance: String,     // formatted
+        pub balance_wei: String, // raw wei
         pub symbol: String,
     }
 
@@ -243,9 +249,17 @@ mod types {
     #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
     pub enum TxStatus {
         Pending,
-        Submitted { tx_hash: String },
-        Confirmed { tx_hash: String, block_number: u64 },
-        Failed { tx_hash: Option<String>, error: String },
+        Submitted {
+            tx_hash: String,
+        },
+        Confirmed {
+            tx_hash: String,
+            block_number: u64,
+        },
+        Failed {
+            tx_hash: Option<String>,
+            error: String,
+        },
         Cancelled,
     }
 
@@ -264,18 +278,18 @@ mod types {
     /// Transaction record
     #[derive(Debug, Clone, Serialize, Deserialize)]
     pub struct TransactionRecord {
-        pub id: String,             // UUID
+        pub id: String, // UUID
         pub chain: Chain,
         pub tx_type: TxType,
         pub from: String,
         pub to: String,
-        pub value: String,          // in native token units
-        pub value_wei: String,      // raw wei
+        pub value: String,     // in native token units
+        pub value_wei: String, // raw wei
         pub gas_estimate: Option<u64>,
         pub gas_price: Option<String>,
         pub nonce: Option<u64>,
         pub status: TxStatus,
-        pub data: Option<String>,   // calldata hex
+        pub data: Option<String>, // calldata hex
         pub created_at: chrono::DateTime<chrono::Utc>,
         pub updated_at: chrono::DateTime<chrono::Utc>,
     }

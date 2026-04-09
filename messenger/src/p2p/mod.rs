@@ -11,20 +11,12 @@
 //! SECURITY: требует аудита перед production
 //! TODO: pentest перед release
 
-use libp2p::{
-    gossipsub,
-    identify,
-    identity,
-    kad,
-    mdns,
-    noise,
-    ping,
-    swarm::{NetworkBehaviour, SwarmEvent},
-    yamux,
-    PeerId,
-    Swarm,
-};
 use libp2p::futures::StreamExt;
+use libp2p::{
+    gossipsub, identify, identity, kad, mdns, noise, ping,
+    swarm::{NetworkBehaviour, SwarmEvent},
+    yamux, PeerId, Swarm,
+};
 use serde::{Deserialize, Serialize};
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
@@ -94,10 +86,7 @@ pub enum P2PEvent {
     /// Peer disconnected
     PeerDisconnected(PeerId),
     /// Message received
-    MessageReceived {
-        from: PeerId,
-        message: P2PMessage,
-    },
+    MessageReceived { from: PeerId, message: P2PMessage },
     /// Gossipsub message received
     GossipMessageReceived {
         from: PeerId,
@@ -105,10 +94,7 @@ pub enum P2PEvent {
         message: Vec<u8>,
     },
     /// DHT record found
-    DhtRecordFound {
-        key: Vec<u8>,
-        value: Vec<u8>,
-    },
+    DhtRecordFound { key: Vec<u8>, value: Vec<u8> },
 }
 
 // ============================================================================
@@ -336,10 +322,7 @@ impl P2PNode {
     /// * `Ok(())` — joined successfully
     /// * `Err(P2PError)` — on failure
     pub fn join_group(&mut self, topic: &str) -> Result<(), P2PError> {
-        let gossip_topic = gossipsub::IdentTopic::new(format!(
-            "/secure-messenger/group/{}",
-            topic
-        ));
+        let gossip_topic = gossipsub::IdentTopic::new(format!("/secure-messenger/group/{}", topic));
 
         self.swarm
             .behaviour_mut()
@@ -361,15 +344,8 @@ impl P2PNode {
     /// # Returns
     /// * `Ok(())` — published successfully
     /// * `Err(P2PError)` — on failure
-    pub fn publish_to_group(
-        &mut self,
-        topic: &str,
-        message: Vec<u8>,
-    ) -> Result<(), P2PError> {
-        let gossip_topic = gossipsub::IdentTopic::new(format!(
-            "/secure-messenger/group/{}",
-            topic
-        ));
+    pub fn publish_to_group(&mut self, topic: &str, message: Vec<u8>) -> Result<(), P2PError> {
+        let gossip_topic = gossipsub::IdentTopic::new(format!("/secure-messenger/group/{}", topic));
 
         self.swarm
             .behaviour_mut()
@@ -395,10 +371,7 @@ impl P2PNode {
         self.swarm
             .behaviour_mut()
             .kademlia
-            .put_record(
-                kad::Record::new(key, value),
-                kad::Quorum::One,
-            )
+            .put_record(kad::Record::new(key, value), kad::Quorum::One)
             .map_err(|e| P2PError::Swarm(format!("DHT put failed: {}", e)))?;
 
         debug!("DHT put record");
@@ -536,10 +509,7 @@ impl P2PNode {
 
                 // Kademlia event
                 SwarmEvent::Behaviour(MeshBehaviourEvent::Kademlia(
-                    kad::Event::OutboundQueryProgressed {
-                        result,
-                        ..
-                    },
+                    kad::Event::OutboundQueryProgressed { result, .. },
                 )) => match result {
                     kad::QueryResult::GetRecord(Ok(kad::GetRecordOk::FoundRecord(
                         kad::PeerRecord { record, .. },
@@ -565,7 +535,10 @@ impl P2PNode {
                 SwarmEvent::Behaviour(MeshBehaviourEvent::Identify(
                     identify::Event::Received { peer_id, info, .. },
                 )) => {
-                    info!("Identified peer: {} (version: {})", peer_id, info.protocol_version);
+                    info!(
+                        "Identified peer: {} (version: {})",
+                        peer_id, info.protocol_version
+                    );
 
                     // Add observed addresses to DHT
                     for addr in info.listen_addrs {
@@ -586,7 +559,11 @@ impl P2PNode {
                     info!(
                         "Connection established: {} ({}, {} total)",
                         peer_id,
-                        if endpoint.is_dialer() { "outgoing" } else { "incoming" },
+                        if endpoint.is_dialer() {
+                            "outgoing"
+                        } else {
+                            "incoming"
+                        },
                         num_established
                     );
                     let _ = self.event_tx.send(P2PEvent::PeerDiscovered(peer_id)).await;

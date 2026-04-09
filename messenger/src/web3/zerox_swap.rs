@@ -17,8 +17,8 @@
 //! - 1-2% для mid-cap tokens
 //! - до 3% для low liquidity tokens
 
+use super::tokens::{from_token_amount, to_token_amount};
 use super::types::*;
-use super::tokens::{to_token_amount, from_token_amount};
 use reqwest::{Client, Url};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -192,7 +192,11 @@ impl ZeroExClient {
     // ========================================================================
 
     /// Получить котировку для обмена
-    pub async fn get_quote(&self, request: QuoteRequest, chain: Chain) -> Web3Result<QuoteResponse> {
+    pub async fn get_quote(
+        &self,
+        request: QuoteRequest,
+        chain: Chain,
+    ) -> Web3Result<QuoteResponse> {
         let base_url = zeroex_api_url(chain);
         let mut url = Url::parse(&format!("{}/quote", base_url))
             .map_err(|e| Web3Error::Network(format!("Invalid URL: {}", e)))?;
@@ -216,8 +220,7 @@ impl ZeroExClient {
         }
 
         if let Some(ref taker) = request.taker_address {
-            url.query_pairs_mut()
-                .append_pair("taker", taker);
+            url.query_pairs_mut().append_pair("taker", taker);
         }
 
         if let Some(ref fee_recipient) = request.fee_recipient {
@@ -226,8 +229,10 @@ impl ZeroExClient {
         }
 
         if let Some(fee_bps) = request.buy_token_percentage_fee {
-            url.query_pairs_mut()
-                .append_pair("buyTokenPercentageFee", &format!("{}", fee_bps as f64 / 10000.0));
+            url.query_pairs_mut().append_pair(
+                "buyTokenPercentageFee",
+                &format!("{}", fee_bps as f64 / 10000.0),
+            );
         }
 
         debug!("0x Quote URL: {}", url);
@@ -276,7 +281,12 @@ impl ZeroExClient {
     // ========================================================================
 
     /// Получить цену токена (быстрая котировка без полной информации)
-    pub async fn get_price(&self, sell_token: &str, buy_token: &str, chain: Chain) -> Web3Result<TokenPrice> {
+    pub async fn get_price(
+        &self,
+        sell_token: &str,
+        buy_token: &str,
+        chain: Chain,
+    ) -> Web3Result<TokenPrice> {
         let base_url = zeroex_api_url(chain);
         let url = Url::parse(&format!("{}/price", base_url))
             .map_err(|e| Web3Error::Network(format!("Invalid URL: {}", e)))?;
@@ -329,7 +339,11 @@ impl ZeroExClient {
     // ========================================================================
 
     /// Получить адрес контракта для approve
-    pub async fn get_allowance_target(&self, token_address: &str, chain: Chain) -> Web3Result<String> {
+    pub async fn get_allowance_target(
+        &self,
+        token_address: &str,
+        chain: Chain,
+    ) -> Web3Result<String> {
         let base_url = zeroex_api_url(chain);
         let url = Url::parse(&format!("{}/allowance", base_url))
             .map_err(|e| Web3Error::Network(format!("Invalid URL: {}", e)))?;
@@ -338,7 +352,8 @@ impl ZeroExClient {
         url.query_pairs_mut()
             .append_pair("tokenAddress", token_address);
 
-        let response = self.http_client
+        let response = self
+            .http_client
             .get(url)
             .send()
             .await
@@ -357,7 +372,10 @@ impl ZeroExClient {
             .await
             .map_err(|e| Web3Error::Network(format!("Failed to parse response: {}", e)))?;
 
-        Ok(allowance_data["allowanceTarget"].as_str().unwrap_or("").to_string())
+        Ok(allowance_data["allowanceTarget"]
+            .as_str()
+            .unwrap_or("")
+            .to_string())
     }
 
     // ========================================================================
@@ -421,10 +439,10 @@ impl ZeroExClient {
 
         // Увеличить для волатильных токенов
         let volatility_adjustment = match token_symbol.to_uppercase().as_str() {
-            "USDC" | "USDT" | "DAI" => 20,     // stablecoins: 0.2%
-            "ETH" | "WETH" => 50,               // major: 0.5%
-            "WBTC" => 75,                       // BTC-wrapped: 0.75%
-            _ => 200,                           // остальные: 2%
+            "USDC" | "USDT" | "DAI" => 20, // stablecoins: 0.2%
+            "ETH" | "WETH" => 50,          // major: 0.5%
+            "WBTC" => 75,                  // BTC-wrapped: 0.75%
+            _ => 200,                      // остальные: 2%
         };
 
         // Увеличить при высоком gas

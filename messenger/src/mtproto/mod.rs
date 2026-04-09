@@ -216,12 +216,18 @@ impl MtProtoCodec {
     pub async fn decode(stream: &mut TcpStream) -> MtProtoResult<ProtocolMessage> {
         // Read length (4 bytes)
         let mut len_buf = [0u8; 4];
-        stream.read_exact(&mut len_buf).await.map_err(|e| MtProtoError::Io(e.to_string()))?;
+        stream
+            .read_exact(&mut len_buf)
+            .await
+            .map_err(|e| MtProtoError::Io(e.to_string()))?;
         let msg_len = u32::from_be_bytes(len_buf) as usize;
 
         // Read message
         let mut buffer = vec![0u8; msg_len];
-        stream.read_exact(&mut buffer).await.map_err(|e| MtProtoError::Io(e.to_string()))?;
+        stream
+            .read_exact(&mut buffer)
+            .await
+            .map_err(|e| MtProtoError::Io(e.to_string()))?;
 
         if buffer.len() < 24 {
             return Err(MtProtoError::InvalidMessage);
@@ -262,7 +268,10 @@ impl SessionManager {
 
     pub async fn create_session(&self, session_id: u64, auth_key: Vec<u8>) -> Session {
         let session = Session::new(session_id, auth_key);
-        self.sessions.write().await.insert(session_id, session.clone());
+        self.sessions
+            .write()
+            .await
+            .insert(session_id, session.clone());
         session
     }
 
@@ -328,7 +337,10 @@ mod tests {
     #[test]
     fn test_message_type_conversion() {
         assert_eq!(MessageType::from_u32(0x60469778), Some(MessageType::ReqPq));
-        assert_eq!(MessageType::from_u32(0x00000001), Some(MessageType::SendMessage));
+        assert_eq!(
+            MessageType::from_u32(0x00000001),
+            Some(MessageType::SendMessage)
+        );
         assert_eq!(MessageType::from_u32(0x000000ff), Some(MessageType::Ping));
         assert_eq!(MessageType::from_u32(0xFFFFFFFF), None);
     }
@@ -385,8 +397,13 @@ mod tests {
         assert!(!session.is_expired(Duration::from_secs(3600)));
 
         // Force expiry
-        manager.sessions.write().await.get_mut(&1).unwrap().last_activity =
-            Instant::now() - Duration::from_secs(3601);
+        manager
+            .sessions
+            .write()
+            .await
+            .get_mut(&1)
+            .unwrap()
+            .last_activity = Instant::now() - Duration::from_secs(3601);
 
         let expired = manager.get_session(1).await;
         assert!(expired.is_none());

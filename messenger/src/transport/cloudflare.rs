@@ -197,10 +197,7 @@ impl CloudflareTransport {
     /// # Returns
     /// * `Ok(())` — сообщение доставлено
     /// * `Err(TransportError)` — при ошибке (сообщение сохранено в queue)
-    pub async fn send_message(
-        &self,
-        message: CloudflareMessage,
-    ) -> Result<(), TransportError> {
+    pub async fn send_message(&self, message: CloudflareMessage) -> Result<(), TransportError> {
         let url = format!("{}/api/v1/msg", self.worker_url);
 
         debug!("Sending message to: {} (id: {})", url, message.id);
@@ -294,7 +291,9 @@ impl CloudflareTransport {
 
         let mut sent_count = 0;
 
-        for (id, recipient_id, ciphertext, signature, created_at, _status, attempts, _next_retry) in rows {
+        for (id, recipient_id, ciphertext, signature, created_at, _status, attempts, _next_retry) in
+            rows
+        {
             let message = CloudflareMessage {
                 id: id.clone(),
                 recipient_id,
@@ -305,8 +304,14 @@ impl CloudflareTransport {
             };
 
             // Обновить статус на "sending"
-            self.update_message_status(&id, DeliveryStatus::Sending, attempts as u32 + 1, None, None)
-                .await?;
+            self.update_message_status(
+                &id,
+                DeliveryStatus::Sending,
+                attempts as u32 + 1,
+                None,
+                None,
+            )
+            .await?;
 
             match self.send_message(message).await {
                 Ok(()) => {

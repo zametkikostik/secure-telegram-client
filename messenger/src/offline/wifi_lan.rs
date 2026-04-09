@@ -10,11 +10,11 @@ use std::collections::HashMap;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
-use tokio::sync::{RwLock, Mutex};
+use thiserror::Error;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpListener;
-use tracing::{debug, info, warn, error};
-use thiserror::Error;
+use tokio::sync::{Mutex, RwLock};
+use tracing::{debug, error, info, warn};
 
 #[derive(Error, Debug)]
 pub enum WifiLanError {
@@ -63,19 +63,36 @@ pub struct WifiLanTransport {
 
 async fn write_frame(stream: &mut tokio::net::TcpStream, data: &[u8]) -> WifiLanResult<()> {
     let len = data.len() as u32;
-    stream.write_all(&len.to_be_bytes()).await.map_err(|e| WifiLanError::Network(e.to_string()))?;
-    stream.write_all(data).await.map_err(|e| WifiLanError::Network(e.to_string()))?;
-    stream.flush().await.map_err(|e| WifiLanError::Network(e.to_string()))?;
+    stream
+        .write_all(&len.to_be_bytes())
+        .await
+        .map_err(|e| WifiLanError::Network(e.to_string()))?;
+    stream
+        .write_all(data)
+        .await
+        .map_err(|e| WifiLanError::Network(e.to_string()))?;
+    stream
+        .flush()
+        .await
+        .map_err(|e| WifiLanError::Network(e.to_string()))?;
     Ok(())
 }
 
 async fn read_frame(stream: &mut tokio::net::TcpStream) -> WifiLanResult<Vec<u8>> {
     let mut len_buf = [0u8; 4];
-    stream.read_exact(&mut len_buf).await.map_err(|e| WifiLanError::Network(e.to_string()))?;
+    stream
+        .read_exact(&mut len_buf)
+        .await
+        .map_err(|e| WifiLanError::Network(e.to_string()))?;
     let len = u32::from_be_bytes(len_buf) as usize;
-    if len > 10 * 1024 * 1024 { return Err(WifiLanError::Network("Too large".into())); }
+    if len > 10 * 1024 * 1024 {
+        return Err(WifiLanError::Network("Too large".into()));
+    }
     let mut data = vec![0u8; len];
-    stream.read_exact(&mut data).await.map_err(|e| WifiLanError::Network(e.to_string()))?;
+    stream
+        .read_exact(&mut data)
+        .await
+        .map_err(|e| WifiLanError::Network(e.to_string()))?;
     Ok(data)
 }
 
@@ -92,11 +109,17 @@ impl WifiLanTransport {
         }
     }
 
-    pub async fn on_message<F>(&self, cb: F) where F: Fn(Vec<u8>, String) + Send + Sync + 'static {
+    pub async fn on_message<F>(&self, cb: F)
+    where
+        F: Fn(Vec<u8>, String) + Send + Sync + 'static,
+    {
         *self.message_callback.lock().await = Some(Arc::new(cb));
     }
 
-    pub async fn on_peer_discovered<F>(&self, cb: F) where F: Fn(LanPeer) + Send + Sync + 'static {
+    pub async fn on_peer_discovered<F>(&self, cb: F)
+    where
+        F: Fn(LanPeer) + Send + Sync + 'static,
+    {
         *self.peer_callback.lock().await = Some(Arc::new(cb));
     }
 
@@ -112,10 +135,15 @@ impl WifiLanTransport {
         tokio::spawn(async move {
             let recv_addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::UNSPECIFIED), DISCOVERY_PORT);
             let socket = match std::net::UdpSocket::bind(recv_addr) {
-                Ok(s) => s, Err(e) => { warn!("UDP bind failed: {}", e); return; }
+                Ok(s) => s,
+                Err(e) => {
+                    warn!("UDP bind failed: {}", e);
+                    return;
+                }
             };
             socket.set_nonblocking(true).ok();
-            let _ = socket.join_multicast_v4(&Ipv4Addr::new(239,255,0,1), &Ipv4Addr::UNSPECIFIED);
+            let _ =
+                socket.join_multicast_v4(&Ipv4Addr::new(239, 255, 0, 1), &Ipv4Addr::UNSPECIFIED);
             info!("LAN discovery started");
             let mut last_bc = Instant::now();
 
@@ -128,23 +156,36 @@ impl WifiLanTransport {
                 match socket.recv_from(&mut buf) {
                     Ok((len, src)) => {
                         if let Ok(pkt) = serde_json::from_slice::<DiscoveryPacket>(&buf[..len]) {
-                            if pkt.peer_id == *peer_id { continue; }
+                            if pkt.peer_id == *peer_id {
+                                continue;
+                            }
                             let peer = LanPeer {
-                                peer_id: pkt.peer_id.clone(), display_name: pkt.display_name.clone(),
-                                ip_address: src.ip().to_string(), tcp_port: pkt.tcp_port,
-                                last_seen: Instant::now(), is_online: true,
+                                peer_id: pkt.peer_id.clone(),
+                                display_name: pkt.display_name.clone(),
+                                ip_address: src.ip().to_string(),
+                                tcp_port: pkt.tcp_port,
+                                last_seen: Instant::now(),
+                                is_online: true,
                             };
-                            if let Some(cb) = peer_cb.lock().await.as_ref() { cb(peer.clone()); }
+                            if let Some(cb) = peer_cb.lock().await.as_ref() {
+                                cb(peer.clone());
+                            }
                             peers.write().await.insert(pkt.peer_id, peer);
                         }
                     }
                     Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {}
-                    Err(e) => { debug!("Discovery error: {}", e); }
+                    Err(e) => {
+                        debug!("Discovery error: {}", e);
+                    }
                 }
                 // Cleanup stale
                 {
                     let mut pm = peers.write().await;
-                    pm.retain(|_, p| { let ok = p.last_seen.elapsed() < PEER_TIMEOUT; p.is_online = ok; ok });
+                    pm.retain(|_, p| {
+                        let ok = p.last_seen.elapsed() < PEER_TIMEOUT;
+                        p.is_online = ok;
+                        ok
+                    });
                 }
                 tokio::time::sleep(Duration::from_millis(500)).await;
             }
@@ -153,13 +194,21 @@ impl WifiLanTransport {
     }
 
     fn broadcast(peer_id: &str, display_name: &str, tcp_port: u16) {
-        let pkt = DiscoveryPacket { peer_id: peer_id.into(), display_name: display_name.into(), tcp_port };
+        let pkt = DiscoveryPacket {
+            peer_id: peer_id.into(),
+            display_name: display_name.into(),
+            tcp_port,
+        };
         if let Ok(data) = serde_json::to_vec(&pkt) {
             if let Ok(sock) = std::net::UdpSocket::bind("0.0.0.0:0") {
                 sock.set_broadcast(true).ok();
-                let mc: SocketAddr = format!("{}:{}", MULTICAST_ADDR, DISCOVERY_PORT).parse().unwrap();
+                let mc: SocketAddr = format!("{}:{}", MULTICAST_ADDR, DISCOVERY_PORT)
+                    .parse()
+                    .unwrap();
                 let _ = sock.send_to(&data, mc);
-                let bc: SocketAddr = format!("255.255.255.255:{}", DISCOVERY_PORT).parse().unwrap();
+                let bc: SocketAddr = format!("255.255.255.255:{}", DISCOVERY_PORT)
+                    .parse()
+                    .unwrap();
                 let _ = sock.send_to(&data, bc);
             }
         }
@@ -168,7 +217,9 @@ impl WifiLanTransport {
     pub async fn start_server(&self) -> WifiLanResult<()> {
         *self.running.write().await = true;
         let addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::UNSPECIFIED), self.tcp_port);
-        let listener = TcpListener::bind(addr).await.map_err(|e| WifiLanError::Network(e.to_string()))?;
+        let listener = TcpListener::bind(addr)
+            .await
+            .map_err(|e| WifiLanError::Network(e.to_string()))?;
         let msg_cb = self.message_callback.clone();
         let running = self.running.clone();
 
@@ -196,11 +247,18 @@ impl WifiLanTransport {
         Ok(())
     }
 
-    pub async fn send_message(&self, peer_ip: &str, peer_port: u16, data: &[u8]) -> WifiLanResult<()> {
+    pub async fn send_message(
+        &self,
+        peer_ip: &str,
+        peer_port: u16,
+        data: &[u8],
+    ) -> WifiLanResult<()> {
         let addr_str = format!("{}:{}", peer_ip, peer_port);
-        let addr: SocketAddr = addr_str.parse()
+        let addr: SocketAddr = addr_str
+            .parse()
             .map_err(|e: std::net::AddrParseError| WifiLanError::Network(e.to_string()))?;
-        let stream = tokio::net::TcpStream::connect(addr).await
+        let stream = tokio::net::TcpStream::connect(addr)
+            .await
             .map_err(|e: std::io::Error| WifiLanError::Network(e.to_string()))?;
         let mut stream = stream;
         write_frame(&mut stream, data).await?;
@@ -212,14 +270,33 @@ impl WifiLanTransport {
         let peers = self.peers.read().await;
         let mut count = 0;
         for p in peers.values() {
-            if p.is_online && self.send_message(&p.ip_address, p.tcp_port, data).await.is_ok() { count += 1; }
+            if p.is_online
+                && self
+                    .send_message(&p.ip_address, p.tcp_port, data)
+                    .await
+                    .is_ok()
+            {
+                count += 1;
+            }
         }
         Ok(count)
     }
 
-    pub async fn get_peers(&self) -> Vec<LanPeer> { self.peers.read().await.values().cloned().collect() }
-    pub async fn get_online_peers(&self) -> Vec<LanPeer> { self.peers.read().await.values().filter(|p| p.is_online).cloned().collect() }
-    pub async fn stop(&self) { *self.running.write().await = false; }
+    pub async fn get_peers(&self) -> Vec<LanPeer> {
+        self.peers.read().await.values().cloned().collect()
+    }
+    pub async fn get_online_peers(&self) -> Vec<LanPeer> {
+        self.peers
+            .read()
+            .await
+            .values()
+            .filter(|p| p.is_online)
+            .cloned()
+            .collect()
+    }
+    pub async fn stop(&self) {
+        *self.running.write().await = false;
+    }
 }
 
 #[cfg(test)]
@@ -231,25 +308,38 @@ mod tests {
     #[tokio::test]
     async fn test_wifi_lan_server_and_client() {
         // Use a high port to avoid conflicts
-        let server_port = 31000 + (std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_millis() as u16 % 1000);
+        let server_port = 31000
+            + (std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_millis() as u16
+                % 1000);
 
         let received = Arc::new(AtomicUsize::new(0));
         let server = WifiLanTransport::new("server-peer", server_port);
         let recv_clone = received.clone();
-        server.on_message(move |_data, _addr| {
-            recv_clone.fetch_add(1, Ordering::SeqCst);
-        }).await;
+        server
+            .on_message(move |_data, _addr| {
+                recv_clone.fetch_add(1, Ordering::SeqCst);
+            })
+            .await;
 
         // Start server
         let server_result = server.start_server().await;
-        assert!(server_result.is_ok(), "Server failed to start: {:?}", server_result);
+        assert!(
+            server_result.is_ok(),
+            "Server failed to start: {:?}",
+            server_result
+        );
 
         // Wait for server to be ready
         tokio::time::sleep(Duration::from_millis(200)).await;
 
         // Create client and send
         let client = WifiLanTransport::new("client-peer", 0);
-        let result = client.send_message("127.0.0.1", server_port, b"hello").await;
+        let result = client
+            .send_message("127.0.0.1", server_port, b"hello")
+            .await;
         assert!(result.is_ok(), "Send failed: {:?}", result);
 
         // Wait for message processing
@@ -266,14 +356,16 @@ mod tests {
         let port = listener.local_addr().unwrap().port();
 
         let client_task = tokio::spawn(async move {
-            let mut s = tokio::net::TcpStream::connect(("127.0.0.1", port)).await.unwrap();
-            write_frame(&mut s, &[1,2,3,4,5]).await.unwrap();
+            let mut s = tokio::net::TcpStream::connect(("127.0.0.1", port))
+                .await
+                .unwrap();
+            write_frame(&mut s, &[1, 2, 3, 4, 5]).await.unwrap();
         });
 
         let server_task = tokio::spawn(async move {
             let (mut s, _) = listener.accept().await.unwrap();
             let data = read_frame(&mut s).await.unwrap();
-            assert_eq!(data, vec![1,2,3,4,5]);
+            assert_eq!(data, vec![1, 2, 3, 4, 5]);
         });
 
         client_task.await.unwrap();

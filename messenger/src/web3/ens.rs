@@ -33,14 +33,8 @@ struct EnsCacheEntry {
 impl EnsResolver {
     pub fn new() -> Self {
         let mut provider_urls = HashMap::new();
-        provider_urls.insert(
-            Chain::Ethereum,
-            "https://eth.llamarpc.com".to_string(),
-        );
-        provider_urls.insert(
-            Chain::Polygon,
-            "https://polygon-rpc.com".to_string(),
-        );
+        provider_urls.insert(Chain::Ethereum, "https://eth.llamarpc.com".to_string());
+        provider_urls.insert(Chain::Polygon, "https://polygon-rpc.com".to_string());
 
         Self {
             cache: Mutex::new(HashMap::new()),
@@ -120,10 +114,7 @@ impl EnsResolver {
 
     /// Check if a string looks like an ENS name
     pub fn is_ens_name(s: &str) -> bool {
-        s.contains('.')
-            && !s.starts_with("0x")
-            && s.len() >= 5
-            && s.len() <= 255
+        s.contains('.') && !s.starts_with("0x") && s.len() >= 5 && s.len() <= 255
     }
 
     /// Format address/name for display
@@ -151,10 +142,7 @@ impl EnsResolver {
 
         // Try ENS metadata API first
         if Self::is_ens_name(name) {
-            let url = format!(
-                "https://metadata.ens.domains/mainnet/domain/{}",
-                name
-            );
+            let url = format!("https://metadata.ens.domains/mainnet/domain/{}", name);
 
             if let Ok(response) = client.get(&url).send().await {
                 if response.status().is_success() {
@@ -227,10 +215,7 @@ mod tests {
 
     #[test]
     fn test_format_display_ens() {
-        assert_eq!(
-            EnsResolver::format_display("vitalik.eth"),
-            "vitalik.eth"
-        );
+        assert_eq!(EnsResolver::format_display("vitalik.eth"), "vitalik.eth");
     }
 
     #[test]

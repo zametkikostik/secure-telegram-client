@@ -23,21 +23,21 @@
 //!   Messages hop through available connections
 
 pub mod bluetooth;
+pub mod mesh;
+pub mod obfuscation;
+pub mod tor_transport;
+pub mod transport_router;
 pub mod wifi_direct;
 pub mod wifi_lan;
-pub mod tor_transport;
-pub mod obfuscation;
-pub mod mesh;
-pub mod transport_router;
 
 // Re-exports
-pub use bluetooth::{BleTransport, BlePeer, BleError};
-pub use wifi_direct::{WifiDirectTransport, LanPeer, WifiError};
-pub use wifi_lan::{WifiLanTransport, LanPeer as WifiLanPeer, WifiLanError, WifiLanResult};
-pub use tor_transport::{TorTransport, TorConfig, TorError};
+pub use bluetooth::{BleError, BlePeer, BleTransport};
+pub use mesh::{DeliveryStrategy, MeshError, MeshMessage, MeshNetwork, MeshPeer};
 pub use obfuscation::{DpiObfuscator, ObfuscationProfile, ProtocolCamouflage};
-pub use mesh::{MeshNetwork, MeshPeer, MeshMessage, MeshError, DeliveryStrategy};
-pub use transport_router::{TransportRouter, TransportType, TransportStats, RoutingMessage};
+pub use tor_transport::{TorConfig, TorError, TorTransport};
+pub use transport_router::{RoutingMessage, TransportRouter, TransportStats, TransportType};
+pub use wifi_direct::{LanPeer, WifiDirectTransport, WifiError};
+pub use wifi_lan::{LanPeer as WifiLanPeer, WifiLanError, WifiLanResult, WifiLanTransport};
 
 // ============================================================================
 // Common Types
@@ -80,8 +80,8 @@ pub struct OfflineMessage {
     pub recipient_id: String,
     pub encrypted_payload: Vec<u8>,
     pub created_at: chrono::DateTime<chrono::Utc>,
-    pub ttl: u32,              // Time-to-live (hops)
-    pub hop_count: u32,        // Current hop count
+    pub ttl: u32,       // Time-to-live (hops)
+    pub hop_count: u32, // Current hop count
     pub delivery_method: Option<DiscoveryMethod>,
     pub is_delivered: bool,
 }

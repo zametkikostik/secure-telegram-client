@@ -44,11 +44,7 @@ pub type ImageRgb8 = ImageBuffer<Rgb<u8>, Vec<u8>>;
 /// * `Err(StegoError)` — if data exceeds image capacity
 ///
 /// SECURITY: modifies image in-place; original data is lost
-pub fn hide(
-    mut image: ImageRgb8,
-    data: &[u8],
-    bit_count: usize,
-) -> Result<ImageRgb8, StegoError> {
+pub fn hide(mut image: ImageRgb8, data: &[u8], bit_count: usize) -> Result<ImageRgb8, StegoError> {
     let (width, height) = image.dimensions();
     let max_bits = (width * height * 3) as usize;
 
@@ -168,7 +164,7 @@ mod tests {
     fn test_data_too_large() {
         let img = create_test_image(10, 10);
         let max_bits = capacity_bits(&img); // 300 bits
-        let big_data = vec![0u8; 100];       // 800 bits
+        let big_data = vec![0u8; 100]; // 800 bits
 
         let result = hide(img, &big_data, big_data.len() * 8);
         assert!(result.is_err());

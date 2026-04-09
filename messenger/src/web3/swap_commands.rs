@@ -5,8 +5,8 @@
 use serde::{Deserialize, Serialize};
 use tauri::State;
 
-use super::zerox_swap::{ZeroExClient, QuoteRequest};
 use super::types::Web3Error;
+use super::zerox_swap::{QuoteRequest, ZeroExClient};
 use super::Chain;
 
 // ============================================================================
@@ -94,11 +94,7 @@ pub struct SwapState {
 
 impl SwapState {
     pub fn new(api_key: Option<String>, fee_recipient: String, fee_bps: u64) -> Self {
-        let client = ZeroExClient::with_fee(
-            api_key.clone(),
-            fee_recipient.clone(),
-            fee_bps,
-        );
+        let client = ZeroExClient::with_fee(api_key.clone(), fee_recipient.clone(), fee_bps);
 
         Self {
             client,
@@ -172,14 +168,18 @@ pub async fn execute_swap(
         .ok_or_else(|| format!("Unsupported chain: {}", request.chain_id))?;
 
     // Выполнить обмен
-    match state.client.execute_swap(
-        chain,
-        &request.sell_token,
-        &request.buy_token,
-        &request.sell_amount,
-        &request.taker_address,
-        request.slippage_bps,
-    ).await {
+    match state
+        .client
+        .execute_swap(
+            chain,
+            &request.sell_token,
+            &request.buy_token,
+            &request.sell_amount,
+            &request.taker_address,
+            request.slippage_bps,
+        )
+        .await
+    {
         Ok(record) => Ok(SwapExecuteResponse {
             success: true,
             swap_record: Some(SwapRecordData {
@@ -211,7 +211,9 @@ pub fn calculate_slippage(
     gas_price_gwei: u64,
     state: State<'_, SwapState>,
 ) -> Result<u32, String> {
-    Ok(state.client.calculate_slippage(&token_symbol, gas_price_gwei))
+    Ok(state
+        .client
+        .calculate_slippage(&token_symbol, gas_price_gwei))
 }
 
 /// Получить адрес для allowance
@@ -221,10 +223,11 @@ pub async fn get_allowance_target(
     chain_id: u64,
     state: State<'_, SwapState>,
 ) -> Result<String, String> {
-    let chain = Chain::from_chain_id(chain_id)
-        .ok_or_else(|| format!("Unsupported chain: {}", chain_id))?;
+    let chain =
+        Chain::from_chain_id(chain_id).ok_or_else(|| format!("Unsupported chain: {}", chain_id))?;
 
-    state.client
+    state
+        .client
         .get_allowance_target(&token_address, chain)
         .await
         .map_err(|e| e.to_string())
@@ -239,19 +242,12 @@ pub async fn quick_swap_quote(
     decimals: u8,
     chain_id: u64,
 ) -> Result<String, String> {
-    let chain = Chain::from_chain_id(chain_id)
-        .ok_or_else(|| format!("Unsupported chain: {}", chain_id))?;
+    let chain =
+        Chain::from_chain_id(chain_id).ok_or_else(|| format!("Unsupported chain: {}", chain_id))?;
 
-    super::zerox_swap::quick_quote(
-        &sell_token,
-        &buy_token,
-        &sell_amount,
-        decimals,
-        chain,
-        None,
-    )
-    .await
-    .map_err(|e: Web3Error| e.to_string())
+    super::zerox_swap::quick_quote(&sell_token, &buy_token, &sell_amount, decimals, chain, None)
+        .await
+        .map_err(|e: Web3Error| e.to_string())
 }
 
 // ============================================================================
@@ -262,9 +258,9 @@ pub async fn quick_swap_quote(
 pub fn register_swap_commands(builder: tauri::Builder<tauri::Wry>) -> tauri::Builder<tauri::Wry> {
     builder
         .manage(SwapState::new(
-            None, // API key из конфига
+            None,                                                     // API key из конфига
             "0x0000000000000000000000000000000000000000".to_string(), // fee recipient
-            100, // 1% fee
+            100,                                                      // 1% fee
         ))
         .invoke_handler(tauri::generate_handler![
             get_swap_quote,

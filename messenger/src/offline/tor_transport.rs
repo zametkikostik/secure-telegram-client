@@ -11,14 +11,14 @@
 //! Enable with: cargo build --features tor
 
 #[cfg(feature = "tor")]
-use arti_client::{TorClient, TorClientConfig, StreamTarget};
-#[cfg(feature = "tor")]
 use arti_client::config::TorClientConfigBuilder;
+#[cfg(feature = "tor")]
+use arti_client::{StreamTarget, TorClient, TorClientConfig};
 
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
-use tracing::{debug, info, warn};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
+use tracing::{debug, info, warn};
 
 #[derive(Error, Debug)]
 pub enum TorError {
@@ -48,7 +48,11 @@ pub enum BridgeType {
     /// No bridge (direct Tor connection)
     None,
     /// obfs4 bridge (looks like random noise)
-    Obfs4 { address: String, fingerprint: String, cert: String },
+    Obfs4 {
+        address: String,
+        fingerprint: String,
+        cert: String,
+    },
     /// Snowflake (WebRTC-based, volunteer proxies)
     Snowflake,
     /// Meek (looks like HTTPS to cloud providers)
@@ -117,7 +121,12 @@ pub struct TorTransport {
 #[cfg(feature = "tor")]
 impl TorTransport {
     pub fn new(config: TorConfig) -> Self {
-        Self { config, client: None, is_connected: false, onion_address: None }
+        Self {
+            config,
+            client: None,
+            is_connected: false,
+            onion_address: None,
+        }
     }
 
     pub async fn connect(&mut self) -> TorResult<()> {
@@ -133,26 +142,41 @@ impl TorTransport {
     }
 
     pub async fn send_via_tor(&self, onion_address: &str, data: &[u8]) -> TorResult<Vec<u8>> {
-        let client = self.client.as_ref()
+        let client = self
+            .client
+            .as_ref()
             .ok_or_else(|| TorError::BootstrapFailed("Not connected".into()))?;
 
-        let mut stream = client.connect(
-            StreamTarget::OnionAddress(onion_address.to_string()),
-            80
-        ).await.map_err(|e| TorError::ConnectionFailed(e.to_string()))?;
+        let mut stream = client
+            .connect(StreamTarget::OnionAddress(onion_address.to_string()), 80)
+            .await
+            .map_err(|e| TorError::ConnectionFailed(e.to_string()))?;
 
-        stream.write_all(data).await.map_err(|e| TorError::ConnectionFailed(e.to_string()))?;
-        stream.send_end().await.map_err(|e| TorError::ConnectionFailed(e.to_string()))?;
+        stream
+            .write_all(data)
+            .await
+            .map_err(|e| TorError::ConnectionFailed(e.to_string()))?;
+        stream
+            .send_end()
+            .await
+            .map_err(|e| TorError::ConnectionFailed(e.to_string()))?;
 
         let mut response = Vec::new();
-        stream.read_to_end(&mut response).await.map_err(|e| TorError::ConnectionFailed(e.to_string()))?;
+        stream
+            .read_to_end(&mut response)
+            .await
+            .map_err(|e| TorError::ConnectionFailed(e.to_string()))?;
 
         debug!("Sent {} bytes via Tor to {}", data.len(), onion_address);
         Ok(response)
     }
 
-    pub fn is_connected(&self) -> bool { self.is_connected }
-    pub fn onion_address(&self) -> Option<&str> { self.onion_address.as_deref() }
+    pub fn is_connected(&self) -> bool {
+        self.is_connected
+    }
+    pub fn onion_address(&self) -> Option<&str> {
+        self.onion_address.as_deref()
+    }
 
     pub async fn disconnect(&mut self) {
         self.client = None;
@@ -170,14 +194,27 @@ pub struct TorTransport {
 #[cfg(not(feature = "tor"))]
 impl TorTransport {
     pub fn new(config: TorConfig) -> Self {
-        Self { config, is_connected: false }
+        Self {
+            config,
+            is_connected: false,
+        }
     }
 
-    pub async fn connect(&mut self) -> TorResult<()> { Err(TorError::BootstrapFailed("Tor feature not enabled".into())) }
-    pub async fn send_via_tor(&self, _addr: &str, _data: &[u8]) -> TorResult<Vec<u8>> { Err(TorError::BootstrapFailed("Not connected".into())) }
-    pub fn is_connected(&self) -> bool { false }
-    pub fn onion_address(&self) -> Option<&str> { None }
-    pub async fn disconnect(&mut self) { self.is_connected = false; }
+    pub async fn connect(&mut self) -> TorResult<()> {
+        Err(TorError::BootstrapFailed("Tor feature not enabled".into()))
+    }
+    pub async fn send_via_tor(&self, _addr: &str, _data: &[u8]) -> TorResult<Vec<u8>> {
+        Err(TorError::BootstrapFailed("Not connected".into()))
+    }
+    pub fn is_connected(&self) -> bool {
+        false
+    }
+    pub fn onion_address(&self) -> Option<&str> {
+        None
+    }
+    pub async fn disconnect(&mut self) {
+        self.is_connected = false;
+    }
 }
 
 // ============================================================================

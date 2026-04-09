@@ -83,16 +83,16 @@ impl AuditSeverity {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum AuditCategory {
-    Authentication,     // Login, logout, SSO, failed auth
-    Authorization,      // Permission changes, role assignments
-    UserManagement,     // Create, delete, modify users
-    DataAccess,         // Read, write, delete data
-    AdminActions,       // Admin panel operations
-    SecurityEvents,     // Intrusion attempts, policy violations
-    Compliance,         // GDPR deletion, data retention
-    SystemEvents,       // Startup, shutdown, config changes
-    FileOperations,     // Upload, download, delete files
-    SessionManagement,  // Session create, expire, revoke
+    Authentication,    // Login, logout, SSO, failed auth
+    Authorization,     // Permission changes, role assignments
+    UserManagement,    // Create, delete, modify users
+    DataAccess,        // Read, write, delete data
+    AdminActions,      // Admin panel operations
+    SecurityEvents,    // Intrusion attempts, policy violations
+    Compliance,        // GDPR deletion, data retention
+    SystemEvents,      // Startup, shutdown, config changes
+    FileOperations,    // Upload, download, delete files
+    SessionManagement, // Session create, expire, revoke
 }
 
 impl AuditCategory {
@@ -167,12 +167,7 @@ pub struct AuditEvent {
 
 impl AuditEvent {
     /// Create new audit event
-    pub fn new(
-        category: AuditCategory,
-        event_type: &str,
-        actor: &str,
-        description: &str,
-    ) -> Self {
+    pub fn new(category: AuditCategory, event_type: &str, actor: &str, description: &str) -> Self {
         let id = uuid::Uuid::new_v4().to_string();
         let timestamp = Utc::now();
 
@@ -317,9 +312,7 @@ impl SiemExporter {
 
     /// Export batch of events
     pub fn export_batch(&self, events: &[AuditEvent]) -> AuditResult<Vec<String>> {
-        events.iter()
-            .map(|e| self.export_event(e))
-            .collect()
+        events.iter().map(|e| self.export_event(e)).collect()
     }
 
     // ========================================================================
@@ -444,7 +437,7 @@ impl SiemExporter {
 pub struct OpenTelemetryConfig {
     pub enabled: bool,
     pub service_name: String,
-    pub endpoint: String,           // OTLP endpoint (e.g., "http://otel-collector:4317")
+    pub endpoint: String, // OTLP endpoint (e.g., "http://otel-collector:4317")
     pub export_interval_secs: u64,
     pub max_export_batch_size: usize,
 }
@@ -525,7 +518,11 @@ impl AuditLogger {
         provider: &str,
         source_ip: Option<&str>,
     ) {
-        let event_type = if success { "login.success" } else { "login.failure" };
+        let event_type = if success {
+            "login.success"
+        } else {
+            "login.failure"
+        };
         let description = if success {
             format!("Successful {} login", provider)
         } else {
@@ -578,13 +575,7 @@ impl AuditLogger {
     }
 
     /// Convenience: log compliance event
-    pub async fn log_compliance(
-        &self,
-        regulation: &str,
-        action: &str,
-        actor: &str,
-        target: &str,
-    ) {
+    pub async fn log_compliance(&self, regulation: &str, action: &str, actor: &str, target: &str) {
         let event = AuditEvent::new(
             AuditCategory::Compliance,
             &format!("compliance.{}", regulation),
@@ -637,12 +628,10 @@ impl AuditLogger {
     }
 
     /// Get events since timestamp
-    pub async fn get_events_since(
-        &self,
-        since: DateTime<Utc>,
-    ) -> Vec<AuditEvent> {
+    pub async fn get_events_since(&self, since: DateTime<Utc>) -> Vec<AuditEvent> {
         let buffer = self.buffer.read().await;
-        buffer.iter()
+        buffer
+            .iter()
             .filter(|e| e.timestamp >= since)
             .cloned()
             .collect()
@@ -772,7 +761,10 @@ mod tests {
     fn test_severity_levels() {
         assert_eq!(AuditSeverity::Info.as_str(), "INFO");
         assert_eq!(AuditSeverity::Critical.as_str(), "CRITICAL");
-        assert_eq!(AuditSeverity::from_syslog_priority(3), AuditSeverity::Critical);
+        assert_eq!(
+            AuditSeverity::from_syslog_priority(3),
+            AuditSeverity::Critical
+        );
         assert_eq!(AuditSeverity::from_syslog_priority(4), AuditSeverity::Error);
     }
 }

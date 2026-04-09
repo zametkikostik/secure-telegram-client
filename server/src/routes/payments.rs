@@ -1,24 +1,32 @@
 //! Payment & Subscription Routes
 
 use axum::{extract::State, http::StatusCode, Json};
+use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use chrono::Utc;
 
-use crate::AppState;
 use crate::middleware::auth::get_user_id_from_header;
+use crate::AppState;
 use axum::http::HeaderMap;
 
 // ============================================================================
 // Helpers
 // ============================================================================
 
-fn require_auth(headers: &HeaderMap, state: &AppState) -> Result<String, (StatusCode, Json<serde_json::Value>)> {
-    let auth_header = headers.get("Authorization")
+fn require_auth(
+    headers: &HeaderMap,
+    state: &AppState,
+) -> Result<String, (StatusCode, Json<serde_json::Value>)> {
+    let auth_header = headers
+        .get("Authorization")
         .and_then(|v| v.to_str().ok())
         .map(|s| s.to_string());
-    get_user_id_from_header(auth_header, &state.auth)
-        .map_err(|_| (StatusCode::UNAUTHORIZED, Json(serde_json::json!({"error": "Unauthorized"}))))
+    get_user_id_from_header(auth_header, &state.auth).map_err(|_| {
+        (
+            StatusCode::UNAUTHORIZED,
+            Json(serde_json::json!({"error": "Unauthorized"})),
+        )
+    })
 }
 
 // ============================================================================
@@ -60,10 +68,19 @@ pub async fn get_credits(
     .bind(&user_id)
     .fetch_one(&*state.db)
     .await
-    .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({"error": e.to_string()}))))?;
+    .map_err(|e| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(serde_json::json!({"error": e.to_string()})),
+        )
+    })?;
 
-    let balance: i64 = row.try_get("bal")
-        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({"error": e.to_string()}))))?;
+    let balance: i64 = row.try_get("bal").map_err(|e| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(serde_json::json!({"error": e.to_string()})),
+        )
+    })?;
 
     Ok(Json(CreditBalance { balance }))
 }
@@ -82,20 +99,28 @@ pub async fn get_credit_history(
     .bind(&user_id)
     .fetch_all(&*state.db)
     .await
-    .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({"error": e.to_string()}))))?;
+    .map_err(|e| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(serde_json::json!({"error": e.to_string()})),
+        )
+    })?;
 
-    let result: Vec<serde_json::Value> = rows.iter().map(|row| {
-        let id: String = row.get("id");
-        let amount: i64 = row.get("amount");
-        let balance_after: i64 = row.get("balance_after");
-        let source: String = row.get("source");
-        let description: String = row.get("description");
-        let created_at: String = row.get("created_at");
-        serde_json::json!({
-            "id": id, "amount": amount, "balance_after": balance_after,
-            "source": source, "description": description, "created_at": created_at,
+    let result: Vec<serde_json::Value> = rows
+        .iter()
+        .map(|row| {
+            let id: String = row.get("id");
+            let amount: i64 = row.get("amount");
+            let balance_after: i64 = row.get("balance_after");
+            let source: String = row.get("source");
+            let description: String = row.get("description");
+            let created_at: String = row.get("created_at");
+            serde_json::json!({
+                "id": id, "amount": amount, "balance_after": balance_after,
+                "source": source, "description": description, "created_at": created_at,
+            })
         })
-    }).collect();
+        .collect();
 
     Ok(Json(result))
 }
@@ -107,8 +132,10 @@ pub async fn add_credits(
 ) -> Result<Json<serde_json::Value>, (StatusCode, Json<serde_json::Value>)> {
     let user_id = require_auth(&headers, &state)?;
 
-    let credits = req["credits"].as_i64()
-        .ok_or((StatusCode::BAD_REQUEST, Json(serde_json::json!({"error": "Missing credits"}))))?;
+    let credits = req["credits"].as_i64().ok_or((
+        StatusCode::BAD_REQUEST,
+        Json(serde_json::json!({"error": "Missing credits"})),
+    ))?;
 
     let now = Utc::now().to_rfc3339();
 
@@ -137,7 +164,9 @@ pub async fn add_credits(
     .await
     .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({"error": e.to_string()}))))?;
 
-    Ok(Json(serde_json::json!({"credits_added": credits, "new_balance": new_balance})))
+    Ok(Json(
+        serde_json::json!({"credits_added": credits, "new_balance": new_balance}),
+    ))
 }
 
 // ============================================================================
@@ -151,16 +180,22 @@ pub async fn send_tip(
 ) -> Result<Json<TipResponse>, (StatusCode, Json<serde_json::Value>)> {
     let sender_id = require_auth(&headers, &state)?;
 
-    let recipient_exists: Option<(String,)> = sqlx::query_as(
-        "SELECT id FROM users WHERE id = ?",
-    )
-    .bind(&req.recipient_id)
-    .fetch_optional(&*state.db)
-    .await
-    .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({"error": e.to_string()}))))?;
+    let recipient_exists: Option<(String,)> = sqlx::query_as("SELECT id FROM users WHERE id = ?")
+        .bind(&req.recipient_id)
+        .fetch_optional(&*state.db)
+        .await
+        .map_err(|e| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(serde_json::json!({"error": e.to_string()})),
+            )
+        })?;
 
     if recipient_exists.is_none() {
-        return Err((StatusCode::NOT_FOUND, Json(serde_json::json!({"error": "Recipient not found"}))));
+        return Err((
+            StatusCode::NOT_FOUND,
+            Json(serde_json::json!({"error": "Recipient not found"})),
+        ));
     }
 
     let tip_id = Uuid::new_v4().simple().to_string();
@@ -178,7 +213,10 @@ pub async fn send_tip(
     let sender_balance: i64 = sender_row.try_get("bal").unwrap_or(0);
 
     if sender_balance < tip_amount_i64 {
-        return Err((StatusCode::BAD_REQUEST, Json(serde_json::json!({"error": "Insufficient credits"}))));
+        return Err((
+            StatusCode::BAD_REQUEST,
+            Json(serde_json::json!({"error": "Insufficient credits"})),
+        ));
     }
 
     sqlx::query(
@@ -219,7 +257,10 @@ pub async fn send_tip(
     .await
     .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({"error": e.to_string()}))))?;
 
-    Ok(Json(TipResponse { tip_id, status: "completed".to_string() }))
+    Ok(Json(TipResponse {
+        tip_id,
+        status: "completed".to_string(),
+    }))
 }
 
 // ============================================================================

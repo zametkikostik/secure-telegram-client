@@ -356,13 +356,14 @@ impl TransportRouter {
 
         if let Some(p2p) = p2p_guard.as_mut() {
             // Попытаться отправить через P2P
-            match p2p.send_message(
-                peer_id
-                    .parse()
-                    .map_err(|_| RouterError::PeerNotFound(peer_id.to_string()))?,
-                message,
-            )
-            .await
+            match p2p
+                .send_message(
+                    peer_id
+                        .parse()
+                        .map_err(|_| RouterError::PeerNotFound(peer_id.to_string()))?,
+                    message,
+                )
+                .await
             {
                 Ok(()) => {
                     info!("P2P send successful to {}", peer_id);
@@ -394,11 +395,8 @@ impl TransportRouter {
         let cf_guard = self.cloudflare_transport.read().await;
 
         if let Some(cf) = cf_guard.as_ref() {
-            let message = CloudflareTransport::create_message(
-                peer_id.to_string(),
-                ciphertext,
-                signature,
-            );
+            let message =
+                CloudflareTransport::create_message(peer_id.to_string(), ciphertext, signature);
 
             match cf.send_message(message.clone()).await {
                 Ok(()) => {
@@ -419,13 +417,7 @@ impl TransportRouter {
     }
 
     /// Записать выбор маршрута в зашифрованный лог
-    async fn log_route(
-        &self,
-        peer_id: &str,
-        route: Route,
-        success: bool,
-        reason: &str,
-    ) {
+    async fn log_route(&self, peer_id: &str, route: Route, success: bool, reason: &str) {
         use sha3::{Digest, Sha3_256};
 
         // Хэшировать ID для приватности

@@ -10,7 +10,7 @@
 //! - anthropic-version: 2023-06-01
 //! - content-type: application/json
 
-use super::{AiError, AiResult, ModelInfo, AiProvider, ProviderConfig};
+use super::{AiError, AiProvider, AiResult, ModelInfo, ProviderConfig};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
@@ -159,13 +159,9 @@ impl AnthropicProvider {
             ));
         }
 
-        let data: AnthropicResponse = response
-            .json()
-            .await
-            .map_err(|e| AiError::ProviderError(
-                "Anthropic".to_string(),
-                format!("JSON parse: {}", e),
-            ))?;
+        let data: AnthropicResponse = response.json().await.map_err(|e| {
+            AiError::ProviderError("Anthropic".to_string(), format!("JSON parse: {}", e))
+        })?;
 
         if let Some(err) = data.error {
             return Err(AiError::ProviderError(
@@ -178,10 +174,12 @@ impl AnthropicProvider {
             .content
             .first()
             .map(|b| b.text.clone())
-            .ok_or_else(|| AiError::ProviderError(
-                "Anthropic".to_string(),
-                "No content blocks in response".into(),
-            ))?;
+            .ok_or_else(|| {
+                AiError::ProviderError(
+                    "Anthropic".to_string(),
+                    "No content blocks in response".into(),
+                )
+            })?;
 
         Ok(content.trim().to_string())
     }
@@ -215,8 +213,8 @@ impl AnthropicProvider {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use super::ProviderConfig;
+    use super::*;
 
     fn make_config() -> ProviderConfig {
         ProviderConfig {
@@ -285,7 +283,12 @@ mod tests {
     #[ignore] // Requires ANTHROPIC_API_KEY
     async fn test_anthropic_chat() {
         let config = make_config();
-        if !config.api_key.as_ref().map(|k| !k.is_empty()).unwrap_or(false) {
+        if !config
+            .api_key
+            .as_ref()
+            .map(|k| !k.is_empty())
+            .unwrap_or(false)
+        {
             println!("Skipping: no ANTHROPIC_API_KEY set");
             return;
         }

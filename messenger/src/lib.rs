@@ -11,22 +11,22 @@
 //! SECURITY: требует аудита перед production
 //! TODO: pentest перед release
 
-pub mod crypto;
-pub mod auth;
-pub mod p2p;
-pub mod transport;
-pub mod chat;
-pub mod storage;
-pub mod ai;
 pub mod ads;
-pub mod monetization;
-pub mod offline;
-pub mod queue;
-pub mod cdn;
+pub mod ai;
 pub mod antispam;
-pub mod mtproto;
+pub mod auth;
+pub mod cdn;
+pub mod chat;
+pub mod crypto;
 #[cfg(test)]
 pub mod e2e;
+pub mod monetization;
+pub mod mtproto;
+pub mod offline;
+pub mod p2p;
+pub mod queue;
+pub mod storage;
+pub mod transport;
 
 #[cfg(feature = "tauri-commands")]
 pub mod commands;
@@ -37,135 +37,54 @@ pub mod web3;
 
 // Re-export top-level types for convenience
 pub use crypto::{
-    HybridKeypair,
+    decrypt, encrypt, sign, verify_signature, CryptoError, HybridCiphertext, HybridKeypair,
     PublicBundle,
-    HybridCiphertext,
-    CryptoError,
-    encrypt,
-    decrypt,
-    sign,
-    verify_signature,
 };
 
-pub use auth::{
-    Keychain,
-    KeychainError,
-    SecurePassword,
-};
+pub use auth::{Keychain, KeychainError, SecurePassword};
 
-pub use p2p::{
-    P2PNode,
-    P2PError,
-    P2PMessage,
-    MessageType,
-    P2PEvent,
-};
+pub use p2p::{MessageType, P2PError, P2PEvent, P2PMessage, P2PNode};
 
 pub use transport::{
-    CloudflareTransport,
-    CloudflareMessage,
-    DeliveryStatus,
-    TransportError,
-    TransportRouter,
-    Route,
-    RouteStats,
-    RouterError,
-    EncryptedRouteLog,
+    CloudflareMessage, CloudflareTransport, DeliveryStatus, EncryptedRouteLog, Route, RouteStats,
+    RouterError, TransportError, TransportRouter,
 };
 
 pub use chat::{
-    ChatManager,
-    ChatMessage,
-    ChatError,
-    ChatStatus,
-    ChatManagerStats,
-    PrivateChat,
-    GroupChat,
-    GroupMember,
-    MemberRole,
-    MemberStatus,
-    GroupSettings,
-    Channel,
-    ChannelSettings,
-    MessageContentType,
-    DeliveryState,
-    ChatTransport,
-    IntegrationError,
-    UserKeysRegistry,
+    Channel, ChannelSettings, ChatError, ChatManager, ChatManagerStats, ChatMessage, ChatStatus,
+    ChatTransport, DeliveryState, GroupChat, GroupMember, GroupSettings, IntegrationError,
+    MemberRole, MemberStatus, MessageContentType, PrivateChat, UserKeysRegistry,
 };
 
 pub use storage::{
-    LocalStorage,
-    StorageError,
-    Contact,
-    AppSettings,
-    SettingEntry,
-    ChatHistoryEntry,
-    CachedMessage,
-    StorageStats,
+    AppSettings, CachedMessage, ChatHistoryEntry, Contact, LocalStorage, SettingEntry,
+    StorageError, StorageStats,
 };
 
 pub use ai::{
-    AiClient,
-    AiConfig,
-    AiError,
-    AiResult,
-    AiProvider,
-    AiProviderRegistry,
-    ProviderConfig,
-    ModelHint,
-    ModelInfo,
-    ProviderStatus,
+    AiClient, AiConfig, AiError, AiProvider, AiProviderRegistry, AiResult, ModelHint, ModelInfo,
+    ProviderConfig, ProviderStatus,
 };
 
 // Ads module re-exports
 pub use ads::{
-    Ad,
-    AdType,
-    AdCategory,
-    AdPreferences,
-    AdImpression,
-    AdStats,
-    AdError,
-    AdResult,
-    engine::AdEngine,
-    fetch::AdStorage,
-    fetch::AdBundleFetcher,
-    fetch::EncryptedAdBundle,
-    fetch::BundleFetchRequest,
-    fetch::BundleFetchResponse,
-    fetch::fetch_and_store_ads,
+    engine::AdEngine, fetch::fetch_and_store_ads, fetch::AdBundleFetcher, fetch::AdStorage,
+    fetch::BundleFetchRequest, fetch::BundleFetchResponse, fetch::EncryptedAdBundle, Ad,
+    AdCategory, AdError, AdImpression, AdPreferences, AdResult, AdStats, AdType,
 };
 
 // Ads commands (optional, requires `tauri-commands` feature)
 #[cfg(feature = "tauri-commands")]
 pub use ads::{
-    AdState,
-    register_ad_commands,
-    FetchAdsRequest,
-    FetchAdsResponse,
-    SelectAdRequest,
-    SelectAdResponse,
-    RecordImpressionRequest,
-    RecordImpressionResponse,
-    RecordClickRequest,
-    RecordClickResponse,
-    AdSettings,
+    register_ad_commands, AdSettings, AdState, FetchAdsRequest, FetchAdsResponse,
+    RecordClickRequest, RecordClickResponse, RecordImpressionRequest, RecordImpressionResponse,
+    SelectAdRequest, SelectAdResponse,
 };
 
 // Monetization module re-exports
 pub use monetization::{
-    Subscription,
-    SubscriptionTier,
-    PaymentMethod,
-    Tip,
-    TipStatus,
-    CreditAccount,
-    CreditTransaction,
-    CreditSource,
-    PremiumFeature,
-    RevenueStats,
-    MonetizationManager,
+    CreditAccount, CreditSource, CreditTransaction, MonetizationManager, PaymentMethod,
+    PremiumFeature, RevenueStats, Subscription, SubscriptionTier, Tip, TipStatus,
 };
 
 /// Library version

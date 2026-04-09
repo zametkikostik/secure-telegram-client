@@ -7,7 +7,7 @@
 //! - **Data Subject Requests**: Access, rectification, erasure, portability
 //! - **Compliance Reports**: Audit-ready reports
 
-use chrono::{DateTime, Utc, Duration};
+use chrono::{DateTime, Duration, Utc};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use thiserror::Error;
@@ -102,9 +102,9 @@ pub struct DataSubjectRequest {
     pub submitted_at: DateTime<Utc>,
     pub deadline: DateTime<Utc>,
     pub completed_at: Option<DateTime<Utc>>,
-    pub handler_id: Option<String>,       // Admin who handled it
+    pub handler_id: Option<String>, // Admin who handled it
     pub notes: Option<String>,
-    pub exported_data: Option<Vec<u8>>,   // For portability/access requests
+    pub exported_data: Option<Vec<u8>>, // For portability/access requests
 }
 
 impl DataSubjectRequest {
@@ -143,10 +143,10 @@ pub struct RetentionPolicy {
     pub data_category: String,
     pub retention_days: u32,
     pub anonymize_after_days: Option<u32>,
-    pub legal_basis: String,                // "consent", "contract", "legitimate_interest"
-    pub regulation: String,                 // "GDPR", "152-ФЗ"
+    pub legal_basis: String, // "consent", "contract", "legitimate_interest"
+    pub regulation: String,  // "GDPR", "152-ФЗ"
     pub auto_delete: bool,
-    pub exceptions: Vec<String>,            // Data types exempt from this policy
+    pub exceptions: Vec<String>, // Data types exempt from this policy
 }
 
 impl RetentionPolicy {
@@ -167,7 +167,8 @@ impl RetentionPolicy {
     pub fn fz152_personal_data() -> Self {
         Self {
             name: "Personal Data (152-ФЗ)".to_string(),
-            description: "Personal data deleted when purpose fulfilled per 152-ФЗ Art. 5".to_string(),
+            description: "Personal data deleted when purpose fulfilled per 152-ФЗ Art. 5"
+                .to_string(),
             data_category: "personal_data".to_string(),
             retention_days: 3 * 365, // 3 years (statute of limitations)
             anonymize_after_days: Some(365),
@@ -201,9 +202,9 @@ impl RetentionPolicy {
 pub struct DeletionPolicy {
     pub name: String,
     pub trigger: DeletionTrigger,
-    pub scope: Vec<String>,             // Data categories to delete
-    pub cascade: bool,                   // Delete related data
-    pub soft_delete_first: bool,         // Soft delete, then hard delete after grace period
+    pub scope: Vec<String>,      // Data categories to delete
+    pub cascade: bool,           // Delete related data
+    pub soft_delete_first: bool, // Soft delete, then hard delete after grace period
     pub grace_period_days: u32,
     pub notify_user: bool,
     pub notify_admin: bool,
@@ -254,10 +255,7 @@ impl DeletionPolicy {
         Self {
             name: "Inactive Account Cleanup".to_string(),
             trigger: DeletionTrigger::InactiveAccount,
-            scope: vec![
-                "sessions".to_string(),
-                "device_tokens".to_string(),
-            ],
+            scope: vec!["sessions".to_string(), "device_tokens".to_string()],
             cascade: false,
             soft_delete_first: false,
             grace_period_days: 0,
@@ -305,7 +303,9 @@ impl GdprChecklist {
                     id: "gdpr-5".to_string(),
                     article: "Article 5".to_string(),
                     title: "Data Minimization".to_string(),
-                    description: "Personal data is adequate, relevant, and limited to what is necessary".to_string(),
+                    description:
+                        "Personal data is adequate, relevant, and limited to what is necessary"
+                            .to_string(),
                     is_compliant: false,
                     evidence: None,
                     last_reviewed: None,
@@ -316,7 +316,8 @@ impl GdprChecklist {
                     id: "gdpr-6".to_string(),
                     article: "Article 6".to_string(),
                     title: "Lawfulness of Processing".to_string(),
-                    description: "Processing has a valid legal basis (consent, contract, etc.)".to_string(),
+                    description: "Processing has a valid legal basis (consent, contract, etc.)"
+                        .to_string(),
                     is_compliant: false,
                     evidence: None,
                     last_reviewed: None,
@@ -327,7 +328,8 @@ impl GdprChecklist {
                     id: "gdpr-7".to_string(),
                     article: "Article 7".to_string(),
                     title: "Conditions for Consent".to_string(),
-                    description: "Consent is freely given, specific, informed, and unambiguous".to_string(),
+                    description: "Consent is freely given, specific, informed, and unambiguous"
+                        .to_string(),
                     is_compliant: false,
                     evidence: None,
                     last_reviewed: None,
@@ -338,7 +340,8 @@ impl GdprChecklist {
                     id: "gdpr-15".to_string(),
                     article: "Article 15".to_string(),
                     title: "Right of Access".to_string(),
-                    description: "Data subjects can obtain confirmation and access to their data".to_string(),
+                    description: "Data subjects can obtain confirmation and access to their data"
+                        .to_string(),
                     is_compliant: false,
                     evidence: None,
                     last_reviewed: None,
@@ -349,7 +352,8 @@ impl GdprChecklist {
                     id: "gdpr-17".to_string(),
                     article: "Article 17".to_string(),
                     title: "Right to Erasure".to_string(),
-                    description: "Data subjects can request deletion of their personal data".to_string(),
+                    description: "Data subjects can request deletion of their personal data"
+                        .to_string(),
                     is_compliant: false,
                     evidence: None,
                     last_reviewed: None,
@@ -360,7 +364,8 @@ impl GdprChecklist {
                     id: "gdpr-20".to_string(),
                     article: "Article 20".to_string(),
                     title: "Right to Data Portability".to_string(),
-                    description: "Data subjects can receive their data in machine-readable format".to_string(),
+                    description: "Data subjects can receive their data in machine-readable format"
+                        .to_string(),
                     is_compliant: false,
                     evidence: None,
                     last_reviewed: None,
@@ -371,7 +376,8 @@ impl GdprChecklist {
                     id: "gdpr-25".to_string(),
                     article: "Article 25".to_string(),
                     title: "Data Protection by Design and Default".to_string(),
-                    description: "E2EE by default, data minimization built into architecture".to_string(),
+                    description: "E2EE by default, data minimization built into architecture"
+                        .to_string(),
                     is_compliant: true,
                     evidence: Some("E2EE with X25519+Kyber1024+ChaCha20-Poly1305".to_string()),
                     last_reviewed: Some(Utc::now()),
@@ -382,7 +388,8 @@ impl GdprChecklist {
                     id: "gdpr-32".to_string(),
                     article: "Article 32".to_string(),
                     title: "Security of Processing".to_string(),
-                    description: "Appropriate technical and organizational measures implemented".to_string(),
+                    description: "Appropriate technical and organizational measures implemented"
+                        .to_string(),
                     is_compliant: false,
                     evidence: None,
                     last_reviewed: None,
@@ -393,7 +400,8 @@ impl GdprChecklist {
                     id: "gdpr-33".to_string(),
                     article: "Article 33".to_string(),
                     title: "Breach Notification".to_string(),
-                    description: "Process to notify supervisory authority within 72 hours".to_string(),
+                    description: "Process to notify supervisory authority within 72 hours"
+                        .to_string(),
                     is_compliant: false,
                     evidence: None,
                     last_reviewed: None,
@@ -424,7 +432,8 @@ impl GdprChecklist {
     }
 
     pub fn critical_issues(&self) -> Vec<&GdprCheck> {
-        self.checks.iter()
+        self.checks
+            .iter()
             .filter(|c| !c.is_compliant && c.risk_level == RiskLevel::Critical)
             .collect()
     }
@@ -459,7 +468,9 @@ impl Fz152Checklist {
                     id: "fz152-5".to_string(),
                     article: "Статья 5".to_string(),
                     title: "Принципы обработки персональных данных".to_string(),
-                    description: "Обработка ограничена достижением конкретных, заранее определённых целей".to_string(),
+                    description:
+                        "Обработка ограничена достижением конкретных, заранее определённых целей"
+                            .to_string(),
                     is_compliant: false,
                     evidence: None,
                     last_reviewed: None,
@@ -479,7 +490,8 @@ impl Fz152Checklist {
                     id: "fz152-9".to_string(),
                     article: "Статья 9".to_string(),
                     title: "Согласие субъекта персональных данных".to_string(),
-                    description: "Согласие должно быть конкретным, информированным, сознательным".to_string(),
+                    description: "Согласие должно быть конкретным, информированным, сознательным"
+                        .to_string(),
                     is_compliant: false,
                     evidence: None,
                     last_reviewed: None,
@@ -489,7 +501,8 @@ impl Fz152Checklist {
                     id: "fz152-14".to_string(),
                     article: "Статья 14".to_string(),
                     title: "Право на доступ к персональным данным".to_string(),
-                    description: "Субъект вправе получить информацию об обработке своих ПДн".to_string(),
+                    description: "Субъект вправе получить информацию об обработке своих ПДн"
+                        .to_string(),
                     is_compliant: false,
                     evidence: None,
                     last_reviewed: None,
@@ -499,7 +512,9 @@ impl Fz152Checklist {
                     id: "fz152-17".to_string(),
                     article: "Статья 17".to_string(),
                     title: "Уничтожение персональных данных".to_string(),
-                    description: "ПДн уничтожаются по достижении целей обработки или при отзыве согласия".to_string(),
+                    description:
+                        "ПДн уничтожаются по достижении целей обработки или при отзыве согласия"
+                            .to_string(),
                     is_compliant: false,
                     evidence: None,
                     last_reviewed: None,
@@ -509,7 +524,9 @@ impl Fz152Checklist {
                     id: "fz152-18-1".to_string(),
                     article: "Статья 18.1".to_string(),
                     title: "Локализация баз данных на территории РФ".to_string(),
-                    description: "Сбор и хранение ПДн граждан РФ должны осуществляться на серверах в России".to_string(),
+                    description:
+                        "Сбор и хранение ПДн граждан РФ должны осуществляться на серверах в России"
+                            .to_string(),
                     is_compliant: false,
                     evidence: None,
                     last_reviewed: None,
@@ -529,7 +546,8 @@ impl Fz152Checklist {
                     id: "fz152-21".to_string(),
                     article: "Статья 21".to_string(),
                     title: "Уведомление Роскомнадзора".to_string(),
-                    description: "Оператор обязан уведомить Роскомнадзор о начале обработки ПДн".to_string(),
+                    description: "Оператор обязан уведомить Роскомнадзор о начале обработки ПДн"
+                        .to_string(),
                     is_compliant: false,
                     evidence: None,
                     last_reviewed: None,
@@ -548,7 +566,8 @@ impl Fz152Checklist {
     }
 
     pub fn critical_issues(&self) -> Vec<&Fz152Check> {
-        self.checks.iter()
+        self.checks
+            .iter()
             .filter(|c| !c.is_compliant && c.risk_level == RiskLevel::Critical)
             .collect()
     }
@@ -641,7 +660,11 @@ impl ComplianceManager {
     // ========================================================================
 
     /// Submit a new data subject request
-    pub async fn submit_dsr(&self, user_id: &str, request_type: DsrType) -> ComplianceResult<String> {
+    pub async fn submit_dsr(
+        &self,
+        user_id: &str,
+        request_type: DsrType,
+    ) -> ComplianceResult<String> {
         let dsr = DataSubjectRequest::new(user_id, request_type);
 
         info!(
@@ -660,7 +683,8 @@ impl ComplianceManager {
     /// Get all DSRs for a user
     pub async fn get_user_dsrs(&self, user_id: &str) -> Vec<DataSubjectRequest> {
         let requests = self.dsr_requests.read().await;
-        requests.iter()
+        requests
+            .iter()
             .filter(|r| r.user_id == user_id)
             .cloned()
             .collect()
@@ -672,7 +696,8 @@ impl ComplianceManager {
         let mut expired = Vec::new();
 
         for req in requests.iter_mut() {
-            if req.is_expired() && matches!(req.status, DsrStatus::Pending | DsrStatus::InProgress) {
+            if req.is_expired() && matches!(req.status, DsrStatus::Pending | DsrStatus::InProgress)
+            {
                 req.status = DsrStatus::Expired;
                 expired.push(req.id.clone());
                 warn!("DSR expired: {} (user: {})", req.id, req.user_id);
@@ -693,7 +718,8 @@ impl ComplianceManager {
 
     /// Get retention policies for a data category
     pub fn get_retention_policy(&self, category: &str) -> Option<&RetentionPolicy> {
-        self.retention_policies.iter()
+        self.retention_policies
+            .iter()
             .find(|p| p.data_category == category)
     }
 
@@ -720,10 +746,22 @@ impl ComplianceManager {
 
         let dsr_summary = DsrSummary {
             total_requests: requests.len(),
-            pending: requests.iter().filter(|r| matches!(r.status, DsrStatus::Pending)).count(),
-            completed: requests.iter().filter(|r| matches!(r.status, DsrStatus::Completed)).count(),
-            rejected: requests.iter().filter(|r| matches!(r.status, DsrStatus::Rejected { .. })).count(),
-            expired: requests.iter().filter(|r| matches!(r.status, DsrStatus::Expired)).count(),
+            pending: requests
+                .iter()
+                .filter(|r| matches!(r.status, DsrStatus::Pending))
+                .count(),
+            completed: requests
+                .iter()
+                .filter(|r| matches!(r.status, DsrStatus::Completed))
+                .count(),
+            rejected: requests
+                .iter()
+                .filter(|r| matches!(r.status, DsrStatus::Rejected { .. }))
+                .count(),
+            expired: requests
+                .iter()
+                .filter(|r| matches!(r.status, DsrStatus::Expired))
+                .count(),
             avg_response_time_days: 0.0, // Calculate from completed DSRS
         };
 
@@ -740,7 +778,12 @@ impl ComplianceManager {
             gdpr: GdprComplianceSummary {
                 checklist_score: gdpr_score,
                 total_checks: self.gdpr_checklist.checks.len(),
-                compliant_checks: self.gdpr_checklist.checks.iter().filter(|c| c.is_compliant).count(),
+                compliant_checks: self
+                    .gdpr_checklist
+                    .checks
+                    .iter()
+                    .filter(|c| c.is_compliant)
+                    .count(),
                 critical_issues: gdpr_critical,
                 open_dsr_count: dsr_summary.pending,
                 overdue_dsr_count: dsr_summary.expired,
@@ -748,7 +791,12 @@ impl ComplianceManager {
             fz152: Fz152ComplianceSummary {
                 checklist_score: fz152_score,
                 total_checks: self.fz152_checklist.checks.len(),
-                compliant_checks: self.fz152_checklist.checks.iter().filter(|c| c.is_compliant).count(),
+                compliant_checks: self
+                    .fz152_checklist
+                    .checks
+                    .iter()
+                    .filter(|c| c.is_compliant)
+                    .count(),
                 critical_issues: fz152_critical,
                 data_localized: false, // Set based on actual infrastructure
             },
@@ -781,8 +829,18 @@ impl ComplianceManager {
     }
 
     /// Mark GDPR check as compliant
-    pub fn update_gdpr_check(&mut self, check_id: &str, is_compliant: bool, evidence: Option<String>) {
-        if let Some(check) = self.gdpr_checklist.checks.iter_mut().find(|c| c.id == check_id) {
+    pub fn update_gdpr_check(
+        &mut self,
+        check_id: &str,
+        is_compliant: bool,
+        evidence: Option<String>,
+    ) {
+        if let Some(check) = self
+            .gdpr_checklist
+            .checks
+            .iter_mut()
+            .find(|c| c.id == check_id)
+        {
             check.is_compliant = is_compliant;
             check.evidence = evidence;
             check.last_reviewed = Some(Utc::now());
@@ -790,8 +848,18 @@ impl ComplianceManager {
     }
 
     /// Mark 152-ФЗ check as compliant
-    pub fn update_fz152_check(&mut self, check_id: &str, is_compliant: bool, evidence: Option<String>) {
-        if let Some(check) = self.fz152_checklist.checks.iter_mut().find(|c| c.id == check_id) {
+    pub fn update_fz152_check(
+        &mut self,
+        check_id: &str,
+        is_compliant: bool,
+        evidence: Option<String>,
+    ) {
+        if let Some(check) = self
+            .fz152_checklist
+            .checks
+            .iter_mut()
+            .find(|c| c.id == check_id)
+        {
             check.is_compliant = is_compliant;
             check.evidence = evidence;
             check.last_reviewed = Some(Utc::now());
@@ -889,8 +957,14 @@ mod tests {
 
     #[test]
     fn test_verification_badge_levels() {
-        assert_eq!(crate::enterprise::admin::VerificationLevel::EmailVerified.display_badge(), "✓");
-        assert_eq!(crate::enterprise::admin::VerificationLevel::IdVerified.display_badge(), "✓✓");
+        assert_eq!(
+            crate::enterprise::admin::VerificationLevel::EmailVerified.display_badge(),
+            "✓"
+        );
+        assert_eq!(
+            crate::enterprise::admin::VerificationLevel::IdVerified.display_badge(),
+            "✓✓"
+        );
         assert_eq!(
             crate::enterprise::admin::VerificationLevel::EnterpriseVerified.display_badge(),
             "✓✓✓"

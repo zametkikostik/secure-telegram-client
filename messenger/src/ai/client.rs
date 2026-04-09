@@ -11,14 +11,14 @@
 //! - Anthropic (direct Claude API)
 //! - OpenAI, Groq, Mistral (optional)
 
-use crate::ai::providers::{OpenRouterProvider, OllamaProvider, AnthropicProvider};
+use crate::ai::providers::{AnthropicProvider, OllamaProvider, OpenRouterProvider};
 use std::env;
 use std::time::Duration;
 
 // Re-export all provider types for use by other ai modules and external code
 pub use crate::ai::providers::{
-    AiProvider, AiProviderRegistry, ProviderConfig, ModelHint, ModelInfo, ProviderStatus,
-    AiError, AiResult,
+    AiError, AiProvider, AiProviderRegistry, AiResult, ModelHint, ModelInfo, ProviderConfig,
+    ProviderStatus,
 };
 
 // ============================================================================
@@ -412,16 +412,34 @@ impl AiClient {
 
             let fb_result = match fb {
                 AiProvider::OpenRouter => {
-                    self.send_openrouter(&fb_model, system_prompt, user_prompt, temperature, max_tokens)
-                        .await
+                    self.send_openrouter(
+                        &fb_model,
+                        system_prompt,
+                        user_prompt,
+                        temperature,
+                        max_tokens,
+                    )
+                    .await
                 }
                 AiProvider::Ollama => {
-                    self.send_ollama(&fb_model, system_prompt, user_prompt, temperature, max_tokens)
-                        .await
+                    self.send_ollama(
+                        &fb_model,
+                        system_prompt,
+                        user_prompt,
+                        temperature,
+                        max_tokens,
+                    )
+                    .await
                 }
                 AiProvider::Anthropic => {
-                    self.send_anthropic(&fb_model, system_prompt, user_prompt, temperature, max_tokens)
-                        .await
+                    self.send_anthropic(
+                        &fb_model,
+                        system_prompt,
+                        user_prompt,
+                        temperature,
+                        max_tokens,
+                    )
+                    .await
                 }
                 _ => continue,
             };
@@ -456,7 +474,13 @@ impl AiClient {
         // If prefer_local, try Ollama first
         if self.prefer_local {
             match self
-                .send_ollama(ollama_model, system_prompt, user_prompt, temperature, max_tokens)
+                .send_ollama(
+                    ollama_model,
+                    system_prompt,
+                    user_prompt,
+                    temperature,
+                    max_tokens,
+                )
                 .await
             {
                 Ok(result) => {
@@ -471,7 +495,13 @@ impl AiClient {
 
         // Try OpenRouter
         match self
-            .send_openrouter(openrouter_model, system_prompt, user_prompt, temperature, max_tokens)
+            .send_openrouter(
+                openrouter_model,
+                system_prompt,
+                user_prompt,
+                temperature,
+                max_tokens,
+            )
             .await
         {
             Ok(result) => {
@@ -483,14 +513,17 @@ impl AiClient {
 
                 // Fallback to Ollama
                 match self
-                    .send_ollama(ollama_model, system_prompt, user_prompt, temperature, max_tokens)
+                    .send_ollama(
+                        ollama_model,
+                        system_prompt,
+                        user_prompt,
+                        temperature,
+                        max_tokens,
+                    )
                     .await
                 {
                     Ok(result) => {
-                        tracing::info!(
-                            "AI: fallback to Ollama local ({}) succeeded",
-                            ollama_model
-                        );
+                        tracing::info!("AI: fallback to Ollama local ({}) succeeded", ollama_model);
                         Ok(result)
                     }
                     Err(e_ollama) => {
@@ -695,9 +728,15 @@ mod tests {
 
     #[test]
     fn test_ai_provider_from_str() {
-        assert_eq!("openrouter".parse::<AiProvider>().unwrap(), AiProvider::OpenRouter);
+        assert_eq!(
+            "openrouter".parse::<AiProvider>().unwrap(),
+            AiProvider::OpenRouter
+        );
         assert_eq!("ollama".parse::<AiProvider>().unwrap(), AiProvider::Ollama);
-        assert_eq!("anthropic".parse::<AiProvider>().unwrap(), AiProvider::Anthropic);
+        assert_eq!(
+            "anthropic".parse::<AiProvider>().unwrap(),
+            AiProvider::Anthropic
+        );
         assert!("unknown".parse::<AiProvider>().is_err());
     }
 

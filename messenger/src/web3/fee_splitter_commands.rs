@@ -95,7 +95,7 @@ pub struct ArbiterPoolResponse {
 #[tauri::command]
 pub async fn get_distribution_config() -> Result<DistributionConfigResponse, String> {
     debug!("Fetching distribution config");
-    
+
     // TODO: Initialize actual client from app state
     Ok(DistributionConfigResponse {
         success: true,
@@ -112,7 +112,7 @@ pub async fn get_distribution_config() -> Result<DistributionConfigResponse, Str
 #[tauri::command]
 pub async fn get_shareholders() -> Result<ShareholdersResponse, String> {
     debug!("Fetching shareholders");
-    
+
     Ok(ShareholdersResponse {
         success: true,
         team: None,
@@ -127,7 +127,7 @@ pub async fn get_shareholders() -> Result<ShareholdersResponse, String> {
 #[tauri::command]
 pub async fn get_distribution_stats() -> Result<DistributionStatsResponse, String> {
     debug!("Fetching distribution stats");
-    
+
     Ok(DistributionStatsResponse {
         success: true,
         total_distributed: "0".to_string(),
@@ -142,7 +142,7 @@ pub async fn get_distribution_stats() -> Result<DistributionStatsResponse, Strin
 #[tauri::command]
 pub async fn distribute_fees() -> Result<TxResponse, String> {
     info!("Distributing fees");
-    
+
     Ok(TxResponse {
         success: true,
         tx_hash: Some("0xplaceholder".to_string()),
@@ -153,19 +153,17 @@ pub async fn distribute_fees() -> Result<TxResponse, String> {
 
 /// Update distribution shares
 #[tauri::command]
-pub async fn update_shares(
-    request: UpdateSharesRequest,
-) -> Result<TxResponse, String> {
+pub async fn update_shares(request: UpdateSharesRequest) -> Result<TxResponse, String> {
     let total = request.team_percent as u16
         + request.treasury_percent as u16
         + request.marketing_percent as u16
         + request.arbiters_percent as u16
         + request.reserve_percent as u16;
-    
+
     if total != 100 {
         return Err(format!("Shares must sum to 100, got {}", total));
     }
-    
+
     info!(
         "Updating shares: team={}, treasury={}, marketing={}, arbiters={}, reserve={}",
         request.team_percent,
@@ -174,7 +172,7 @@ pub async fn update_shares(
         request.arbiters_percent,
         request.reserve_percent
     );
-    
+
     Ok(TxResponse {
         success: true,
         tx_hash: Some("0xplaceholder".to_string()),
@@ -185,11 +183,12 @@ pub async fn update_shares(
 
 /// Update shareholder wallet
 #[tauri::command]
-pub async fn update_shareholder_wallet(
-    request: UpdateWalletRequest,
-) -> Result<TxResponse, String> {
-    info!("Updating {} wallet to {}", request.role, request.new_wallet_address);
-    
+pub async fn update_shareholder_wallet(request: UpdateWalletRequest) -> Result<TxResponse, String> {
+    info!(
+        "Updating {} wallet to {}",
+        request.role, request.new_wallet_address
+    );
+
     Ok(TxResponse {
         success: true,
         tx_hash: Some("0xplaceholder".to_string()),
@@ -200,14 +199,12 @@ pub async fn update_shareholder_wallet(
 
 /// Add arbiter to pool
 #[tauri::command]
-pub async fn add_arbiter(
-    request: AddArbiterRequest,
-) -> Result<TxResponse, String> {
+pub async fn add_arbiter(request: AddArbiterRequest) -> Result<TxResponse, String> {
     info!(
         "Adding arbiter: {}, share: {}",
         request.arbiter_address, request.share
     );
-    
+
     Ok(TxResponse {
         success: true,
         tx_hash: Some("0xplaceholder".to_string()),
@@ -218,11 +215,9 @@ pub async fn add_arbiter(
 
 /// Remove arbiter from pool
 #[tauri::command]
-pub async fn remove_arbiter(
-    arbiter_address: String,
-) -> Result<TxResponse, String> {
+pub async fn remove_arbiter(arbiter_address: String) -> Result<TxResponse, String> {
     info!("Removing arbiter: {}", arbiter_address);
-    
+
     Ok(TxResponse {
         success: true,
         tx_hash: Some("0xplaceholder".to_string()),
@@ -235,7 +230,7 @@ pub async fn remove_arbiter(
 #[tauri::command]
 pub async fn arbiter_withdraw() -> Result<TxResponse, String> {
     info!("Arbiter withdrawing");
-    
+
     Ok(TxResponse {
         success: true,
         tx_hash: Some("0xplaceholder".to_string()),
@@ -248,7 +243,7 @@ pub async fn arbiter_withdraw() -> Result<TxResponse, String> {
 #[tauri::command]
 pub async fn get_arbiter_pool_info() -> Result<ArbiterPoolResponse, String> {
     debug!("Fetching arbiter pool info");
-    
+
     Ok(ArbiterPoolResponse {
         success: true,
         total_shares: "0".to_string(),
@@ -262,7 +257,7 @@ pub async fn get_arbiter_pool_info() -> Result<ArbiterPoolResponse, String> {
 #[tauri::command]
 pub async fn toggle_pause() -> Result<TxResponse, String> {
     info!("Toggling pause");
-    
+
     Ok(TxResponse {
         success: true,
         tx_hash: Some("0xplaceholder".to_string()),
@@ -273,11 +268,9 @@ pub async fn toggle_pause() -> Result<TxResponse, String> {
 
 /// Transfer ownership
 #[tauri::command]
-pub async fn transfer_ownership(
-    new_owner_address: String,
-) -> Result<TxResponse, String> {
+pub async fn transfer_ownership(new_owner_address: String) -> Result<TxResponse, String> {
     info!("Transferring ownership to {}", new_owner_address);
-    
+
     Ok(TxResponse {
         success: true,
         tx_hash: Some("0xplaceholder".to_string()),
@@ -288,20 +281,18 @@ pub async fn transfer_ownership(
 
 /// Calculate distribution amounts for a given fee
 #[tauri::command]
-pub async fn calculate_distribution(
-    fee_amount_wei: String,
-) -> Result<serde_json::Value, String> {
+pub async fn calculate_distribution(fee_amount_wei: String) -> Result<serde_json::Value, String> {
     let fee: u128 = fee_amount_wei
         .parse()
         .map_err(|e| format!("Invalid amount: {}", e))?;
-    
+
     // Default: 40/25/15/10/10
     let team = fee * 40 / 100;
     let treasury = fee * 25 / 100;
     let marketing = fee * 15 / 100;
     let arbiters = fee * 10 / 100;
     let reserve = fee * 10 / 100;
-    
+
     Ok(serde_json::json!({
         "success": true,
         "total": fee_amount_wei,

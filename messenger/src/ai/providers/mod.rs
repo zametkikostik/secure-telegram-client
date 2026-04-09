@@ -13,14 +13,14 @@ use std::collections::HashMap;
 use std::env;
 use std::time::Duration;
 
-pub mod openrouter;
-pub mod ollama;
 pub mod anthropic;
+pub mod ollama;
+pub mod openrouter;
 
 // Re-export common types
-pub use openrouter::OpenRouterProvider;
-pub use ollama::OllamaProvider;
 pub use anthropic::AnthropicProvider;
+pub use ollama::OllamaProvider;
+pub use openrouter::OpenRouterProvider;
 
 // ============================================================================
 // Provider Enum
@@ -147,7 +147,11 @@ impl AiProviderRegistry {
                 // Ollama is available if configured (no API key needed)
                 self.providers.contains_key(provider)
             }
-            AiProvider::OpenRouter | AiProvider::Anthropic | AiProvider::OpenAI | AiProvider::Groq | AiProvider::Mistral => {
+            AiProvider::OpenRouter
+            | AiProvider::Anthropic
+            | AiProvider::OpenAI
+            | AiProvider::Groq
+            | AiProvider::Mistral => {
                 // Cloud providers need an API key
                 self.providers
                     .get(provider)
@@ -200,8 +204,8 @@ impl AiProviderRegistry {
         }
 
         // Ollama
-        let ollama_url = env::var("OLLAMA_URL")
-            .unwrap_or_else(|_| "http://localhost:11434".to_string());
+        let ollama_url =
+            env::var("OLLAMA_URL").unwrap_or_else(|_| "http://localhost:11434".to_string());
         self.register(
             AiProvider::Ollama,
             ProviderConfig {

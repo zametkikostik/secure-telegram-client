@@ -27,28 +27,16 @@ pub mod commands;
 
 // Re-export fetch module types
 pub use fetch::{
+    fetch_and_store_ads, AdBundleFetcher, AdStorage, BundleFetchRequest, BundleFetchResponse,
     EncryptedAdBundle,
-    BundleFetchRequest,
-    BundleFetchResponse,
-    AdStorage,
-    AdBundleFetcher,
-    fetch_and_store_ads,
 };
 
 // Re-export commands when feature is enabled
 #[cfg(feature = "tauri-commands")]
 pub use commands::{
-    AdState,
-    register_ad_commands,
-    FetchAdsRequest,
-    FetchAdsResponse,
-    SelectAdRequest,
-    SelectAdResponse,
-    RecordImpressionRequest,
-    RecordImpressionResponse,
-    RecordClickRequest,
-    RecordClickResponse,
-    AdSettings,
+    register_ad_commands, AdSettings, AdState, FetchAdsRequest, FetchAdsResponse,
+    RecordClickRequest, RecordClickResponse, RecordImpressionRequest, RecordImpressionResponse,
+    SelectAdRequest, SelectAdResponse,
 };
 
 use serde::{Deserialize, Serialize};
@@ -240,10 +228,7 @@ impl Default for AdPreferences {
                 AdCategory::Tech,
                 AdCategory::OpenSource,
             ],
-            blocked_categories: vec![
-                AdCategory::Shopping,
-                AdCategory::Social,
-            ],
+            blocked_categories: vec![AdCategory::Shopping, AdCategory::Social],
             max_ads_per_hour: 10,
             enable_reward_ads: true,
             enable_banner_ads: true,

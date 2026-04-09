@@ -55,8 +55,7 @@ pub async fn translate_multi(
 
 /// Detect language of the text
 pub async fn detect_language(client: &AiClient, text: &str) -> AiResult<String> {
-    let system_prompt =
-        "Detect the language of the following text. Return ONLY the language name \
+    let system_prompt = "Detect the language of the following text. Return ONLY the language name \
          in English, nothing else.";
 
     let user_prompt = format!("Text: {}", text);
@@ -98,11 +97,7 @@ mod tests {
     async fn test_translate_ru_en() {
         let client = make_client();
         let result = translate(&client, "Привет мир", "Russian", "English").await;
-        assert!(
-            result.is_ok(),
-            "Translation failed: {:?}",
-            result
-        );
+        assert!(result.is_ok(), "Translation failed: {:?}", result);
         let translated = result.unwrap();
         assert!(
             translated.to_lowercase().contains("hello"),

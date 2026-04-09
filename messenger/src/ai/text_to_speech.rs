@@ -7,11 +7,7 @@ use crate::ai::client::{AiClient, AiError, AiResult};
 use std::path::Path;
 
 /// Synthesize text to audio bytes (OGG opus)
-pub async fn synthesize(
-    client: &AiClient,
-    text: &str,
-    lang: &str,
-) -> AiResult<Vec<u8>> {
+pub async fn synthesize(client: &AiClient, text: &str, lang: &str) -> AiResult<Vec<u8>> {
     // Try local Coqui TTS first (prefer local for TTS)
     if client.config.prefer_local {
         match synthesize_coqui_local(text, lang).await {
@@ -98,10 +94,7 @@ async fn synthesize_coqui_local(text: &str, lang: &str) -> AiResult<Vec<u8>> {
 
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
-        return Err(AiError::Ollama(format!(
-            "Coqui TTS error: {}",
-            stderr
-        )));
+        return Err(AiError::Ollama(format!("Coqui TTS error: {}", stderr)));
     }
 
     // Read the generated WAV file
@@ -192,11 +185,7 @@ mod tests {
         let client = make_client();
 
         let result = synthesize(&client, "Привет мир", "ru").await;
-        assert!(
-            result.is_ok(),
-            "Synthesis failed: {:?}",
-            result
-        );
+        assert!(result.is_ok(), "Synthesis failed: {:?}", result);
         let audio = result.unwrap();
         assert!(!audio.is_empty());
     }

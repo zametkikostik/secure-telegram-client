@@ -89,7 +89,10 @@ impl WifiDirectTransport {
         // 3. Listen for discovery packets from peers
         // 4. Update peer list
 
-        info!("LAN multicast discovery started on {}:{}", self.multicast_group, self.listening_port);
+        info!(
+            "LAN multicast discovery started on {}:{}",
+            self.multicast_group, self.listening_port
+        );
         Ok(())
     }
 

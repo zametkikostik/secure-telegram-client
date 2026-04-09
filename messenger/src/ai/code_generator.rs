@@ -13,11 +13,7 @@ const OPENROUTER_MODEL: &str = "qwen/qwen-2.5-coder-32b-instruct";
 const OLLAMA_MODEL: &str = "qwen2.5-coder:14b";
 
 /// Generate code from a description
-pub async fn generate_code(
-    client: &AiClient,
-    description: &str,
-    lang: &str,
-) -> AiResult<String> {
+pub async fn generate_code(client: &AiClient, description: &str, lang: &str) -> AiResult<String> {
     let system_prompt = format!(
         "You are an expert {lang} developer. Generate clean, well-documented, \
          production-ready code based on the user's description. \
@@ -25,9 +21,7 @@ pub async fn generate_code(
          Use code blocks with language tags.",
     );
 
-    let user_prompt = format!(
-        "Language: {lang}\n\nDescription:\n{description}",
-    );
+    let user_prompt = format!("Language: {lang}\n\nDescription:\n{description}",);
 
     client
         .send_with_fallback(
@@ -54,9 +48,8 @@ pub async fn generate_function(
          error handling, and unit tests.",
     );
 
-    let user_prompt = format!(
-        "Function signature:\n```\n{signature}\n```\n\nDescription:\n{description}",
-    );
+    let user_prompt =
+        format!("Function signature:\n```\n{signature}\n```\n\nDescription:\n{description}",);
 
     client
         .send_with_fallback(
@@ -101,20 +94,14 @@ pub async fn refactor_code(
 }
 
 /// Generate unit tests for code
-pub async fn generate_tests(
-    client: &AiClient,
-    code: &str,
-    lang: &str,
-) -> AiResult<String> {
+pub async fn generate_tests(client: &AiClient, code: &str, lang: &str) -> AiResult<String> {
     let system_prompt = format!(
         "You are an expert {lang} developer specializing in testing. \
          Generate comprehensive unit tests for the provided code. \
          Cover happy path, edge cases, and error conditions.",
     );
 
-    let user_prompt = format!(
-        "Generate tests for this {lang} code:\n```\n{code}\n```",
-    );
+    let user_prompt = format!("Generate tests for this {lang} code:\n```\n{code}\n```",);
 
     client
         .send_with_fallback(
@@ -129,11 +116,7 @@ pub async fn generate_tests(
 }
 
 /// Explain code in natural language
-pub async fn explain_code(
-    client: &AiClient,
-    code: &str,
-    lang: &str,
-) -> AiResult<String> {
+pub async fn explain_code(client: &AiClient, code: &str, lang: &str) -> AiResult<String> {
     let system_prompt = format!(
         "You are an expert {lang} developer. Explain what the provided code \
          does in clear, concise language. Include time/space complexity \
@@ -143,19 +126,13 @@ pub async fn explain_code(
     let user_prompt = format!("Explain this {lang} code:\n```\n{code}\n```",);
 
     client
-        .chat(
-            OPENROUTER_MODEL,
-            OLLAMA_MODEL,
-            &system_prompt,
-            &user_prompt,
-        )
+        .chat(OPENROUTER_MODEL, OLLAMA_MODEL, &system_prompt, &user_prompt)
         .await
 }
 
 /// Generate Rust struct from JSON
 pub async fn json_to_rust_struct(client: &AiClient, json: &str) -> AiResult<String> {
-    let system_prompt =
-        "You are an expert Rust developer. Generate idiomatic Rust structs \
+    let system_prompt = "You are an expert Rust developer. Generate idiomatic Rust structs \
          with serde derive macros from the provided JSON. Use proper types, \
          lifetimes, and derive macros.";
 
@@ -207,11 +184,7 @@ mod tests {
         )
         .await;
 
-        assert!(
-            result.is_ok(),
-            "Code generation failed: {:?}",
-            result
-        );
+        assert!(result.is_ok(), "Code generation failed: {:?}", result);
         let code = result.unwrap();
         assert!(!code.is_empty());
     }

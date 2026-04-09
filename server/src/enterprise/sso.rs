@@ -9,15 +9,15 @@
 //! Integration uses `axum-sessions` for session management.
 
 use axum::{
-    extract::{Query, State, Request},
-    response::{IntoResponse, Redirect, Json},
+    extract::{Query, Request, State},
+    response::{IntoResponse, Json, Redirect},
     routing::{get, post},
     Router,
 };
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use thiserror::Error;
-use tracing::{info, warn, debug};
+use tracing::{debug, info, warn};
 
 // ============================================================================
 // Error Types
@@ -64,7 +64,7 @@ pub type SsoResult<T> = Result<T, SsoError>;
 pub enum SsoProvider {
     /// OAuth2 provider (Google, Microsoft, etc.)
     OAuth2 {
-        provider_name: String,       // "google", "microsoft", "github"
+        provider_name: String, // "google", "microsoft", "github"
         client_id: String,
         client_secret: String,
         auth_url: String,
@@ -76,21 +76,21 @@ pub enum SsoProvider {
 
     /// LDAP/Active Directory
     Ldap {
-        url: String,                  // "ldap://ad.company.com:389"
-        bind_dn: String,              // "CN=service,OU=Users,DC=company,DC=com"
+        url: String,     // "ldap://ad.company.com:389"
+        bind_dn: String, // "CN=service,OU=Users,DC=company,DC=com"
         bind_password: String,
-        base_dn: String,              // "OU=Users,DC=company,DC=com"
-        search_filter: String,        // "(sAMAccountName={username})"
+        base_dn: String,       // "OU=Users,DC=company,DC=com"
+        search_filter: String, // "(sAMAccountName={username})"
         use_tls: bool,
         tls_verify_certs: bool,
     },
 
     /// SAML 2.0 (Okta, OneLogin, ADFS)
     Saml {
-        idp_metadata_url: String,     // SAML IdP metadata XML URL
-        sp_entity_id: String,         // Service Provider entity ID
-        acs_url: String,              // Assertion Consumer Service URL
-        name_id_format: String,       // "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"
+        idp_metadata_url: String, // SAML IdP metadata XML URL
+        sp_entity_id: String,     // Service Provider entity ID
+        acs_url: String,          // Assertion Consumer Service URL
+        name_id_format: String,   // "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"
         sign_requests: bool,
         signing_cert: Option<String>,
         signing_key: Option<String>,
@@ -98,9 +98,9 @@ pub enum SsoProvider {
 
     /// Kerberos (Windows domain)
     Kerberos {
-        realm: String,                // "COMPANY.COM"
-        kdc_server: String,           // "dc.company.com"
-        service_principal: String,    // "HTTP/app.company.com@COMPANY.COM"
+        realm: String,             // "COMPANY.COM"
+        kdc_server: String,        // "dc.company.com"
+        service_principal: String, // "HTTP/app.company.com@COMPANY.COM"
         keytab_path: Option<String>,
     },
 }
@@ -127,9 +127,9 @@ pub struct SsoConfig {
     pub providers: Vec<SsoProvider>,
     pub session_timeout_secs: u64,
     pub require_verified_email: bool,
-    pub allowed_domains: Vec<String>,  // If empty, all domains allowed
-    pub auto_provision_users: bool,    // Create user account on first SSO login
-    pub default_role: String,          // Role assigned to new SSO users
+    pub allowed_domains: Vec<String>, // If empty, all domains allowed
+    pub auto_provision_users: bool,   // Create user account on first SSO login
+    pub default_role: String,         // Role assigned to new SSO users
 }
 
 impl Default for SsoConfig {
@@ -157,11 +157,11 @@ pub struct SsoSession {
     pub provider: String,
     pub email: Option<String>,
     pub display_name: Option<String>,
-    pub external_id: String,           // ID from external provider
+    pub external_id: String, // ID from external provider
     pub session_id: String,
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub expires_at: chrono::DateTime<chrono::Utc>,
-    pub claims: serde_json::Value,     // All claims from provider
+    pub claims: serde_json::Value, // All claims from provider
 }
 
 impl SsoSession {
@@ -188,7 +188,10 @@ impl SsoClient {
             .build()
             .map_err(|e| SsoError::ConfigError(e.to_string()))?;
 
-        Ok(Self { config, http_client })
+        Ok(Self {
+            config,
+            http_client,
+        })
     }
 
     // ========================================================================
@@ -196,11 +199,7 @@ impl SsoClient {
     // ========================================================================
 
     /// Get OAuth2 authorization URL (redirect user to provider)
-    pub fn get_oauth2_auth_url(
-        &self,
-        provider_name: &str,
-        state: &str,
-    ) -> SsoResult<String> {
+    pub fn get_oauth2_auth_url(&self, provider_name: &str, state: &str) -> SsoResult<String> {
         let provider = self.find_oauth2_provider(provider_name)?;
 
         match provider {
@@ -240,7 +239,8 @@ impl SsoClient {
                 ..
             } => {
                 // Exchange code for access token
-                let token_response = self.http_client
+                let token_response = self
+                    .http_client
                     .post(&token_url)
                     .form(&[
                         ("grant_type", "authorization_code"),
@@ -254,9 +254,10 @@ impl SsoClient {
                     .map_err(|e| SsoError::AuthFailed(e.to_string()))?;
 
                 if !token_response.status().is_success() {
-                    return Err(SsoError::AuthFailed(
-                        format!("Token exchange failed: HTTP {}", token_response.status())
-                    ));
+                    return Err(SsoError::AuthFailed(format!(
+                        "Token exchange failed: HTTP {}",
+                        token_response.status()
+                    )));
                 }
 
                 let tokens: serde_json::Value = token_response
@@ -269,7 +270,8 @@ impl SsoClient {
                     .ok_or_else(|| SsoError::TokenValidation("No access_token".into()))?;
 
                 // Get user info
-                let user_response = self.http_client
+                let user_response = self
+                    .http_client
                     .get(&user_info_url)
                     .bearer_auth(access_token)
                     .send()
@@ -311,7 +313,10 @@ impl SsoClient {
                     user_info,
                 );
 
-                info!("OAuth2 login successful: provider={}, email={:?}", provider_name, email_for_log);
+                info!(
+                    "OAuth2 login successful: provider={}, email={:?}",
+                    provider_name, email_for_log
+                );
                 Ok(session)
             }
             _ => Err(SsoError::ProviderNotFound("Not an OAuth2 provider".into())),
@@ -323,16 +328,17 @@ impl SsoClient {
     // ========================================================================
 
     /// Authenticate user against LDAP/Active Directory
-    pub async fn authenticate_ldap(
-        &self,
-        username: &str,
-        password: &str,
-    ) -> SsoResult<SsoSession> {
+    pub async fn authenticate_ldap(&self, username: &str, password: &str) -> SsoResult<SsoSession> {
         let provider = self.find_ldap_provider()?;
 
         match provider {
             SsoProvider::Ldap {
-                url, bind_dn, bind_password, base_dn, search_filter, ..
+                url,
+                bind_dn,
+                bind_password,
+                base_dn,
+                search_filter,
+                ..
             } => {
                 // NOTE: In production, use the `ldap3` crate for actual LDAP communication
                 // This is a placeholder showing the interface
@@ -396,7 +402,9 @@ impl SsoClient {
 
         warn!("SAML response processing not fully implemented — needs saml2 crate");
 
-        Err(SsoError::SamlError("SAML processing not implemented".into()))
+        Err(SsoError::SamlError(
+            "SAML processing not implemented".into(),
+        ))
     }
 
     // ========================================================================
@@ -409,12 +417,11 @@ impl SsoClient {
 
         match provider {
             SsoProvider::Kerberos {
-                realm, service_principal, ..
+                realm,
+                service_principal,
+                ..
             } => {
-                debug!(
-                    "Kerberos auth: realm={}, sp={}",
-                    realm, service_principal
-                );
+                debug!("Kerberos auth: realm={}, sp={}", realm, service_principal);
 
                 // NOTE: In production, use `kerberos` crate
                 // 1. Validate SPNEGO ticket with KDC
@@ -423,7 +430,9 @@ impl SsoClient {
 
                 warn!("Kerberos authentication not fully implemented — needs kerberos crate");
 
-                Err(SsoError::KerberosError("Kerberos provider not configured".into()))
+                Err(SsoError::KerberosError(
+                    "Kerberos provider not configured".into(),
+                ))
             }
             _ => Err(SsoError::ProviderNotFound("Not a Kerberos provider".into())),
         }
@@ -463,15 +472,19 @@ impl SsoClient {
     // ========================================================================
 
     fn find_oauth2_provider(&self, name: &str) -> SsoResult<SsoProvider> {
-        self.config.providers
+        self.config
+            .providers
             .iter()
-            .find(|p| matches!(p, SsoProvider::OAuth2 { provider_name, .. } if provider_name == name))
+            .find(
+                |p| matches!(p, SsoProvider::OAuth2 { provider_name, .. } if provider_name == name),
+            )
             .cloned()
             .ok_or_else(|| SsoError::ProviderNotFound(name.to_string()))
     }
 
     fn find_ldap_provider(&self) -> SsoResult<SsoProvider> {
-        self.config.providers
+        self.config
+            .providers
             .iter()
             .find(|p| matches!(p, SsoProvider::Ldap { .. }))
             .cloned()
@@ -479,7 +492,8 @@ impl SsoClient {
     }
 
     fn find_saml_provider(&self) -> SsoResult<SsoProvider> {
-        self.config.providers
+        self.config
+            .providers
             .iter()
             .find(|p| matches!(p, SsoProvider::Saml { .. }))
             .cloned()
@@ -487,7 +501,8 @@ impl SsoClient {
     }
 
     fn find_kerberos_provider(&self) -> SsoResult<SsoProvider> {
-        self.config.providers
+        self.config
+            .providers
             .iter()
             .find(|p| matches!(p, SsoProvider::Kerberos { .. }))
             .cloned()
@@ -507,9 +522,10 @@ impl SsoClient {
         if self.config.allowed_domains.iter().any(|d| d == domain) {
             Ok(())
         } else {
-            Err(SsoError::AuthFailed(
-                format!("Email domain '{}' not allowed", domain)
-            ))
+            Err(SsoError::AuthFailed(format!(
+                "Email domain '{}' not allowed",
+                domain
+            )))
         }
     }
 }
@@ -553,7 +569,8 @@ async fn oauth2_login_handler(
         Err(e) => (
             axum::http::StatusCode::BAD_REQUEST,
             Json(serde_json::json!({ "error": e.to_string() })),
-        ).into_response(),
+        )
+            .into_response(),
     }
 }
 
@@ -565,10 +582,13 @@ async fn oauth2_callback_handler(
 ) -> impl IntoResponse {
     let code = match params["code"].as_str() {
         Some(c) => c,
-        None => return (
-            axum::http::StatusCode::BAD_REQUEST,
-            Json(serde_json::json!({ "error": "No authorization code" })),
-        ).into_response(),
+        None => {
+            return (
+                axum::http::StatusCode::BAD_REQUEST,
+                Json(serde_json::json!({ "error": "No authorization code" })),
+            )
+                .into_response()
+        }
     };
 
     match client.exchange_oauth2_code(&provider, code).await {
@@ -580,12 +600,14 @@ async fn oauth2_callback_handler(
                     "success": true,
                     "session": session,
                 })),
-            ).into_response()
+            )
+                .into_response()
         }
         Err(e) => (
             axum::http::StatusCode::UNAUTHORIZED,
             Json(serde_json::json!({ "error": e.to_string() })),
-        ).into_response(),
+        )
+            .into_response(),
     }
 }
 
@@ -607,23 +629,24 @@ async fn ldap_login_handler(
                 "success": true,
                 "session": session,
             })),
-        ).into_response(),
+        )
+            .into_response(),
         Err(e) => (
             axum::http::StatusCode::UNAUTHORIZED,
             Json(serde_json::json!({ "error": e.to_string() })),
-        ).into_response(),
+        )
+            .into_response(),
     }
 }
 
 /// SAML login — generate AuthnRequest
-async fn saml_login_handler(
-    State(_client): State<Arc<SsoClient>>,
-) -> impl IntoResponse {
+async fn saml_login_handler(State(_client): State<Arc<SsoClient>>) -> impl IntoResponse {
     // In production: return redirect to IdP with SAMLRequest
     (
         axum::http::StatusCode::NOT_IMPLEMENTED,
         Json(serde_json::json!({ "error": "SAML not configured" })),
-    ).into_response()
+    )
+        .into_response()
 }
 
 /// SAML ACS — process IdP response
@@ -635,7 +658,8 @@ async fn saml_acs_handler(
     (
         axum::http::StatusCode::NOT_IMPLEMENTED,
         Json(serde_json::json!({ "error": "SAML ACS not configured" })),
-    ).into_response()
+    )
+        .into_response()
 }
 
 /// Kerberos login
@@ -650,10 +674,13 @@ async fn kerberos_login_handler(
 ) -> impl IntoResponse {
     let ticket = match base64::decode(&req.spnego_ticket) {
         Ok(t) => t,
-        Err(e) => return (
-            axum::http::StatusCode::BAD_REQUEST,
-            Json(serde_json::json!({ "error": format!("Invalid ticket: {}", e) })),
-        ).into_response(),
+        Err(e) => {
+            return (
+                axum::http::StatusCode::BAD_REQUEST,
+                Json(serde_json::json!({ "error": format!("Invalid ticket: {}", e) })),
+            )
+                .into_response()
+        }
     };
 
     match client.authenticate_kerberos(&ticket).await {
@@ -663,11 +690,13 @@ async fn kerberos_login_handler(
                 "success": true,
                 "session": session,
             })),
-        ).into_response(),
+        )
+            .into_response(),
         Err(e) => (
             axum::http::StatusCode::UNAUTHORIZED,
             Json(serde_json::json!({ "error": e.to_string() })),
-        ).into_response(),
+        )
+            .into_response(),
     }
 }
 

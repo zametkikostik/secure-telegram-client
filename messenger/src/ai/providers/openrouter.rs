@@ -12,7 +12,7 @@
 //! - anthropic/claude-3-5-sonnet
 //! - openai/gpt-4o-mini
 
-use super::{AiError, AiResult, ModelInfo, AiProvider, ProviderConfig};
+use super::{AiError, AiProvider, AiResult, ModelInfo, ProviderConfig};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
@@ -191,13 +191,9 @@ impl OpenRouterProvider {
             ));
         }
 
-        let data: OpenRouterResponse = response
-            .json()
-            .await
-            .map_err(|e| AiError::ProviderError(
-                "OpenRouter".to_string(),
-                format!("JSON parse: {}", e),
-            ))?;
+        let data: OpenRouterResponse = response.json().await.map_err(|e| {
+            AiError::ProviderError("OpenRouter".to_string(), format!("JSON parse: {}", e))
+        })?;
 
         if let Some(err) = data.error {
             return Err(AiError::ProviderError(
@@ -206,22 +202,17 @@ impl OpenRouterProvider {
             ));
         }
 
-        let choice = data
-            .choices
-            .first()
-            .ok_or_else(|| AiError::ProviderError(
-                "OpenRouter".to_string(),
-                "No choices in response".into(),
-            ))?;
+        let choice = data.choices.first().ok_or_else(|| {
+            AiError::ProviderError("OpenRouter".to_string(), "No choices in response".into())
+        })?;
 
         let content = choice
             .message
             .as_ref()
             .map(|m| m.content.clone())
-            .ok_or_else(|| AiError::ProviderError(
-                "OpenRouter".to_string(),
-                "No content in response".into(),
-            ))?;
+            .ok_or_else(|| {
+                AiError::ProviderError("OpenRouter".to_string(), "No content in response".into())
+            })?;
 
         Ok(content.trim().to_string())
     }
@@ -252,13 +243,9 @@ impl OpenRouterProvider {
             ));
         }
 
-        let data: OpenRouterModelsResponse = response
-            .json()
-            .await
-            .map_err(|e| AiError::ProviderError(
-                "OpenRouter".to_string(),
-                format!("JSON parse: {}", e),
-            ))?;
+        let data: OpenRouterModelsResponse = response.json().await.map_err(|e| {
+            AiError::ProviderError("OpenRouter".to_string(), format!("JSON parse: {}", e))
+        })?;
 
         let models: Vec<ModelInfo> = data
             .data
@@ -377,7 +364,12 @@ mod tests {
     #[ignore] // Requires OPENROUTER_API_KEY
     async fn test_openrouter_free_model() {
         let config = make_config();
-        if !config.api_key.as_ref().map(|k| !k.is_empty()).unwrap_or(false) {
+        if !config
+            .api_key
+            .as_ref()
+            .map(|k| !k.is_empty())
+            .unwrap_or(false)
+        {
             println!("Skipping: no OPENROUTER_API_KEY set");
             return;
         }
@@ -404,7 +396,12 @@ mod tests {
     #[ignore] // Requires OPENROUTER_API_KEY
     async fn test_openrouter_list_models() {
         let config = make_config();
-        if !config.api_key.as_ref().map(|k| !k.is_empty()).unwrap_or(false) {
+        if !config
+            .api_key
+            .as_ref()
+            .map(|k| !k.is_empty())
+            .unwrap_or(false)
+        {
             println!("Skipping: no OPENROUTER_API_KEY set");
             return;
         }

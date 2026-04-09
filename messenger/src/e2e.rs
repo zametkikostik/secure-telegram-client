@@ -10,7 +10,7 @@
 //! 5. Mesh: multi-hop relay
 
 use std::sync::Arc;
-use tokio::time::{Duration, timeout};
+use tokio::time::{timeout, Duration};
 
 // ============================================================================
 // Test Client
@@ -34,7 +34,8 @@ impl TestClient {
     }
 
     async fn register(&mut self, username: &str, password: &str) -> Result<(), String> {
-        let resp = self.http_client
+        let resp = self
+            .http_client
             .post(&format!("{}/api/v1/auth/register", self.server_url))
             .json(&serde_json::json!({
                 "username": username,
@@ -46,7 +47,10 @@ impl TestClient {
             .map_err(|e| format!("Register failed: {}", e))?;
 
         let status = resp.status();
-        let body: serde_json::Value = resp.json().await.map_err(|e| format!("Parse error: {}", e))?;
+        let body: serde_json::Value = resp
+            .json()
+            .await
+            .map_err(|e| format!("Parse error: {}", e))?;
 
         if status.is_success() {
             self.token = Some(body["token"].as_str().unwrap_or("").to_string());
@@ -58,7 +62,8 @@ impl TestClient {
     }
 
     async fn login(&mut self, username: &str, password: &str) -> Result<(), String> {
-        let resp = self.http_client
+        let resp = self
+            .http_client
             .post(&format!("{}/api/v1/auth/login", self.server_url))
             .json(&serde_json::json!({
                 "username": username,
@@ -69,7 +74,10 @@ impl TestClient {
             .map_err(|e| format!("Login failed: {}", e))?;
 
         let status = resp.status();
-        let body: serde_json::Value = resp.json().await.map_err(|e| format!("Parse error: {}", e))?;
+        let body: serde_json::Value = resp
+            .json()
+            .await
+            .map_err(|e| format!("Parse error: {}", e))?;
 
         if status.is_success() {
             self.token = Some(body["token"].as_str().unwrap_or("").to_string());
@@ -82,7 +90,8 @@ impl TestClient {
 
     async fn get_me(&self) -> Result<serde_json::Value, String> {
         let token = self.token.as_ref().ok_or("Not authenticated")?;
-        let resp = self.http_client
+        let resp = self
+            .http_client
             .get(&format!("{}/api/v1/users/me", self.server_url))
             .header("Authorization", format!("Bearer {}", token))
             .send()
@@ -94,7 +103,8 @@ impl TestClient {
 
     async fn create_chat(&self, name: &str) -> Result<serde_json::Value, String> {
         let token = self.token.as_ref().ok_or("Not authenticated")?;
-        let resp = self.http_client
+        let resp = self
+            .http_client
             .post(&format!("{}/api/v1/chats", self.server_url))
             .header("Authorization", format!("Bearer {}", token))
             .json(&serde_json::json!({
@@ -108,10 +118,18 @@ impl TestClient {
         resp.json().await.map_err(|e| format!("Parse error: {}", e))
     }
 
-    async fn send_message(&self, chat_id: &str, content: &str) -> Result<serde_json::Value, String> {
+    async fn send_message(
+        &self,
+        chat_id: &str,
+        content: &str,
+    ) -> Result<serde_json::Value, String> {
         let token = self.token.as_ref().ok_or("Not authenticated")?;
-        let resp = self.http_client
-            .post(&format!("{}/api/v1/chats/{}/messages", self.server_url, chat_id))
+        let resp = self
+            .http_client
+            .post(&format!(
+                "{}/api/v1/chats/{}/messages",
+                self.server_url, chat_id
+            ))
             .header("Authorization", format!("Bearer {}", token))
             .json(&serde_json::json!({
                 "content": content,
@@ -122,7 +140,10 @@ impl TestClient {
             .map_err(|e| format!("Send message failed: {}", e))?;
 
         let status = resp.status();
-        let body: serde_json::Value = resp.json().await.map_err(|e| format!("Parse error: {}", e))?;
+        let body: serde_json::Value = resp
+            .json()
+            .await
+            .map_err(|e| format!("Parse error: {}", e))?;
 
         if status.is_success() {
             Ok(body)
@@ -133,14 +154,21 @@ impl TestClient {
 
     async fn list_messages(&self, chat_id: &str) -> Result<Vec<serde_json::Value>, String> {
         let token = self.token.as_ref().ok_or("Not authenticated")?;
-        let resp = self.http_client
-            .get(&format!("{}/api/v1/chats/{}/messages", self.server_url, chat_id))
+        let resp = self
+            .http_client
+            .get(&format!(
+                "{}/api/v1/chats/{}/messages",
+                self.server_url, chat_id
+            ))
             .header("Authorization", format!("Bearer {}", token))
             .send()
             .await
             .map_err(|e| format!("List messages failed: {}", e))?;
 
-        let body: Vec<serde_json::Value> = resp.json().await.map_err(|e| format!("Parse error: {}", e))?;
+        let body: Vec<serde_json::Value> = resp
+            .json()
+            .await
+            .map_err(|e| format!("Parse error: {}", e))?;
         Ok(body)
     }
 }
@@ -186,14 +214,16 @@ mod tests {
         let router = TransportRouter::new("alice-peer");
 
         // Register Wi-Fi LAN transport (working locally)
-        router.register_transport(
-            TransportType::WifiLan,
-            |_t, _recipient, data| {
-                let data_len = data.len();
-                Box::pin(async move { Ok(data_len as u64) })
-            },
-            || Box::pin(async { true }),
-        ).await;
+        router
+            .register_transport(
+                TransportType::WifiLan,
+                |_t, _recipient, data| {
+                    let data_len = data.len();
+                    Box::pin(async move { Ok(data_len as u64) })
+                },
+                || Box::pin(async { true }),
+            )
+            .await;
 
         // Start health monitoring
         router.start_health_monitoring().await;
@@ -201,7 +231,9 @@ mod tests {
 
         // Send message through router
         let encrypted_payload = b"Hello from Alice!";
-        let result = router.send_message("bob-peer", encrypted_payload.to_vec()).await;
+        let result = router
+            .send_message("bob-peer", encrypted_payload.to_vec())
+            .await;
 
         assert!(result.is_ok(), "Message should be delivered");
         assert!(result.unwrap().starts_with("Wi-Fi LAN"));
@@ -219,7 +251,7 @@ mod tests {
 
     #[tokio::test]
     async fn e2e_mesh_relay() {
-        use crate::offline::mesh::{MeshNetwork, MeshMessage};
+        use crate::offline::mesh::{MeshMessage, MeshNetwork};
 
         // Create mesh network for Alice
         let alice = MeshNetwork::new("alice");
@@ -244,7 +276,10 @@ mod tests {
 
     #[tokio::test]
     async fn e2e_encryption_roundtrip() {
-        use chacha20poly1305::{aead::{Aead, KeyInit}, ChaCha20Poly1305, Key, Nonce};
+        use chacha20poly1305::{
+            aead::{Aead, KeyInit},
+            ChaCha20Poly1305, Key, Nonce,
+        };
         use rand::RngCore;
 
         // Simulate E2EE encryption
@@ -281,11 +316,13 @@ mod tests {
         assert_eq!(router.get_queue_size().await, 1);
 
         // Now register a transport
-        router.register_transport(
-            TransportType::WifiLan,
-            |_t, _r, _d| Box::pin(async { Ok(10) }),
-            || Box::pin(async { true }),
-        ).await;
+        router
+            .register_transport(
+                TransportType::WifiLan,
+                |_t, _r, _d| Box::pin(async { Ok(10) }),
+                || Box::pin(async { true }),
+            )
+            .await;
 
         // Start health monitor
         router.start_health_monitoring().await;
@@ -329,16 +366,20 @@ mod tests {
         // Start server
         let server = WifiLanTransport::new("server", server_port);
         let recv_clone = received.clone();
-        server.on_message(move |_data, _addr| {
-            recv_clone.fetch_add(1, Ordering::SeqCst);
-        }).await;
+        server
+            .on_message(move |_data, _addr| {
+                recv_clone.fetch_add(1, Ordering::SeqCst);
+            })
+            .await;
         server.start_server().await.unwrap();
         tokio::time::sleep(Duration::from_millis(300)).await;
 
         // Client sends message
         let client = WifiLanTransport::new("client", 0);
         let test_msg = b"E2E test message";
-        let result = client.send_message("127.0.0.1", server_port, test_msg).await;
+        let result = client
+            .send_message("127.0.0.1", server_port, test_msg)
+            .await;
         assert!(result.is_ok(), "Send should succeed: {:?}", result);
 
         tokio::time::sleep(Duration::from_millis(500)).await;

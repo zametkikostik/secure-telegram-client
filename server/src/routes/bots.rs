@@ -4,19 +4,19 @@
 
 use axum::{
     extract::{Path, Query, State},
-    http::{StatusCode, HeaderMap},
+    http::{HeaderMap, StatusCode},
     Json,
 };
-use serde::Deserialize;
-use sqlx::SqlitePool;
-use sha3::{Digest, Sha3_256};
-use uuid::Uuid;
 use chrono::Utc;
+use serde::Deserialize;
+use sha3::{Digest, Sha3_256};
+use sqlx::SqlitePool;
+use uuid::Uuid;
 
-use crate::AppState;
-use crate::models::bot::*;
 #[allow(unused_imports)]
-use crate::middleware::auth::{AuthError, get_user_id_from_header};
+use crate::middleware::auth::{get_user_id_from_header, AuthError};
+use crate::models::bot::*;
+use crate::AppState;
 
 // ============================================================================
 // Bot CRUD
@@ -26,13 +26,21 @@ use crate::middleware::auth::{AuthError, get_user_id_from_header};
 // Helpers
 // ============================================================================
 
-fn require_auth(headers: &HeaderMap, state: &AppState) -> Result<String, (StatusCode, Json<serde_json::Value>)> {
-    let auth_header = headers.get("Authorization")
+fn require_auth(
+    headers: &HeaderMap,
+    state: &AppState,
+) -> Result<String, (StatusCode, Json<serde_json::Value>)> {
+    let auth_header = headers
+        .get("Authorization")
         .and_then(|v| v.to_str().ok())
         .map(|s| s.to_string());
 
-    get_user_id_from_header(auth_header, &state.auth)
-        .map_err(|_| (StatusCode::UNAUTHORIZED, Json(serde_json::json!({"error": "Unauthorized"}))))
+    get_user_id_from_header(auth_header, &state.auth).map_err(|_| {
+        (
+            StatusCode::UNAUTHORIZED,
+            Json(serde_json::json!({"error": "Unauthorized"})),
+        )
+    })
 }
 
 /// Create a new bot
@@ -91,8 +99,16 @@ pub async fn create_bot(
 
     // Add default commands for new bots
     let default_commands = vec![
-        ("/start", "Start interacting with the bot", "Hello! I'm {bot_name}. How can I help you?"),
-        ("/help", "Show available commands", "Available commands:\n/start - Start\n/help - This help"),
+        (
+            "/start",
+            "Start interacting with the bot",
+            "Hello! I'm {bot_name}. How can I help you?",
+        ),
+        (
+            "/help",
+            "Show available commands",
+            "Available commands:\n/start - Start\n/help - This help",
+        ),
     ];
 
     for (cmd, desc, tmpl) in default_commands {
@@ -113,10 +129,20 @@ pub async fn create_bot(
         .ok();
     }
 
-    let bot = get_bot_by_id(&*state.db, &bot_id).await
-        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({"error": e.to_string()}))))?;
+    let bot = get_bot_by_id(&*state.db, &bot_id).await.map_err(|e| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(serde_json::json!({"error": e.to_string()})),
+        )
+    })?;
 
-    Ok((StatusCode::CREATED, Json(BotWithToken { bot, token: plain_token })))
+    Ok((
+        StatusCode::CREATED,
+        Json(BotWithToken {
+            bot,
+            token: plain_token,
+        }),
+    ))
 }
 
 /// List user's bots
@@ -178,7 +204,10 @@ pub async fn get_bot(
 
     match bot {
         Some(b) => Ok(Json(b)),
-        None => Err((StatusCode::NOT_FOUND, Json(serde_json::json!({"error": "Bot not found"})))),
+        None => Err((
+            StatusCode::NOT_FOUND,
+            Json(serde_json::json!({"error": "Bot not found"})),
+        )),
     }
 }
 
@@ -220,12 +249,21 @@ pub async fn update_bot(
     })?;
 
     if result.rows_affected() == 0 {
-        return Err((StatusCode::NOT_FOUND, Json(serde_json::json!({"error": "Bot not found"}))));
+        return Err((
+            StatusCode::NOT_FOUND,
+            Json(serde_json::json!({"error": "Bot not found"})),
+        ));
     }
 
-    get_bot_by_id(&*state.db, &bot_id).await
+    get_bot_by_id(&*state.db, &bot_id)
+        .await
         .map(Json)
-        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({"error": e.to_string()}))))
+        .map_err(|e| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(serde_json::json!({"error": e.to_string()})),
+            )
+        })
 }
 
 /// Delete a bot
@@ -248,7 +286,10 @@ pub async fn delete_bot(
         })?;
 
     if result.rows_affected() == 0 {
-        return Err((StatusCode::NOT_FOUND, Json(serde_json::json!({"error": "Bot not found"}))));
+        return Err((
+            StatusCode::NOT_FOUND,
+            Json(serde_json::json!({"error": "Bot not found"})),
+        ));
     }
 
     Ok(StatusCode::NO_CONTENT)
@@ -278,7 +319,10 @@ pub async fn rotate_token(
         })?;
 
     if result.rows_affected() == 0 {
-        return Err((StatusCode::NOT_FOUND, Json(serde_json::json!({"error": "Bot not found"}))));
+        return Err((
+            StatusCode::NOT_FOUND,
+            Json(serde_json::json!({"error": "Bot not found"})),
+        ));
     }
 
     Ok(Json(BotTokenResponse { token: new_token }))
@@ -307,7 +351,10 @@ pub async fn list_commands(
         })?;
 
     if owner.as_deref() != Some(&user_id) {
-        return Err((StatusCode::FORBIDDEN, Json(serde_json::json!({"error": "Forbidden"}))));
+        return Err((
+            StatusCode::FORBIDDEN,
+            Json(serde_json::json!({"error": "Forbidden"})),
+        ));
     }
 
     let commands = sqlx::query_as::<_, BotCommand>(
@@ -346,7 +393,10 @@ pub async fn create_command(
         })?;
 
     if owner.as_deref() != Some(&user_id) {
-        return Err((StatusCode::FORBIDDEN, Json(serde_json::json!({"error": "Forbidden"}))));
+        return Err((
+            StatusCode::FORBIDDEN,
+            Json(serde_json::json!({"error": "Forbidden"})),
+        ));
     }
 
     let cmd_id = Uuid::new_v4().simple().to_string();
@@ -404,7 +454,10 @@ pub async fn delete_command(
         })?;
 
     if owner.as_deref() != Some(&user_id) {
-        return Err((StatusCode::FORBIDDEN, Json(serde_json::json!({"error": "Forbidden"}))));
+        return Err((
+            StatusCode::FORBIDDEN,
+            Json(serde_json::json!({"error": "Forbidden"})),
+        ));
     }
 
     let result = sqlx::query("DELETE FROM bot_commands WHERE id = ? AND bot_id = ?")
@@ -420,7 +473,10 @@ pub async fn delete_command(
         })?;
 
     if result.rows_affected() == 0 {
-        return Err((StatusCode::NOT_FOUND, Json(serde_json::json!({"error": "Command not found"}))));
+        return Err((
+            StatusCode::NOT_FOUND,
+            Json(serde_json::json!({"error": "Command not found"})),
+        ));
     }
 
     Ok(StatusCode::NO_CONTENT)
@@ -448,7 +504,10 @@ pub async fn list_webhooks(
         })?;
 
     if owner.as_deref() != Some(&user_id) {
-        return Err((StatusCode::FORBIDDEN, Json(serde_json::json!({"error": "Forbidden"}))));
+        return Err((
+            StatusCode::FORBIDDEN,
+            Json(serde_json::json!({"error": "Forbidden"})),
+        ));
     }
 
     let webhooks = sqlx::query_as::<_, BotWebhook>(
@@ -486,11 +545,16 @@ pub async fn create_webhook(
         })?;
 
     if owner.as_deref() != Some(&user_id) {
-        return Err((StatusCode::FORBIDDEN, Json(serde_json::json!({"error": "Forbidden"}))));
+        return Err((
+            StatusCode::FORBIDDEN,
+            Json(serde_json::json!({"error": "Forbidden"})),
+        ));
     }
 
     let wh_id = Uuid::new_v4().simple().to_string();
-    let secret = req.secret.unwrap_or_else(|| Uuid::new_v4().simple().to_string());
+    let secret = req
+        .secret
+        .unwrap_or_else(|| Uuid::new_v4().simple().to_string());
     let events = serde_json::to_string(&req.events.unwrap_or_else(|| vec!["message".to_string()]))
         .unwrap_or_else(|_| r#"["message"]"#.to_string());
     let now = Utc::now().to_rfc3339();
@@ -536,7 +600,10 @@ pub async fn delete_webhook(
         })?;
 
     if owner.as_deref() != Some(&user_id) {
-        return Err((StatusCode::FORBIDDEN, Json(serde_json::json!({"error": "Forbidden"}))));
+        return Err((
+            StatusCode::FORBIDDEN,
+            Json(serde_json::json!({"error": "Forbidden"})),
+        ));
     }
 
     let result = sqlx::query("DELETE FROM bot_webhooks WHERE id = ? AND bot_id = ?")
@@ -552,7 +619,10 @@ pub async fn delete_webhook(
         })?;
 
     if result.rows_affected() == 0 {
-        return Err((StatusCode::NOT_FOUND, Json(serde_json::json!({"error": "Webhook not found"}))));
+        return Err((
+            StatusCode::NOT_FOUND,
+            Json(serde_json::json!({"error": "Webhook not found"})),
+        ));
     }
 
     Ok(StatusCode::NO_CONTENT)
@@ -599,55 +669,59 @@ pub async fn install_from_store(
 ) -> Result<Json<Bot>, (StatusCode, Json<serde_json::Value>)> {
     let user_id = require_auth(&headers, &state)?;
     // Get listing
-    let listing: Option<BotStoreListing> = sqlx::query_as(
-        "SELECT * FROM bot_store_listings WHERE id = ?",
-    )
-    .bind(&listing_id)
-    .fetch_optional(&*state.db)
-    .await
-    .map_err(|e| {
-        (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Json(serde_json::json!({"error": e.to_string()})),
-        )
-    })?;
+    let listing: Option<BotStoreListing> =
+        sqlx::query_as("SELECT * FROM bot_store_listings WHERE id = ?")
+            .bind(&listing_id)
+            .fetch_optional(&*state.db)
+            .await
+            .map_err(|e| {
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Json(serde_json::json!({"error": e.to_string()})),
+                )
+            })?;
 
     let listing = match listing {
         Some(l) => l,
-        None => return Err((StatusCode::NOT_FOUND, Json(serde_json::json!({"error": "Bot not found in store"})))),
+        None => {
+            return Err((
+                StatusCode::NOT_FOUND,
+                Json(serde_json::json!({"error": "Bot not found in store"})),
+            ))
+        }
     };
 
     // If listing has a bot_id, install it. Otherwise create a new bot.
     let bot_id = if let Some(ref bot_id) = listing.bot_id {
         // Check if already installed
-        let exists: Option<(String,)> = sqlx::query_as(
-            "SELECT bot_id FROM bot_installations WHERE bot_id = ? AND user_id = ?",
-        )
-        .bind(bot_id)
-        .bind(&user_id)
-        .fetch_optional(&*state.db)
-        .await
-        .ok()
-        .flatten();
+        let exists: Option<(String,)> =
+            sqlx::query_as("SELECT bot_id FROM bot_installations WHERE bot_id = ? AND user_id = ?")
+                .bind(bot_id)
+                .bind(&user_id)
+                .fetch_optional(&*state.db)
+                .await
+                .ok()
+                .flatten();
 
         if exists.is_some() {
-            return Err((StatusCode::CONFLICT, Json(serde_json::json!({"error": "Already installed"}))));
+            return Err((
+                StatusCode::CONFLICT,
+                Json(serde_json::json!({"error": "Already installed"})),
+            ));
         }
 
         // Link to user
-        sqlx::query(
-            "UPDATE bots SET owner_id = ? WHERE id = ?",
-        )
-        .bind(&user_id)
-        .bind(bot_id)
-        .execute(&*state.db)
-        .await
-        .map_err(|e| {
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(serde_json::json!({"error": e.to_string()})),
-            )
-        })?;
+        sqlx::query("UPDATE bots SET owner_id = ? WHERE id = ?")
+            .bind(&user_id)
+            .bind(bot_id)
+            .execute(&*state.db)
+            .await
+            .map_err(|e| {
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Json(serde_json::json!({"error": e.to_string()})),
+                )
+            })?;
 
         bot_id.clone()
     } else {
@@ -693,17 +767,21 @@ pub async fn install_from_store(
     .ok();
 
     // Update install count
-    sqlx::query(
-        "UPDATE bot_store_listings SET install_count = install_count + 1 WHERE id = ?",
-    )
-    .bind(&listing_id)
-    .execute(&*state.db)
-    .await
-    .ok();
+    sqlx::query("UPDATE bot_store_listings SET install_count = install_count + 1 WHERE id = ?")
+        .bind(&listing_id)
+        .execute(&*state.db)
+        .await
+        .ok();
 
-    get_bot_by_id(&*state.db, &bot_id).await
+    get_bot_by_id(&*state.db, &bot_id)
+        .await
         .map(Json)
-        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({"error": e.to_string()}))))
+        .map_err(|e| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(serde_json::json!({"error": e.to_string()})),
+            )
+        })
 }
 
 /// Search bots in bot store
@@ -744,8 +822,12 @@ pub async fn search_bots(
         query_builder = query_builder.bind(bind);
     }
 
-    let bots = query_builder.fetch_all(&*state.db).await
-        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({"error": e.to_string()}))))?;
+    let bots = query_builder.fetch_all(&*state.db).await.map_err(|e| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(serde_json::json!({"error": e.to_string()})),
+        )
+    })?;
 
     Ok(Json(bots))
 }
@@ -759,28 +841,38 @@ pub async fn uninstall_from_store(
     let user_id = require_auth(&headers, &state)?;
 
     // Check if bot is installed by this user
-    let installed: Option<(String,)> = sqlx::query_as(
-        "SELECT bot_id FROM bot_installations WHERE bot_id = ? AND user_id = ?",
-    )
-    .bind(&bot_id)
-    .bind(&user_id)
-    .fetch_optional(&*state.db)
-    .await
-    .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({"error": e.to_string()}))))?;
+    let installed: Option<(String,)> =
+        sqlx::query_as("SELECT bot_id FROM bot_installations WHERE bot_id = ? AND user_id = ?")
+            .bind(&bot_id)
+            .bind(&user_id)
+            .fetch_optional(&*state.db)
+            .await
+            .map_err(|e| {
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Json(serde_json::json!({"error": e.to_string()})),
+                )
+            })?;
 
     if installed.is_none() {
-        return Err((StatusCode::NOT_FOUND, Json(serde_json::json!({"error": "Bot not installed by this user"}))));
+        return Err((
+            StatusCode::NOT_FOUND,
+            Json(serde_json::json!({"error": "Bot not installed by this user"})),
+        ));
     }
 
     // Remove installation record
-    sqlx::query(
-        "DELETE FROM bot_installations WHERE bot_id = ? AND user_id = ?",
-    )
-    .bind(&bot_id)
-    .bind(&user_id)
-    .execute(&*state.db)
-    .await
-    .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({"error": e.to_string()}))))?;
+    sqlx::query("DELETE FROM bot_installations WHERE bot_id = ? AND user_id = ?")
+        .bind(&bot_id)
+        .bind(&user_id)
+        .execute(&*state.db)
+        .await
+        .map_err(|e| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(serde_json::json!({"error": e.to_string()})),
+            )
+        })?;
 
     // Decrement install count
     sqlx::query(
@@ -791,7 +883,9 @@ pub async fn uninstall_from_store(
     .await
     .ok();
 
-    Ok(Json(serde_json::json!({ "success": true, "message": "Bot uninstalled successfully" })))
+    Ok(Json(
+        serde_json::json!({ "success": true, "message": "Bot uninstalled successfully" }),
+    ))
 }
 
 // ============================================================================

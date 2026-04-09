@@ -109,29 +109,25 @@ impl TokenRegistry {
         // Arbitrum tokens
         registry.tokens.insert(
             Chain::Arbitrum.chain_id(),
-            vec![
-                TokenInfo {
-                    address: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831".to_string(),
-                    name: "USD Coin".to_string(),
-                    symbol: "USDC".to_string(),
-                    decimals: 6,
-                    logo_uri: None,
-                },
-            ],
+            vec![TokenInfo {
+                address: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831".to_string(),
+                name: "USD Coin".to_string(),
+                symbol: "USDC".to_string(),
+                decimals: 6,
+                logo_uri: None,
+            }],
         );
 
         // Base tokens
         registry.tokens.insert(
             Chain::Base.chain_id(),
-            vec![
-                TokenInfo {
-                    address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913".to_string(),
-                    name: "USD Coin".to_string(),
-                    symbol: "USDC".to_string(),
-                    decimals: 6,
-                    logo_uri: None,
-                },
-            ],
+            vec![TokenInfo {
+                address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913".to_string(),
+                name: "USD Coin".to_string(),
+                symbol: "USDC".to_string(),
+                decimals: 6,
+                logo_uri: None,
+            }],
         );
 
         registry
@@ -147,34 +143,27 @@ impl TokenRegistry {
 
     /// Find token by symbol
     pub fn find_by_symbol(&self, chain: Chain, symbol: &str) -> Option<TokenInfo> {
-        self.tokens
-            .get(&chain.chain_id())
-            .and_then(|tokens| {
-                tokens
-                    .iter()
-                    .find(|t| t.symbol.eq_ignore_ascii_case(symbol))
-                    .cloned()
-            })
+        self.tokens.get(&chain.chain_id()).and_then(|tokens| {
+            tokens
+                .iter()
+                .find(|t| t.symbol.eq_ignore_ascii_case(symbol))
+                .cloned()
+        })
     }
 
     /// Find token by address
     pub fn find_by_address(&self, chain: Chain, address: &str) -> Option<TokenInfo> {
-        self.tokens
-            .get(&chain.chain_id())
-            .and_then(|tokens| {
-                tokens
-                    .iter()
-                    .find(|t| t.address.eq_ignore_ascii_case(address))
-                    .cloned()
-            })
+        self.tokens.get(&chain.chain_id()).and_then(|tokens| {
+            tokens
+                .iter()
+                .find(|t| t.address.eq_ignore_ascii_case(address))
+                .cloned()
+        })
     }
 
     /// Add a custom token
     pub fn add_token(&mut self, chain: Chain, token: TokenInfo) {
-        self.tokens
-            .entry(chain.chain_id())
-            .or_default()
-            .push(token);
+        self.tokens.entry(chain.chain_id()).or_default().push(token);
     }
 }
 
@@ -254,10 +243,7 @@ mod tests {
         assert_eq!(tokens.len(), 4);
 
         let usdc = registry.find_by_symbol(Chain::Ethereum, "USDC").unwrap();
-        assert_eq!(
-            usdc.address,
-            "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
-        );
+        assert_eq!(usdc.address, "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48");
         assert_eq!(usdc.decimals, 6);
     }
 
@@ -283,10 +269,7 @@ mod tests {
     fn test_token_registry_base() {
         let registry = TokenRegistry::new();
         let usdc = registry.find_by_symbol(Chain::Base, "USDC").unwrap();
-        assert_eq!(
-            usdc.address,
-            "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
-        );
+        assert_eq!(usdc.address, "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913");
     }
 
     #[test]

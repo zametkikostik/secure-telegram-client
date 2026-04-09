@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Arc;
 use thiserror::Error;
-use tokio::sync::{RwLock, Mutex};
+use tokio::sync::{Mutex, RwLock};
 use tracing::{debug, info};
 
 #[derive(Error, Debug)]
@@ -63,20 +63,28 @@ impl BleTransport {
         }
     }
 
-    pub fn is_available(&self) -> bool { self.available }
+    pub fn is_available(&self) -> bool {
+        self.available
+    }
 
     pub async fn on_message<F>(&self, cb: F)
-    where F: Fn(Vec<u8>, String) + Send + Sync + 'static {
+    where
+        F: Fn(Vec<u8>, String) + Send + Sync + 'static,
+    {
         *self.message_callback.lock().await = Some(Arc::new(cb));
     }
 
     pub async fn on_peer_discovered<F>(&self, cb: F)
-    where F: Fn(BlePeer) + Send + Sync + 'static {
+    where
+        F: Fn(BlePeer) + Send + Sync + 'static,
+    {
         *self.peer_callback.lock().await = Some(Arc::new(cb));
     }
 
     pub async fn start_scanning(&self) -> BleResult<()> {
-        if !self.available { return Err(BleError::AdapterNotAvailable); }
+        if !self.available {
+            return Err(BleError::AdapterNotAvailable);
+        }
         // With btleplug:
         // let manager = Manager::new().await?;
         // let adapters = manager.adapters().await?;
@@ -86,18 +94,24 @@ impl BleTransport {
     }
 
     pub async fn start_advertising(&self) -> BleResult<()> {
-        if !self.available { return Err(BleError::AdapterNotAvailable); }
+        if !self.available {
+            return Err(BleError::AdapterNotAvailable);
+        }
         info!("BLE advertising started (stub)");
         Ok(())
     }
 
     pub async fn connect(&self, _ble_address: &str) -> BleResult<()> {
-        if !self.available { return Err(BleError::AdapterNotAvailable); }
+        if !self.available {
+            return Err(BleError::AdapterNotAvailable);
+        }
         Ok(())
     }
 
     pub async fn send_message(&self, _ble_address: &str, _data: &[u8]) -> BleResult<()> {
-        if !self.available { return Err(BleError::AdapterNotAvailable); }
+        if !self.available {
+            return Err(BleError::AdapterNotAvailable);
+        }
         // With btleplug:
         // peripheral.write_characteristic(msg_char, data, WriteType::WithoutResponse).await?;
         Ok(())

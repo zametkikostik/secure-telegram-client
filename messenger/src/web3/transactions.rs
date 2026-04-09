@@ -173,10 +173,7 @@ impl TxStore {
             updated_at: now,
         };
 
-        self.transactions
-            .lock()
-            .unwrap()
-            .insert(id.clone(), record);
+        self.transactions.lock().unwrap().insert(id.clone(), record);
 
         id
     }
@@ -195,25 +192,39 @@ impl TxStore {
 
     /// Mark as submitted
     pub fn mark_submitted(&self, id: &str, tx_hash: &str) -> Option<TransactionRecord> {
-        self.update_status(id, TxStatus::Submitted {
-            tx_hash: tx_hash.to_string(),
-        })
+        self.update_status(
+            id,
+            TxStatus::Submitted {
+                tx_hash: tx_hash.to_string(),
+            },
+        )
     }
 
     /// Mark as confirmed
     pub fn mark_confirmed(&self, id: &str, tx_hash: &str, block: u64) -> Option<TransactionRecord> {
-        self.update_status(id, TxStatus::Confirmed {
-            tx_hash: tx_hash.to_string(),
-            block_number: block,
-        })
+        self.update_status(
+            id,
+            TxStatus::Confirmed {
+                tx_hash: tx_hash.to_string(),
+                block_number: block,
+            },
+        )
     }
 
     /// Mark as failed
-    pub fn mark_failed(&self, id: &str, tx_hash: Option<&str>, error: &str) -> Option<TransactionRecord> {
-        self.update_status(id, TxStatus::Failed {
-            tx_hash: tx_hash.map(String::from),
-            error: error.to_string(),
-        })
+    pub fn mark_failed(
+        &self,
+        id: &str,
+        tx_hash: Option<&str>,
+        error: &str,
+    ) -> Option<TransactionRecord> {
+        self.update_status(
+            id,
+            TxStatus::Failed {
+                tx_hash: tx_hash.map(String::from),
+                error: error.to_string(),
+            },
+        )
     }
 
     /// Cancel a pending transaction
@@ -295,8 +306,8 @@ pub struct GasEstimate {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GasPrice {
-    pub max_fee_per_gas: String,     // in gwei
-    pub max_priority_fee: String,    // in gwei
+    pub max_fee_per_gas: String,  // in gwei
+    pub max_priority_fee: String, // in gwei
     pub estimated_time_secs: u64,
 }
 
@@ -417,7 +428,8 @@ mod tests {
         let tx = TxRequest::approval(
             "0xSpender".to_string(),
             "0xToken".to_string(),
-            "115792089237316195423570985008687907853269984665640564039457584007913129639935".to_string(),
+            "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                .to_string(),
         );
 
         assert_eq!(tx.tx_type, TxType::Approval);

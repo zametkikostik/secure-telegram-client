@@ -10,7 +10,7 @@
 //! - POST /api/chat — chat completion (preferred)
 //! - POST /api/generate — text generation (legacy)
 
-use super::{AiError, AiResult, ModelInfo, AiProvider, ProviderConfig};
+use super::{AiError, AiProvider, AiResult, ModelInfo, ProviderConfig};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
@@ -142,10 +142,9 @@ impl OllamaProvider {
             .get(format!("{}/api/tags", self.config.base_url))
             .send()
             .await
-            .map_err(|e| AiError::ProviderError(
-                "Ollama".to_string(),
-                format!("Failed to connect: {}", e),
-            ))?;
+            .map_err(|e| {
+                AiError::ProviderError("Ollama".to_string(), format!("Failed to connect: {}", e))
+            })?;
 
         if !response.status().is_success() {
             return Err(AiError::ProviderError(
@@ -154,13 +153,9 @@ impl OllamaProvider {
             ));
         }
 
-        let data: OllamaTagsResponse = response
-            .json()
-            .await
-            .map_err(|e| AiError::ProviderError(
-                "Ollama".to_string(),
-                format!("JSON parse: {}", e),
-            ))?;
+        let data: OllamaTagsResponse = response.json().await.map_err(|e| {
+            AiError::ProviderError("Ollama".to_string(), format!("JSON parse: {}", e))
+        })?;
 
         Ok(data.models)
     }
@@ -237,22 +232,17 @@ impl OllamaProvider {
             ));
         }
 
-        let data: OllamaChatResponse = response
-            .json()
-            .await
-            .map_err(|e| AiError::ProviderError(
-                "Ollama".to_string(),
-                format!("JSON parse: {}", e),
-            ))?;
+        let data: OllamaChatResponse = response.json().await.map_err(|e| {
+            AiError::ProviderError("Ollama".to_string(), format!("JSON parse: {}", e))
+        })?;
 
         let content = data
             .message
             .as_ref()
             .map(|m| m.content.clone())
-            .ok_or_else(|| AiError::ProviderError(
-                "Ollama".to_string(),
-                "No message in response".into(),
-            ))?;
+            .ok_or_else(|| {
+                AiError::ProviderError("Ollama".to_string(), "No message in response".into())
+            })?;
 
         Ok(content.trim().to_string())
     }
@@ -315,13 +305,9 @@ impl OllamaProvider {
             ));
         }
 
-        let data: OllamaGenerateResponse = response
-            .json()
-            .await
-            .map_err(|e| AiError::ProviderError(
-                "Ollama".to_string(),
-                format!("JSON parse: {}", e),
-            ))?;
+        let data: OllamaGenerateResponse = response.json().await.map_err(|e| {
+            AiError::ProviderError("Ollama".to_string(), format!("JSON parse: {}", e))
+        })?;
 
         if data.response.is_empty() {
             return Err(AiError::ProviderError(
@@ -340,8 +326,8 @@ impl OllamaProvider {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use super::ProviderConfig;
+    use super::*;
 
     fn make_config() -> ProviderConfig {
         ProviderConfig {
@@ -370,7 +356,11 @@ mod tests {
         let models = models.unwrap();
         println!("Local Ollama models:");
         for m in &models {
-            println!("  - {} (size: {:.1} GB)", m.name, (m.size.unwrap_or(0) as f64) / 1e9);
+            println!(
+                "  - {} (size: {:.1} GB)",
+                m.name,
+                (m.size.unwrap_or(0) as f64) / 1e9
+            );
         }
     }
 

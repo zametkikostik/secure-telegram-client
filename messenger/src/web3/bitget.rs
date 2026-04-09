@@ -209,12 +209,17 @@ impl BitgetClient {
     }
 
     /// Получить заголовки авторизации
-    fn auth_headers(&self, method: Method, request_path: &str, body: &str) -> HashMap<String, String> {
+    fn auth_headers(
+        &self,
+        method: Method,
+        request_path: &str,
+        body: &str,
+    ) -> HashMap<String, String> {
         let mut headers = HashMap::new();
-        
-        if let (Some(api_key), Some(secret_key), Some(passphrase)) = 
-            (&self.api_key, &self.secret_key, &self.passphrase) {
-            
+
+        if let (Some(api_key), Some(secret_key), Some(passphrase)) =
+            (&self.api_key, &self.secret_key, &self.passphrase)
+        {
             // Bitget требует подписи запросов
             let timestamp = SystemTime::now()
                 .duration_since(UNIX_EPOCH)
@@ -264,9 +269,7 @@ impl BitgetClient {
         let body_str = order_body.to_string();
         let auth_headers = self.auth_headers(Method::POST, path, &body_str);
 
-        let mut req = self.http_client
-            .post(&url)
-            .json(&order_body);
+        let mut req = self.http_client.post(&url).json(&order_body);
 
         for (key, value) in auth_headers {
             req = req.header(&key, &value);
@@ -283,7 +286,10 @@ impl BitgetClient {
                 .await
                 .unwrap_or_else(|_| "Unknown error".to_string());
             error!("Bitget order error: {}", error_text);
-            return Err(Web3Error::Network(format!("Bitget order error: {}", error_text)));
+            return Err(Web3Error::Network(format!(
+                "Bitget order error: {}",
+                error_text
+            )));
         }
 
         let order_response: serde_json::Value = response
@@ -303,7 +309,8 @@ impl BitgetClient {
         let now = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap_or_default()
-            .as_secs() * 1000;
+            .as_secs()
+            * 1000;
 
         let buy_response = BuyResponse {
             order_id: data["orderId"].as_str().unwrap_or("").to_string(),
@@ -324,10 +331,7 @@ impl BitgetClient {
 
         info!(
             "Order placed: {} {} (id: {}, status: {})",
-            buy_response.amount,
-            buy_response.symbol,
-            buy_response.order_id,
-            buy_response.status
+            buy_response.amount, buy_response.symbol, buy_response.order_id, buy_response.status
         );
 
         Ok(buy_response)
@@ -342,13 +346,12 @@ impl BitgetClient {
             "orderId": order_id,
         });
 
-        let mut req = self.http_client
-            .post(&url)
-            .json(&query);
+        let mut req = self.http_client.post(&url).json(&query);
 
         // Для GET запросов Bitget использует POST для получения информации
         let body_str = query.to_string();
-        let auth_headers = self.auth_headers(Method::POST, "/api/spot/v1/trade/orderInfo", &body_str);
+        let auth_headers =
+            self.auth_headers(Method::POST, "/api/spot/v1/trade/orderInfo", &body_str);
 
         for (key, value) in auth_headers {
             req = req.header(&key, &value);
@@ -364,7 +367,10 @@ impl BitgetClient {
                 .text()
                 .await
                 .unwrap_or_else(|_| "Unknown error".to_string());
-            return Err(Web3Error::Network(format!("Bitget API error: {}", error_text)));
+            return Err(Web3Error::Network(format!(
+                "Bitget API error: {}",
+                error_text
+            )));
         }
 
         let order_data: serde_json::Value = response
@@ -377,7 +383,8 @@ impl BitgetClient {
         let now = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap_or_default()
-            .as_secs() * 1000;
+            .as_secs()
+            * 1000;
 
         Ok(BuyResponse {
             order_id: data["orderId"].as_str().unwrap_or("").to_string(),
@@ -410,9 +417,7 @@ impl BitgetClient {
         let body_str = cancel_body.to_string();
         let auth_headers = self.auth_headers(Method::POST, path, &body_str);
 
-        let mut req = self.http_client
-            .post(&url)
-            .json(&cancel_body);
+        let mut req = self.http_client.post(&url).json(&cancel_body);
 
         for (key, value) in auth_headers {
             req = req.header(&key, &value);
@@ -428,7 +433,10 @@ impl BitgetClient {
                 .text()
                 .await
                 .unwrap_or_else(|_| "Unknown error".to_string());
-            return Err(Web3Error::Network(format!("Bitget cancel error: {}", error_text)));
+            return Err(Web3Error::Network(format!(
+                "Bitget cancel error: {}",
+                error_text
+            )));
         }
 
         Ok(())
@@ -459,7 +467,10 @@ impl BitgetClient {
                 .text()
                 .await
                 .unwrap_or_else(|_| "Unknown error".to_string());
-            return Err(Web3Error::Network(format!("Bitget API error: {}", error_text)));
+            return Err(Web3Error::Network(format!(
+                "Bitget API error: {}",
+                error_text
+            )));
         }
 
         let account_data: serde_json::Value = response
@@ -468,7 +479,7 @@ impl BitgetClient {
             .map_err(|e| Web3Error::Network(format!("Failed to parse response: {}", e)))?;
 
         let data = &account_data["data"];
-        
+
         Ok(AccountInfo {
             available_balance: data["available"].as_str().unwrap_or("0").to_string(),
             frozen_balance: data["frozen"].as_str().unwrap_or("0").to_string(),
@@ -485,7 +496,8 @@ impl BitgetClient {
     pub async fn get_market_price(&self, symbol: &str) -> Web3Result<MarketPrice> {
         let url = format!("{}/api/market/v1/ticker", BITGET_API_BASE);
 
-        let response = self.http_client
+        let response = self
+            .http_client
             .get(&url)
             .query(&[("symbol", symbol)])
             .send()
@@ -497,7 +509,10 @@ impl BitgetClient {
                 .text()
                 .await
                 .unwrap_or_else(|_| "Unknown error".to_string());
-            return Err(Web3Error::Network(format!("Bitget API error: {}", error_text)));
+            return Err(Web3Error::Network(format!(
+                "Bitget API error: {}",
+                error_text
+            )));
         }
 
         let market_data: serde_json::Value = response
@@ -526,7 +541,8 @@ impl BitgetClient {
     pub async fn get_symbols(&self) -> Web3Result<Vec<String>> {
         let url = format!("{}/api/spot/v1/public/symbols", BITGET_API_BASE);
 
-        let response = self.http_client
+        let response = self
+            .http_client
             .get(&url)
             .send()
             .await
@@ -537,7 +553,10 @@ impl BitgetClient {
                 .text()
                 .await
                 .unwrap_or_else(|_| "Unknown error".to_string());
-            return Err(Web3Error::Network(format!("Bitget API error: {}", error_text)));
+            return Err(Web3Error::Network(format!(
+                "Bitget API error: {}",
+                error_text
+            )));
         }
 
         let symbols_data: serde_json::Value = response
@@ -565,10 +584,7 @@ impl BitgetClient {
         symbol: String,
         quote_amount: String, // Amount in USDT
     ) -> Web3Result<BuyResponse> {
-        info!(
-            "Starting market buy: {} {}",
-            quote_amount, symbol
-        );
+        info!("Starting market buy: {} {}", quote_amount, symbol);
 
         let request = BuyRequest {
             symbol: symbol.clone(),
@@ -584,9 +600,7 @@ impl BitgetClient {
 
         info!(
             "Order placed: {} {} (id: {})",
-            order.amount,
-            symbol,
-            order.order_id
+            order.amount, symbol, order.order_id
         );
 
         Ok(order)
@@ -598,10 +612,7 @@ impl BitgetClient {
         symbol: String,
         amount: String, // Amount in crypto
     ) -> Web3Result<BuyResponse> {
-        info!(
-            "Starting market sell: {} {}",
-            amount, symbol
-        );
+        info!("Starting market sell: {} {}", amount, symbol);
 
         let request = BuyRequest {
             symbol: symbol.clone(),
@@ -617,9 +628,7 @@ impl BitgetClient {
 
         info!(
             "Order placed: {} {} (id: {})",
-            order.amount,
-            symbol,
-            order.order_id
+            order.amount, symbol, order.order_id
         );
 
         Ok(order)
@@ -691,10 +700,10 @@ fn hmac_sha256(key: &str, message: &str) -> String {
 
     type HmacSha256 = Hmac<Sha256>;
 
-    let mut mac = HmacSha256::new_from_slice(key.as_bytes())
-        .expect("HMAC can take key of any size");
+    let mut mac =
+        HmacSha256::new_from_slice(key.as_bytes()).expect("HMAC can take key of any size");
     mac.update(message.as_bytes());
-    
+
     let result = mac.finalize();
     hex::encode(result.into_bytes())
 }
@@ -704,7 +713,7 @@ pub fn calculate_fee(amount: &str, fee_bps: u64) -> Web3Result<String> {
     let amount_f64: f64 = amount
         .parse()
         .map_err(|_| Web3Error::Wallet(format!("Invalid amount: {}", amount)))?;
-    
+
     let fee = amount_f64 * (fee_bps as f64) / 10000.0;
     Ok(format!("{:.4}", fee))
 }
@@ -719,9 +728,7 @@ mod tests {
 
     #[test]
     fn test_buy_request_builder_market_buy() {
-        let request = BuyRequestBuilder::new("BTCUSDT")
-            .market_buy("100")
-            .build();
+        let request = BuyRequestBuilder::new("BTCUSDT").market_buy("100").build();
 
         assert_eq!(request.symbol, "BTCUSDT");
         assert_eq!(request.side, OrderSide::Buy);

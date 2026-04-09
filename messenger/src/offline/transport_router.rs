@@ -16,7 +16,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 use tokio::sync::RwLock;
-use tracing::{debug, info, warn, error};
+use tracing::{debug, error, info, warn};
 
 // ============================================================================
 // Transport Types
@@ -53,12 +53,12 @@ impl TransportType {
     /// Default priority (lower = better)
     pub fn default_priority(&self) -> u8 {
         match self {
-            TransportType::P2PDirect => 1,       // Fastest
-            TransportType::WifiLan => 2,         // Very fast (local)
-            TransportType::Bluetooth => 3,       // Fast (proximity)
-            TransportType::Tor => 4,             // Slow but private
+            TransportType::P2PDirect => 1,        // Fastest
+            TransportType::WifiLan => 2,          // Very fast (local)
+            TransportType::Bluetooth => 3,        // Fast (proximity)
+            TransportType::Tor => 4,              // Slow but private
             TransportType::CloudflareWorker => 5, // Medium
-            TransportType::TelegramBot => 6,     // Slowest fallback
+            TransportType::TelegramBot => 6,      // Slowest fallback
         }
     }
 }
@@ -125,12 +125,23 @@ pub struct RoutingMessage {
 // Transport Handler
 // ============================================================================
 
-pub type SendFn = Box<dyn Fn(TransportType, &str, Vec<u8>) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<u64, String>> + Send>> + Send + Sync>;
+pub type SendFn = Box<
+    dyn Fn(
+            TransportType,
+            &str,
+            Vec<u8>,
+        )
+            -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<u64, String>> + Send>>
+        + Send
+        + Sync,
+>;
 
 pub struct TransportHandler {
     pub transport_type: TransportType,
     pub send_fn: SendFn,
-    pub health_fn: Box<dyn Fn() -> std::pin::Pin<Box<dyn std::future::Future<Output = bool> + Send>> + Send + Sync>,
+    pub health_fn: Box<
+        dyn Fn() -> std::pin::Pin<Box<dyn std::future::Future<Output = bool> + Send>> + Send + Sync,
+    >,
 }
 
 // ============================================================================
@@ -160,10 +171,25 @@ impl TransportRouter {
     // Registration
     // ========================================================================
 
-    pub async fn register_transport<F, H>(&self, transport_type: TransportType, send_fn: F, health_fn: H)
-    where
-        F: Fn(TransportType, &str, Vec<u8>) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<u64, String>> + Send>> + Send + Sync + 'static,
-        H: Fn() -> std::pin::Pin<Box<dyn std::future::Future<Output = bool> + Send>> + Send + Sync + 'static,
+    pub async fn register_transport<F, H>(
+        &self,
+        transport_type: TransportType,
+        send_fn: F,
+        health_fn: H,
+    ) where
+        F: Fn(
+                TransportType,
+                &str,
+                Vec<u8>,
+            )
+                -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<u64, String>> + Send>>
+            + Send
+            + Sync
+            + 'static,
+        H: Fn() -> std::pin::Pin<Box<dyn std::future::Future<Output = bool> + Send>>
+            + Send
+            + Sync
+            + 'static,
     {
         let handler = TransportHandler {
             transport_type,
@@ -171,10 +197,16 @@ impl TransportRouter {
             health_fn: Box::new(health_fn),
         };
 
-        self.transports.write().await.insert(transport_type, handler);
+        self.transports
+            .write()
+            .await
+            .insert(transport_type, handler);
 
         // Initialize stats
-        self.stats.write().await.insert(transport_type, TransportStats::new(transport_type));
+        self.stats
+            .write()
+            .await
+            .insert(transport_type, TransportStats::new(transport_type));
 
         info!("Registered transport: {}", transport_type.name());
     }
@@ -184,7 +216,11 @@ impl TransportRouter {
     // ========================================================================
 
     /// Send message with automatic transport selection and fallback
-    pub async fn send_message(&self, recipient_id: &str, encrypted_payload: Vec<u8>) -> Result<String, String> {
+    pub async fn send_message(
+        &self,
+        recipient_id: &str,
+        encrypted_payload: Vec<u8>,
+    ) -> Result<String, String> {
         let msg = RoutingMessage {
             id: uuid::Uuid::new_v4().to_string(),
             sender_id: self.local_peer_id.clone(),
@@ -216,8 +252,15 @@ impl TransportRouter {
             match self.try_send(transport_type, &msg).await {
                 Ok(delivery_time_ms) => {
                     // Update stats
-                    self.update_stats(*transport_type, true, delivery_time_ms).await;
-                    let msg_id = msg.id.clone(); info!("Message {} delivered via {} in {}ms", msg_id, transport_type.name(), delivery_time_ms);
+                    self.update_stats(*transport_type, true, delivery_time_ms)
+                        .await;
+                    let msg_id = msg.id.clone();
+                    info!(
+                        "Message {} delivered via {} in {}ms",
+                        msg_id,
+                        transport_type.name(),
+                        delivery_time_ms
+                    );
                     return Ok(format!("{}:{}", transport_type.name(), msg.id));
                 }
                 Err(e) => {
@@ -228,22 +271,40 @@ impl TransportRouter {
         }
 
         // All transports failed
-        let msg_id = msg.id.clone(); let max_retries = msg.max_retries; let retry_count = msg.retry_count + 1;
+        let msg_id = msg.id.clone();
+        let max_retries = msg.max_retries;
+        let retry_count = msg.retry_count + 1;
         if retry_count < msg.max_retries {
             self.message_queue.write().await.push(msg.clone());
-            Err(format!("All transports failed, message {} queued for retry {}/{}", msg_id, retry_count, max_retries))
+            Err(format!(
+                "All transports failed, message {} queued for retry {}/{}",
+                msg_id, retry_count, max_retries
+            ))
         } else {
-            Err(format!("All transports failed after {} retries, message dropped", max_retries))
+            Err(format!(
+                "All transports failed after {} retries, message dropped",
+                max_retries
+            ))
         }
     }
 
-    async fn try_send(&self, transport_type: &TransportType, msg: &RoutingMessage) -> Result<u64, String> {
+    async fn try_send(
+        &self,
+        transport_type: &TransportType,
+        msg: &RoutingMessage,
+    ) -> Result<u64, String> {
         let transports = self.transports.read().await;
-        let handler = transports.get(transport_type)
+        let handler = transports
+            .get(transport_type)
             .ok_or_else(|| format!("Transport {} not registered", transport_type.name()))?;
 
         let start = Instant::now();
-        let result = (handler.send_fn)(*transport_type, &msg.recipient_id, msg.encrypted_payload.clone()).await;
+        let result = (handler.send_fn)(
+            *transport_type,
+            &msg.recipient_id,
+            msg.encrypted_payload.clone(),
+        )
+        .await;
         let elapsed_ms = start.elapsed().as_millis() as u64;
 
         match result {
@@ -277,11 +338,20 @@ impl TransportRouter {
                         s.last_health_check_secs = 0;
                     }
 
-                    debug!("Transport {} health: {}", ttype.name(), if available { "OK" } else { "FAIL" });
+                    debug!(
+                        "Transport {} health: {}",
+                        ttype.name(),
+                        if available { "OK" } else { "FAIL" }
+                    );
                 }
 
                 // Retry queued messages if new transports available
-                let available_count = stats.read().await.values().filter(|s| s.is_available).count();
+                let available_count = stats
+                    .read()
+                    .await
+                    .values()
+                    .filter(|s| s.is_available)
+                    .count();
                 if available_count > 0 {
                     let mut queue = message_queue.write().await;
                     if !queue.is_empty() {
@@ -306,7 +376,8 @@ impl TransportRouter {
 
     async fn get_best_transports(&self) -> Vec<(TransportType, f64)> {
         let stats = self.stats.read().await;
-        let mut transports: Vec<_> = stats.iter()
+        let mut transports: Vec<_> = stats
+            .iter()
             .filter(|(_, s)| s.is_available)
             .map(|(t, s)| (*t, s.score()))
             .collect();
@@ -324,7 +395,8 @@ impl TransportRouter {
             // Exponential moving average for RTT
             s.avg_rtt_ms = s.avg_rtt_ms * 0.8 + (rtt_ms as f64) * 0.2;
             // Success rate
-            s.success_rate = (s.total_messages - s.failed_messages) as f64 / s.total_messages as f64;
+            s.success_rate =
+                (s.total_messages - s.failed_messages) as f64 / s.total_messages as f64;
             s.last_used_secs_ago = Some(0);
         }
     }
@@ -334,7 +406,10 @@ impl TransportRouter {
     }
 
     pub async fn get_available_transports(&self) -> Vec<TransportType> {
-        self.stats.read().await.iter()
+        self.stats
+            .read()
+            .await
+            .iter()
             .filter(|(_, s)| s.is_available)
             .map(|(t, _)| *t)
             .collect()
@@ -358,7 +433,17 @@ mod tests {
     use super::*;
     use std::sync::atomic::{AtomicUsize, Ordering};
 
-    fn make_send_fn(counter: Arc<AtomicUsize>, should_fail: bool) -> impl Fn(TransportType, &str, Vec<u8>) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<u64, String>> + Send>> + Send + Sync {
+    fn make_send_fn(
+        counter: Arc<AtomicUsize>,
+        should_fail: bool,
+    ) -> impl Fn(
+        TransportType,
+        &str,
+        Vec<u8>,
+    )
+        -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<u64, String>> + Send>>
+           + Send
+           + Sync {
         move |_t, _recipient, _data| {
             let counter = counter.clone();
             let should_fail = should_fail;
@@ -373,7 +458,10 @@ mod tests {
         }
     }
 
-    fn make_health_fn(available: bool) -> impl Fn() -> std::pin::Pin<Box<dyn std::future::Future<Output = bool> + Send>> + Send + Sync {
+    fn make_health_fn(
+        available: bool,
+    ) -> impl Fn() -> std::pin::Pin<Box<dyn std::future::Future<Output = bool> + Send>> + Send + Sync
+    {
         move || {
             let available = available;
             Box::pin(async move { available })
@@ -385,17 +473,21 @@ mod tests {
         let router = TransportRouter::new("peer1");
         let counter = Arc::new(AtomicUsize::new(0));
 
-        router.register_transport(
-            TransportType::P2PDirect,
-            make_send_fn(counter.clone(), false),
-            make_health_fn(true),
-        ).await;
+        router
+            .register_transport(
+                TransportType::P2PDirect,
+                make_send_fn(counter.clone(), false),
+                make_health_fn(true),
+            )
+            .await;
 
-        router.register_transport(
-            TransportType::CloudflareWorker,
-            make_send_fn(counter.clone(), false),
-            make_health_fn(true),
-        ).await;
+        router
+            .register_transport(
+                TransportType::CloudflareWorker,
+                make_send_fn(counter.clone(), false),
+                make_health_fn(true),
+            )
+            .await;
 
         router.start_health_monitoring().await;
         tokio::time::sleep(Duration::from_millis(100)).await;
@@ -408,11 +500,13 @@ mod tests {
         let router = TransportRouter::new("peer1");
         let counter = Arc::new(AtomicUsize::new(0));
 
-        router.register_transport(
-            TransportType::P2PDirect,
-            make_send_fn(counter.clone(), false),
-            make_health_fn(true),
-        ).await;
+        router
+            .register_transport(
+                TransportType::P2PDirect,
+                make_send_fn(counter.clone(), false),
+                make_health_fn(true),
+            )
+            .await;
 
         router.start_health_monitoring().await;
         tokio::time::sleep(Duration::from_millis(100)).await;
@@ -431,18 +525,22 @@ mod tests {
         let cf_counter = Arc::new(AtomicUsize::new(0));
 
         // P2P always fails
-        router.register_transport(
-            TransportType::P2PDirect,
-            make_send_fn(p2p_counter.clone(), true),
-            make_health_fn(true),
-        ).await;
+        router
+            .register_transport(
+                TransportType::P2PDirect,
+                make_send_fn(p2p_counter.clone(), true),
+                make_health_fn(true),
+            )
+            .await;
 
         // Cloudflare always succeeds
-        router.register_transport(
-            TransportType::CloudflareWorker,
-            make_send_fn(cf_counter.clone(), false),
-            make_health_fn(true),
-        ).await;
+        router
+            .register_transport(
+                TransportType::CloudflareWorker,
+                make_send_fn(cf_counter.clone(), false),
+                make_health_fn(true),
+            )
+            .await;
 
         router.start_health_monitoring().await;
         tokio::time::sleep(Duration::from_millis(100)).await;
@@ -472,11 +570,13 @@ mod tests {
         let router = TransportRouter::new("peer1");
         let counter = Arc::new(AtomicUsize::new(0));
 
-        router.register_transport(
-            TransportType::P2PDirect,
-            make_send_fn(counter.clone(), false),
-            make_health_fn(true),
-        ).await;
+        router
+            .register_transport(
+                TransportType::P2PDirect,
+                make_send_fn(counter.clone(), false),
+                make_health_fn(true),
+            )
+            .await;
 
         router.start_health_monitoring().await;
         tokio::time::sleep(Duration::from_millis(100)).await;
@@ -502,30 +602,34 @@ mod tests {
 
         // Register in reverse order
         let used_clone = used_transport.clone();
-        router.register_transport(
-            TransportType::TelegramBot,
-            move |t, _r, _d| {
-                let used = used_clone.clone();
-                Box::pin(async move {
-                    *used.lock().unwrap() = Some(t);
-                    Ok(100)
-                })
-            },
-            make_health_fn(true),
-        ).await;
+        router
+            .register_transport(
+                TransportType::TelegramBot,
+                move |t, _r, _d| {
+                    let used = used_clone.clone();
+                    Box::pin(async move {
+                        *used.lock().unwrap() = Some(t);
+                        Ok(100)
+                    })
+                },
+                make_health_fn(true),
+            )
+            .await;
 
         let used_clone = used_transport.clone();
-        router.register_transport(
-            TransportType::P2PDirect,
-            move |t, _r, _d| {
-                let used = used_clone.clone();
-                Box::pin(async move {
-                    *used.lock().unwrap() = Some(t);
-                    Ok(5)
-                })
-            },
-            make_health_fn(true),
-        ).await;
+        router
+            .register_transport(
+                TransportType::P2PDirect,
+                move |t, _r, _d| {
+                    let used = used_clone.clone();
+                    Box::pin(async move {
+                        *used.lock().unwrap() = Some(t);
+                        Ok(5)
+                    })
+                },
+                make_health_fn(true),
+            )
+            .await;
 
         router.start_health_monitoring().await;
         tokio::time::sleep(Duration::from_millis(100)).await;

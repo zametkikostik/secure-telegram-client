@@ -56,7 +56,8 @@ impl CdnConfig {
             account_id: std::env::var("R2_ACCOUNT_ID").unwrap_or_default(),
             access_key_id: std::env::var("R2_ACCESS_KEY_ID").unwrap_or_default(),
             secret_access_key: std::env::var("R2_SECRET_ACCESS_KEY").unwrap_or_default(),
-            cdn_url: std::env::var("CDN_URL").unwrap_or_else(|_| "https://cdn.messenger.app".into()),
+            cdn_url: std::env::var("CDN_URL")
+                .unwrap_or_else(|_| "https://cdn.messenger.app".into()),
             default_cache_ttl: 86400 * 30, // 30 days
             image_optimization: true,
         }
@@ -94,17 +95,24 @@ impl CdnClient {
             self.config.account_id, self.config.bucket, key
         );
 
-        let response = self.http_client
+        let response = self
+            .http_client
             .put(&url)
             .header("Content-Type", content_type)
-            .header("Cache-Control", format!("public, max-age={}", self.config.default_cache_ttl))
+            .header(
+                "Cache-Control",
+                format!("public, max-age={}", self.config.default_cache_ttl),
+            )
             .body(data)
             .send()
             .await
             .map_err(|e| CdnError::UploadFailed(e.to_string()))?;
 
         if !response.status().is_success() {
-            return Err(CdnError::UploadFailed(format!("HTTP {}", response.status())));
+            return Err(CdnError::UploadFailed(format!(
+                "HTTP {}",
+                response.status()
+            )));
         }
 
         let cdn_url = format!("{}/{}", self.config.cdn_url, key);
@@ -119,7 +127,12 @@ impl CdnClient {
         image_data: Vec<u8>,
         content_type: &str,
     ) -> CdnResult<String> {
-        let key = format!("avatars/{}/{}.{}", user_id, uuid::Uuid::new_v4().simple(), self.extension(content_type));
+        let key = format!(
+            "avatars/{}/{}.{}",
+            user_id,
+            uuid::Uuid::new_v4().simple(),
+            self.extension(content_type)
+        );
 
         // In production: resize, convert to WebP, create thumbnails
         self.upload(&key, image_data, content_type).await
@@ -131,14 +144,18 @@ impl CdnClient {
 
     /// Download file from CDN
     pub async fn download(&self, cdn_url: &str) -> CdnResult<Vec<u8>> {
-        let response = self.http_client
+        let response = self
+            .http_client
             .get(cdn_url)
             .send()
             .await
             .map_err(|e| CdnError::DownloadFailed(e.to_string()))?;
 
         if !response.status().is_success() {
-            return Err(CdnError::DownloadFailed(format!("HTTP {}", response.status())));
+            return Err(CdnError::DownloadFailed(format!(
+                "HTTP {}",
+                response.status()
+            )));
         }
 
         let data = response
@@ -163,9 +180,13 @@ impl CdnClient {
             self.config.account_id
         );
 
-        let response = self.http_client
+        let response = self
+            .http_client
             .post(&purge_url)
-            .header("Authorization", format!("Bearer {}", self.config.secret_access_key))
+            .header(
+                "Authorization",
+                format!("Bearer {}", self.config.secret_access_key),
+            )
             .json(&serde_json::json!({
                 "files": urls,
             }))
@@ -174,7 +195,10 @@ impl CdnClient {
             .map_err(|e| CdnError::CacheInvalidationFailed(e.to_string()))?;
 
         if !response.status().is_success() {
-            return Err(CdnError::CacheInvalidationFailed(format!("HTTP {}", response.status())));
+            return Err(CdnError::CacheInvalidationFailed(format!(
+                "HTTP {}",
+                response.status()
+            )));
         }
 
         info!("Purged cache for {} URLs", urls.len());

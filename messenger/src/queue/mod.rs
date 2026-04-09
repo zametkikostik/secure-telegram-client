@@ -9,12 +9,12 @@
 //! - Batch processing
 
 use serde::{Deserialize, Serialize};
-use sqlx::{SqlitePool, Row};
-use std::time::{Duration, Instant};
+use sqlx::{Row, SqlitePool};
 use std::collections::HashMap;
-use tokio::sync::RwLock;
-use tracing::{debug, info, warn, error};
+use std::time::{Duration, Instant};
 use thiserror::Error;
+use tokio::sync::RwLock;
+use tracing::{debug, error, info, warn};
 
 // ============================================================================
 // Error Types
@@ -85,7 +85,8 @@ pub struct MessageQueue {
 
 impl MessageQueue {
     pub async fn new(db_url: &str) -> QueueResult<Self> {
-        let db = SqlitePool::connect(db_url).await
+        let db = SqlitePool::connect(db_url)
+            .await
             .map_err(|e| QueueError::Database(e.to_string()))?;
 
         let queue = Self {
@@ -113,19 +114,27 @@ impl MessageQueue {
                 retry_count INTEGER NOT NULL DEFAULT 0,
                 max_retries INTEGER NOT NULL DEFAULT 3,
                 status TEXT NOT NULL DEFAULT 'pending'
-            )"
-        ).execute(&self.db).await.map_err(|e| QueueError::Database(e.to_string()))?;
+            )",
+        )
+        .execute(&self.db)
+        .await
+        .map_err(|e| QueueError::Database(e.to_string()))?;
 
         sqlx::query("CREATE INDEX IF NOT EXISTS idx_queue_status ON queue_messages(status, queue_name, visible_after, priority DESC)")
             .execute(&self.db).await.map_err(|e| QueueError::Database(e.to_string()))?;
 
-        sqlx::query("CREATE TABLE IF NOT EXISTS queue_dead_letters (
+        sqlx::query(
+            "CREATE TABLE IF NOT EXISTS queue_dead_letters (
             id TEXT PRIMARY KEY,
             original_queue TEXT NOT NULL,
             payload BLOB NOT NULL,
             error_reason TEXT,
             failed_at TEXT NOT NULL
-        )").execute(&self.db).await.map_err(|e| QueueError::Database(e.to_string()))?;
+        )",
+        )
+        .execute(&self.db)
+        .await
+        .map_err(|e| QueueError::Database(e.to_string()))?;
 
         Ok(())
     }
@@ -134,10 +143,18 @@ impl MessageQueue {
     // Enqueue
     // ========================================================================
 
-    pub async fn enqueue(&self, queue_name: &str, payload: Vec<u8>, priority: MessagePriority) -> QueueResult<String> {
+    pub async fn enqueue(
+        &self,
+        queue_name: &str,
+        payload: Vec<u8>,
+        priority: MessagePriority,
+    ) -> QueueResult<String> {
         // Check queue size
-        let count: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM queue_messages WHERE status = 'pending'")
-            .fetch_one(&self.db).await.map_err(|e| QueueError::Database(e.to_string()))?;
+        let count: i64 =
+            sqlx::query_scalar("SELECT COUNT(*) FROM queue_messages WHERE status = 'pending'")
+                .fetch_one(&self.db)
+                .await
+                .map_err(|e| QueueError::Database(e.to_string()))?;
 
         if count as usize >= self.max_queue_size {
             return Err(QueueError::QueueFull(self.max_queue_size));
@@ -160,7 +177,10 @@ impl MessageQueue {
         .bind(now.to_rfc3339())
         .execute(&self.db).await.map_err(|e| QueueError::Database(e.to_string()))?;
 
-        debug!("Enqueued message {} to {} (priority: {:?})", id, queue_name, priority);
+        debug!(
+            "Enqueued message {} to {} (priority: {:?})",
+            id, queue_name, priority
+        );
         Ok(id)
     }
 
@@ -178,24 +198,40 @@ impl MessageQueue {
              FROM queue_messages
              WHERE queue_name = ? AND status = 'pending' AND visible_after <= ?
              ORDER BY priority DESC, created_at ASC
-             LIMIT 1"
+             LIMIT 1",
         )
         .bind(queue_name)
         .bind(visible)
-        .fetch_optional(&self.db).await.map_err(|e| QueueError::Database(e.to_string()))?;
+        .fetch_optional(&self.db)
+        .await
+        .map_err(|e| QueueError::Database(e.to_string()))?;
 
-        let Some(row) = row else { return Ok(None); };
+        let Some(row) = row else {
+            return Ok(None);
+        };
 
-        let id: String = row.try_get("id").map_err(|e| QueueError::Database(e.to_string()))?;
+        let id: String = row
+            .try_get("id")
+            .map_err(|e| QueueError::Database(e.to_string()))?;
 
         // Mark as processing
         sqlx::query("UPDATE queue_messages SET status = 'processing' WHERE id = ?")
-            .bind(&id).execute(&self.db).await.map_err(|e| QueueError::Database(e.to_string()))?;
+            .bind(&id)
+            .execute(&self.db)
+            .await
+            .map_err(|e| QueueError::Database(e.to_string()))?;
 
-        self.processing.write().await.insert(id.clone(), Instant::now());
+        self.processing
+            .write()
+            .await
+            .insert(id.clone(), Instant::now());
 
-        let payload: Vec<u8> = row.try_get("payload").map_err(|e| QueueError::Database(e.to_string()))?;
-        let priority: i64 = row.try_get("priority").map_err(|e| QueueError::Database(e.to_string()))?;
+        let payload: Vec<u8> = row
+            .try_get("payload")
+            .map_err(|e| QueueError::Database(e.to_string()))?;
+        let priority: i64 = row
+            .try_get("priority")
+            .map_err(|e| QueueError::Database(e.to_string()))?;
 
         Ok(Some(QueueMessage {
             id,
@@ -217,7 +253,10 @@ impl MessageQueue {
 
     pub async fn ack(&self, message_id: &str) -> QueueResult<()> {
         sqlx::query("UPDATE queue_messages SET status = 'completed' WHERE id = ?")
-            .bind(message_id).execute(&self.db).await.map_err(|e| QueueError::Database(e.to_string()))?;
+            .bind(message_id)
+            .execute(&self.db)
+            .await
+            .map_err(|e| QueueError::Database(e.to_string()))?;
 
         self.processing.write().await.remove(message_id);
         debug!("Acknowledged message {}", message_id);
@@ -248,24 +287,37 @@ impl MessageQueue {
             .bind(limit as i64)
             .fetch_all(&self.db).await.map_err(|e| QueueError::Database(e.to_string()))?;
 
-        Ok(rows.into_iter().filter_map(|row| {
-            let id: String = row.try_get("id").ok()?;
-            let payload: Vec<u8> = row.try_get("payload").ok()?;
-            Some(QueueMessage {
-                id, queue_name: "dead_letter".to_string(), priority: 0, payload,
-                metadata: HashMap::new(), created_at: chrono::Utc::now(),
-                visible_after: chrono::Utc::now(), retry_count: 0, max_retries: 0,
-                status: MessageStatus::DeadLetter,
+        Ok(rows
+            .into_iter()
+            .filter_map(|row| {
+                let id: String = row.try_get("id").ok()?;
+                let payload: Vec<u8> = row.try_get("payload").ok()?;
+                Some(QueueMessage {
+                    id,
+                    queue_name: "dead_letter".to_string(),
+                    priority: 0,
+                    payload,
+                    metadata: HashMap::new(),
+                    created_at: chrono::Utc::now(),
+                    visible_after: chrono::Utc::now(),
+                    retry_count: 0,
+                    max_retries: 0,
+                    status: MessageStatus::DeadLetter,
+                })
             })
-        }).collect())
+            .collect())
     }
 
     pub async fn retry_dead_letter(&self, message_id: &str) -> QueueResult<()> {
         sqlx::query(
             "UPDATE queue_messages SET
                 status = 'pending', retry_count = 0, visible_after = datetime('now')
-             WHERE id = ? AND status = 'dead_letter'"
-        ).bind(message_id).execute(&self.db).await.map_err(|e| QueueError::Database(e.to_string()))?;
+             WHERE id = ? AND status = 'dead_letter'",
+        )
+        .bind(message_id)
+        .execute(&self.db)
+        .await
+        .map_err(|e| QueueError::Database(e.to_string()))?;
 
         info!("Retried dead letter: {}", message_id);
         Ok(())
@@ -276,8 +328,13 @@ impl MessageQueue {
     // ========================================================================
 
     pub async fn queue_size(&self, queue_name: &str) -> QueueResult<usize> {
-        let count: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM queue_messages WHERE queue_name = ? AND status = 'pending'")
-            .bind(queue_name).fetch_one(&self.db).await.map_err(|e| QueueError::Database(e.to_string()))?;
+        let count: i64 = sqlx::query_scalar(
+            "SELECT COUNT(*) FROM queue_messages WHERE queue_name = ? AND status = 'pending'",
+        )
+        .bind(queue_name)
+        .fetch_one(&self.db)
+        .await
+        .map_err(|e| QueueError::Database(e.to_string()))?;
         Ok(count as usize)
     }
 
@@ -298,7 +355,10 @@ mod tests {
     async fn test_enqueue_dequeue() {
         let queue = MessageQueue::new("sqlite::memory:").await.unwrap();
 
-        let id = queue.enqueue("test", b"hello".to_vec(), MessagePriority::Normal).await.unwrap();
+        let id = queue
+            .enqueue("test", b"hello".to_vec(), MessagePriority::Normal)
+            .await
+            .unwrap();
         assert!(!id.is_empty());
 
         let msg = queue.dequeue("test").await.unwrap();
@@ -310,9 +370,18 @@ mod tests {
     async fn test_priority_ordering() {
         let queue = MessageQueue::new("sqlite::memory:").await.unwrap();
 
-        queue.enqueue("test", b"low".to_vec(), MessagePriority::Low).await.unwrap();
-        queue.enqueue("test", b"high".to_vec(), MessagePriority::High).await.unwrap();
-        queue.enqueue("test", b"normal".to_vec(), MessagePriority::Normal).await.unwrap();
+        queue
+            .enqueue("test", b"low".to_vec(), MessagePriority::Low)
+            .await
+            .unwrap();
+        queue
+            .enqueue("test", b"high".to_vec(), MessagePriority::High)
+            .await
+            .unwrap();
+        queue
+            .enqueue("test", b"normal".to_vec(), MessagePriority::Normal)
+            .await
+            .unwrap();
 
         // Should dequeue high priority first
         let msg1 = queue.dequeue("test").await.unwrap().unwrap();
@@ -329,7 +398,10 @@ mod tests {
     async fn test_ack_nack() {
         let queue = MessageQueue::new("sqlite::memory:").await.unwrap();
 
-        let id = queue.enqueue("test", b"msg".to_vec(), MessagePriority::Normal).await.unwrap();
+        let id = queue
+            .enqueue("test", b"msg".to_vec(), MessagePriority::Normal)
+            .await
+            .unwrap();
 
         queue.dequeue("test").await.unwrap();
         queue.ack(&id).await.unwrap();
@@ -343,7 +415,10 @@ mod tests {
     async fn test_dead_letter() {
         let queue = MessageQueue::new("sqlite::memory:").await.unwrap();
 
-        let id = queue.enqueue("test", b"msg".to_vec(), MessagePriority::Normal).await.unwrap();
+        let id = queue
+            .enqueue("test", b"msg".to_vec(), MessagePriority::Normal)
+            .await
+            .unwrap();
         queue.dequeue("test").await.unwrap();
         queue.nack(&id).await.unwrap(); // Will retry
 

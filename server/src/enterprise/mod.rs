@@ -6,25 +6,25 @@
 //! - **Admin Panel**: User management, verification badges
 //! - **Compliance**: GDPR/152-ФЗ data deletion policies
 
-pub mod sso;
-pub mod audit;
 pub mod admin;
+pub mod audit;
 pub mod compliance;
+pub mod sso;
 
 // Re-export main types
-pub use sso::{SsoConfig, SsoProvider, SsoClient, SsoError, SsoResult, SsoSession};
-pub use audit::{
-    AuditLogger, AuditEvent, AuditSeverity, AuditCategory,
-    SiemExporter, SiemFormat, OpenTelemetryConfig,
-};
 pub use admin::{
-    AdminState, AdminUser, AdminAction, VerificationBadge,
-    VerificationLevel, AdminError, AdminResult,
+    AdminAction, AdminError, AdminResult, AdminState, AdminUser, VerificationBadge,
+    VerificationLevel,
+};
+pub use audit::{
+    AuditCategory, AuditEvent, AuditLogger, AuditSeverity, OpenTelemetryConfig, SiemExporter,
+    SiemFormat,
 };
 pub use compliance::{
-    ComplianceManager, DataSubjectRequest, DeletionPolicy,
-    RetentionPolicy, ComplianceReport, GdprChecklist, Fz152Checklist,
+    ComplianceManager, ComplianceReport, DataSubjectRequest, DeletionPolicy, Fz152Checklist,
+    GdprChecklist, RetentionPolicy,
 };
+pub use sso::{SsoClient, SsoConfig, SsoError, SsoProvider, SsoResult, SsoSession};
 
 /// Enterprise feature flags
 #[derive(Debug, Clone, Default)]
@@ -46,6 +46,9 @@ impl EnterpriseConfig {
     }
 
     pub fn is_any_enabled(&self) -> bool {
-        self.sso_enabled || self.audit_enabled || self.admin_panel_enabled || self.compliance_enabled
+        self.sso_enabled
+            || self.audit_enabled
+            || self.admin_panel_enabled
+            || self.compliance_enabled
     }
 }

@@ -279,8 +279,7 @@ impl ChatTransport {
 
         info!(
             "Sent group message to {} ({} members)",
-            chat_id,
-            member_count
+            chat_id, member_count
         );
 
         Ok(message_ids)
@@ -356,8 +355,7 @@ impl ChatTransport {
         } else {
             // Создать новый чат
             let mut chat_guard = self.chat_manager.write().await;
-            let chat = chat_guard
-                .get_or_create_private_chat(&self.local_peer_id(), from_peer_id);
+            let chat = chat_guard.get_or_create_private_chat(&self.local_peer_id(), from_peer_id);
             let id = chat.id.clone();
 
             let mut peer_to_chat = self.peer_to_chat.write().await;
@@ -481,10 +479,12 @@ impl ChatTransport {
     // ========================================================================
 
     /// Создать приватный чат и зарегистрировать маппинг
-    pub async fn create_private_chat(&self, peer_id: &str) -> Result<PrivateChat, IntegrationError> {
+    pub async fn create_private_chat(
+        &self,
+        peer_id: &str,
+    ) -> Result<PrivateChat, IntegrationError> {
         let mut chat_guard = self.chat_manager.write().await;
-        let chat = chat_guard
-            .get_or_create_private_chat(&self.local_peer_id(), peer_id);
+        let chat = chat_guard.get_or_create_private_chat(&self.local_peer_id(), peer_id);
         let chat_clone = chat.clone();
 
         let mut peer_to_chat = self.peer_to_chat.write().await;
@@ -571,12 +571,7 @@ mod tests {
         let kyber = keypair.kyber_public.clone();
         let ed25519 = keypair.ed25519_public;
 
-        registry.register(
-            "user-1".to_string(),
-            x25519,
-            kyber,
-            ed25519,
-        );
+        registry.register("user-1".to_string(), x25519, kyber, ed25519);
 
         assert!(registry.is_registered("user-1"));
         assert!(!registry.is_registered("user-2"));

@@ -1,7 +1,7 @@
-pub mod users;
-pub mod chats;
-pub mod messages;
 pub mod bots;
-pub mod payments;
+pub mod chats;
 pub mod files;
+pub mod messages;
+pub mod payments;
 pub mod stories;
+pub mod users;

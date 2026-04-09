@@ -143,7 +143,11 @@ impl TelegramBotTransport {
              You have a new encrypted message.\n\
              <i>Message cannot be read here — open Secure Messenger to decrypt.</i>\n\n\
              <code>{}</code>",
-            &payload.encrypted_content.chars().take(50).collect::<String>()
+            &payload
+                .encrypted_content
+                .chars()
+                .take(50)
+                .collect::<String>()
         );
 
         // Inline keyboard with "Open in Secure Messenger" button
@@ -154,8 +158,12 @@ impl TelegramBotTransport {
             }]]
         });
 
-        let response = self.http_client
-            .post(&format!("{}/bot{}/sendMessage", self.base_url, self.bot_token))
+        let response = self
+            .http_client
+            .post(&format!(
+                "{}/bot{}/sendMessage",
+                self.base_url, self.bot_token
+            ))
             .json(&serde_json::json!({
                 "chat_id": telegram_user_id,
                 "text": message_text,
@@ -181,12 +189,12 @@ impl TelegramBotTransport {
             .map_err(|e| TelegramBotError::SerializationError(e.to_string()))?;
 
         if result["ok"].as_bool() == Some(true) {
-            let message_id = result["result"]["message_id"]
-                .as_i64()
-                .ok_or_else(|| TelegramBotError::TelegramApiError {
+            let message_id = result["result"]["message_id"].as_i64().ok_or_else(|| {
+                TelegramBotError::TelegramApiError {
                     code: 0,
                     description: "No message_id in response".into(),
-                })?;
+                }
+            })?;
 
             info!(
                 "Sent encrypted message to telegram user {} (msg_id: {})",
@@ -237,8 +245,12 @@ impl TelegramBotTransport {
             }]]
         });
 
-        let response = self.http_client
-            .post(&format!("{}/bot{}/sendMessage", self.base_url, self.bot_token))
+        let response = self
+            .http_client
+            .post(&format!(
+                "{}/bot{}/sendMessage",
+                self.base_url, self.bot_token
+            ))
             .json(&serde_json::json!({
                 "chat_id": telegram_user_id,
                 "text": text,
@@ -261,9 +273,7 @@ impl TelegramBotTransport {
             .await
             .map_err(|e| TelegramBotError::SerializationError(e.to_string()))?;
 
-        let message_id = result["result"]["message_id"]
-            .as_i64()
-            .unwrap_or(0);
+        let message_id = result["result"]["message_id"].as_i64().unwrap_or(0);
 
         Ok(message_id)
     }
@@ -274,7 +284,8 @@ impl TelegramBotTransport {
 
     /// Check if user has started the bot
     pub async fn is_user_active(&self, telegram_user_id: i64) -> bool {
-        let response = self.http_client
+        let response = self
+            .http_client
             .post(&format!("{}/bot{}/getChat", self.base_url, self.bot_token))
             .json(&serde_json::json!({
                 "chat_id": telegram_user_id,
@@ -290,7 +301,8 @@ impl TelegramBotTransport {
 
     /// Get bot info (username, name, etc.)
     pub async fn get_bot_info(&self) -> TelegramBotResult<BotInfo> {
-        let response = self.http_client
+        let response = self
+            .http_client
             .get(&format!("{}/bot{}/getMe", self.base_url, self.bot_token))
             .send()
             .await
@@ -352,9 +364,7 @@ impl MessageRouter {
     pub fn new() -> Self {
         let telegram_transport = TelegramBotTransport::from_env().ok();
 
-        Self {
-            telegram_transport,
-        }
+        Self { telegram_transport }
     }
 
     /// Send message with automatic fallback
@@ -399,9 +409,7 @@ impl MessageRouter {
 
                 Ok(format!("telegram:{}", msg_id))
             }
-            None => {
-                Err(TelegramBotError::BotTokenNotConfigured)
-            }
+            None => Err(TelegramBotError::BotTokenNotConfigured),
         }
     }
 }

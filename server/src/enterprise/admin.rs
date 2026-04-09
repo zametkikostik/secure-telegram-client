@@ -7,10 +7,10 @@
 //! - **Dashboard**: System stats, active sessions, audit log
 
 use axum::{
-    extract::{Path, Query, State, Json},
+    extract::{Json, Path, Query, State},
+    http::StatusCode,
     response::IntoResponse,
     routing::{get, post},
-    http::StatusCode,
     Router,
 };
 use serde::{Deserialize, Serialize};
@@ -25,11 +25,16 @@ use tracing::{info, warn};
 
 #[derive(Error, Debug)]
 pub enum AdminError {
-    #[error("User not found: {0}")] UserNotFound(String),
-    #[error("Permission denied")] PermissionDenied,
-    #[error("Invalid action: {0}")] InvalidAction(String),
-    #[error("Database error: {0}")] Database(String),
-    #[error("Validation error: {0}")] Validation(String),
+    #[error("User not found: {0}")]
+    UserNotFound(String),
+    #[error("Permission denied")]
+    PermissionDenied,
+    #[error("Invalid action: {0}")]
+    InvalidAction(String),
+    #[error("Database error: {0}")]
+    Database(String),
+    #[error("Validation error: {0}")]
+    Validation(String),
 }
 
 pub type AdminResult<T> = Result<T, AdminError>;
@@ -231,42 +236,78 @@ async fn get_dashboard(State(app_state): State<crate::AppState>) -> impl IntoRes
     let admins = state.allowed_admins.read().await;
 
     let total_users = users.len();
-    let active_users = users.iter().filter(|u| u.is_active && !u.is_suspended).count();
+    let active_users = users
+        .iter()
+        .filter(|u| u.is_active && !u.is_suspended)
+        .count();
     let suspended_users = users.iter().filter(|u| u.is_suspended).count();
-    let verified_users = users.iter().filter(|u| {
-        u.verification_badge.level != VerificationLevel::Unverified && !u.verification_badge.is_revoked
-    }).count();
+    let verified_users = users
+        .iter()
+        .filter(|u| {
+            u.verification_badge.level != VerificationLevel::Unverified
+                && !u.verification_badge.is_revoked
+        })
+        .count();
 
     let mut breakdown = serde_json::Map::new();
-    for level in &[VerificationLevel::Unverified, VerificationLevel::EmailVerified,
-                   VerificationLevel::PhoneVerified, VerificationLevel::IdVerified,
-                   VerificationLevel::EnterpriseVerified] {
-        let count = users.iter().filter(|u| u.verification_badge.level == *level).count();
-        breakdown.insert(format!("level_{}", level.numeric_level()),
-            serde_json::json!({"level": level.display_badge(), "count": count}));
+    for level in &[
+        VerificationLevel::Unverified,
+        VerificationLevel::EmailVerified,
+        VerificationLevel::PhoneVerified,
+        VerificationLevel::IdVerified,
+        VerificationLevel::EnterpriseVerified,
+    ] {
+        let count = users
+            .iter()
+            .filter(|u| u.verification_badge.level == *level)
+            .count();
+        breakdown.insert(
+            format!("level_{}", level.numeric_level()),
+            serde_json::json!({"level": level.display_badge(), "count": count}),
+        );
     }
 
     Json(AdminDashboardResponse {
-        total_users, active_users, suspended_users, verified_users,
+        total_users,
+        active_users,
+        suspended_users,
+        verified_users,
         admin_count: admins.len(),
         verification_breakdown: serde_json::Value::Object(breakdown),
     })
 }
 
-async fn list_users(State(app_state): State<crate::AppState>, Query(params): Query<ListUsersQuery>) -> impl IntoResponse {
+async fn list_users(
+    State(app_state): State<crate::AppState>,
+    Query(params): Query<ListUsersQuery>,
+) -> impl IntoResponse {
     let state = &app_state.admin_state;
     let users = state.users.read().await;
     let mut filtered: Vec<&AdminUser> = users.iter().collect();
 
     if let Some(ref search) = params.search {
         let s = search.to_lowercase();
-        filtered.retain(|u| u.username.to_lowercase().contains(&s)
-            || u.email.as_ref().map(|e| e.to_lowercase().contains(&s)).unwrap_or(false)
-            || u.display_name.as_ref().map(|d| d.to_lowercase().contains(&s)).unwrap_or(false));
+        filtered.retain(|u| {
+            u.username.to_lowercase().contains(&s)
+                || u.email
+                    .as_ref()
+                    .map(|e| e.to_lowercase().contains(&s))
+                    .unwrap_or(false)
+                || u.display_name
+                    .as_ref()
+                    .map(|d| d.to_lowercase().contains(&s))
+                    .unwrap_or(false)
+        });
     }
-    if let Some(ref role) = params.role { filtered.retain(|u| u.role == *role); }
-    if let Some(level) = params.verification_level { filtered.retain(|u| u.verification_badge.level.numeric_level() == level); }
-    if let Some(suspended) = params.is_suspended { filtered.retain(|u| u.is_suspended == suspended); }
+    if let Some(ref role) = params.role {
+        filtered.retain(|u| u.role == *role);
+    }
+    if let Some(level) = params.verification_level {
+        filtered.retain(|u| u.verification_badge.level.numeric_level() == level);
+    }
+    if let Some(suspended) = params.is_suspended {
+        filtered.retain(|u| u.is_suspended == suspended);
+    }
 
     let total = filtered.len();
     let page = params.page.unwrap_or(0);
@@ -275,37 +316,70 @@ async fn list_users(State(app_state): State<crate::AppState>, Query(params): Que
     let end = (start + per_page).min(total);
     let users_page: Vec<AdminUser> = if start < total {
         filtered[start..end].iter().map(|u| (*u).clone()).collect()
-    } else { Vec::new() };
+    } else {
+        Vec::new()
+    };
 
-    Json(ListUsersResponse { users: users_page, total, page, per_page, has_more: end < total })
+    Json(ListUsersResponse {
+        users: users_page,
+        total,
+        page,
+        per_page,
+        has_more: end < total,
+    })
 }
 
-async fn get_user(State(app_state): State<crate::AppState>, Path(user_id): Path<String>) -> impl IntoResponse {
+async fn get_user(
+    State(app_state): State<crate::AppState>,
+    Path(user_id): Path<String>,
+) -> impl IntoResponse {
     let state = &app_state.admin_state;
     let users = state.users.read().await;
     match users.iter().find(|u| u.id == user_id) {
         Some(user) => (StatusCode::OK, Json(user.clone())).into_response(),
-        None => (StatusCode::NOT_FOUND, Json(serde_json::json!({"error": "User not found"}))).into_response(),
+        None => (
+            StatusCode::NOT_FOUND,
+            Json(serde_json::json!({"error": "User not found"})),
+        )
+            .into_response(),
     }
 }
 
-async fn perform_admin_action(State(app_state): State<crate::AppState>, Json(req): Json<AdminActionRequest>) -> impl IntoResponse {
+async fn perform_admin_action(
+    State(app_state): State<crate::AppState>,
+    Json(req): Json<AdminActionRequest>,
+) -> impl IntoResponse {
     let state = &app_state.admin_state;
     if !state.is_admin(&req.admin_id).await {
-        return (StatusCode::FORBIDDEN, Json(serde_json::json!({"error": "Permission denied"}))).into_response();
+        return (
+            StatusCode::FORBIDDEN,
+            Json(serde_json::json!({"error": "Permission denied"})),
+        )
+            .into_response();
     }
     let action_label = match &req.action {
         AdminAction::SuspendUser => "Suspended",
         AdminAction::UnsuspendUser => "Unsuspended",
         AdminAction::ChangeRole => "Role changed",
         AdminAction::ForceLogout => "Force logout",
-        AdminAction::DeleteUser { confirm } => { if !confirm {
-            return (StatusCode::BAD_REQUEST, Json(serde_json::json!({"error": "Confirmation required"}))).into_response();
-        } "Deleted" }
+        AdminAction::DeleteUser { confirm } => {
+            if !confirm {
+                return (
+                    StatusCode::BAD_REQUEST,
+                    Json(serde_json::json!({"error": "Confirmation required"})),
+                )
+                    .into_response();
+            }
+            "Deleted"
+        }
         AdminAction::ResetTwoFactor => "2FA reset",
         AdminAction::ExportUserData => "Export requested",
         AdminAction::VerifyUser | AdminAction::RevokeVerification => {
-            return (StatusCode::BAD_REQUEST, Json(serde_json::json!({"error": "Use dedicated endpoints"}))).into_response();
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(serde_json::json!({"error": "Use dedicated endpoints"})),
+            )
+                .into_response();
         }
     };
 
@@ -315,26 +389,46 @@ async fn perform_admin_action(State(app_state): State<crate::AppState>, Json(req
             AdminAction::SuspendUser => u.is_suspended = true,
             AdminAction::UnsuspendUser => u.is_suspended = false,
             AdminAction::ChangeRole => u.role = "user".to_string(),
-            AdminAction::DeleteUser { .. } => { users.retain(|u| u.id != req.admin_id); }
+            AdminAction::DeleteUser { .. } => {
+                users.retain(|u| u.id != req.admin_id);
+            }
             AdminAction::ResetTwoFactor => u.two_factor_enabled = false,
             _ => {}
         }
     }
     info!("Admin action {:?} by {}", req.action, req.admin_id);
-    (StatusCode::OK, Json(AdminActionResponse { success: true, user: None, message: action_label.to_string() })).into_response()
+    (
+        StatusCode::OK,
+        Json(AdminActionResponse {
+            success: true,
+            user: None,
+            message: action_label.to_string(),
+        }),
+    )
+        .into_response()
 }
 
-async fn verify_user(State(app_state): State<crate::AppState>, Path(user_id): Path<String>, Json(req): Json<serde_json::Value>) -> impl IntoResponse {
+async fn verify_user(
+    State(app_state): State<crate::AppState>,
+    Path(user_id): Path<String>,
+    Json(req): Json<serde_json::Value>,
+) -> impl IntoResponse {
     let state = &app_state.admin_state;
     let admin_id = req["admin_id"].as_str().unwrap_or("");
     if !state.is_admin(admin_id).await {
-        return (StatusCode::FORBIDDEN, Json(serde_json::json!({"error": "Permission denied"}))).into_response();
+        return (
+            StatusCode::FORBIDDEN,
+            Json(serde_json::json!({"error": "Permission denied"})),
+        )
+            .into_response();
     }
     let level_num = req["level"].as_u64().unwrap_or(1) as u8;
     let method = req["method"].as_str().unwrap_or("manual");
     let level = match level_num {
-        1 => VerificationLevel::EmailVerified, 2 => VerificationLevel::PhoneVerified,
-        3 => VerificationLevel::IdVerified, 4 => VerificationLevel::EnterpriseVerified,
+        1 => VerificationLevel::EmailVerified,
+        2 => VerificationLevel::PhoneVerified,
+        3 => VerificationLevel::IdVerified,
+        4 => VerificationLevel::EnterpriseVerified,
         _ => VerificationLevel::EmailVerified,
     };
     let mut users = state.users.write().await;
@@ -343,17 +437,33 @@ async fn verify_user(State(app_state): State<crate::AppState>, Path(user_id): Pa
         u.verification_badge.is_revoked = false;
         u.verification_badge.verification_method = method.to_string();
         u.verification_badge.verified_at = chrono::Utc::now().to_rfc3339();
-        (StatusCode::OK, Json(serde_json::json!({"success": true, "level": level.display_badge()}))).into_response()
+        (
+            StatusCode::OK,
+            Json(serde_json::json!({"success": true, "level": level.display_badge()})),
+        )
+            .into_response()
     } else {
-        (StatusCode::NOT_FOUND, Json(serde_json::json!({"error": "User not found"}))).into_response()
+        (
+            StatusCode::NOT_FOUND,
+            Json(serde_json::json!({"error": "User not found"})),
+        )
+            .into_response()
     }
 }
 
-async fn revoke_verification(State(app_state): State<crate::AppState>, Path(user_id): Path<String>, Json(req): Json<serde_json::Value>) -> impl IntoResponse {
+async fn revoke_verification(
+    State(app_state): State<crate::AppState>,
+    Path(user_id): Path<String>,
+    Json(req): Json<serde_json::Value>,
+) -> impl IntoResponse {
     let state = &app_state.admin_state;
     let admin_id = req["admin_id"].as_str().unwrap_or("");
     if !state.is_admin(admin_id).await {
-        return (StatusCode::FORBIDDEN, Json(serde_json::json!({"error": "Permission denied"}))).into_response();
+        return (
+            StatusCode::FORBIDDEN,
+            Json(serde_json::json!({"error": "Permission denied"})),
+        )
+            .into_response();
     }
     let mut users = state.users.write().await;
     if let Some(u) = users.iter_mut().find(|u| u.id == user_id) {
@@ -362,7 +472,11 @@ async fn revoke_verification(State(app_state): State<crate::AppState>, Path(user
         u.verification_badge.revoked_by = Some(admin_id.to_string());
         (StatusCode::OK, Json(serde_json::json!({"success": true}))).into_response()
     } else {
-        (StatusCode::NOT_FOUND, Json(serde_json::json!({"error": "User not found"}))).into_response()
+        (
+            StatusCode::NOT_FOUND,
+            Json(serde_json::json!({"error": "User not found"})),
+        )
+            .into_response()
     }
 }
 
@@ -371,7 +485,10 @@ async fn list_admins(State(app_state): State<crate::AppState>) -> impl IntoRespo
     Json(state.allowed_admins.read().await.clone())
 }
 
-async fn add_admin(State(app_state): State<crate::AppState>, Path(user_id): Path<String>) -> impl IntoResponse {
+async fn add_admin(
+    State(app_state): State<crate::AppState>,
+    Path(user_id): Path<String>,
+) -> impl IntoResponse {
     let state = &app_state.admin_state;
     state.add_admin(&user_id).await;
     info!("User {} promoted to admin", user_id);

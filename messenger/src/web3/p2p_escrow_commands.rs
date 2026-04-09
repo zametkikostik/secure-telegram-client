@@ -96,14 +96,12 @@ pub struct PlatformStatsInfo {
 
 /// Create a new P2P deal
 #[tauri::command]
-pub async fn create_deal(
-    request: CreateDealRequest,
-) -> Result<TxReceiptResponse, String> {
+pub async fn create_deal(request: CreateDealRequest) -> Result<TxReceiptResponse, String> {
     info!("Creating deal: seller={}", request.seller_address);
-    
+
     // TODO: Initialize actual client from app state
     // This is a placeholder implementation
-    
+
     Ok(TxReceiptResponse {
         success: true,
         tx_hash: Some("0xplaceholder".to_string()),
@@ -115,11 +113,9 @@ pub async fn create_deal(
 
 /// Fund an existing deal with ETH
 #[tauri::command]
-pub async fn fund_deal(
-    request: FundDealRequest,
-) -> Result<TxReceiptResponse, String> {
+pub async fn fund_deal(request: FundDealRequest) -> Result<TxReceiptResponse, String> {
     info!("Funding deal: id={}", request.deal_id);
-    
+
     Ok(TxReceiptResponse {
         success: true,
         tx_hash: Some("0xplaceholder".to_string()),
@@ -131,11 +127,9 @@ pub async fn fund_deal(
 
 /// Get deal information
 #[tauri::command]
-pub async fn get_deal(
-    deal_id: String,
-) -> Result<DealResponse, String> {
+pub async fn get_deal(deal_id: String) -> Result<DealResponse, String> {
     debug!("Fetching deal: id={}", deal_id);
-    
+
     Ok(DealResponse {
         success: true,
         deal: None, // TODO: Implement
@@ -145,11 +139,9 @@ pub async fn get_deal(
 
 /// Get user's deals
 #[tauri::command]
-pub async fn get_user_deals(
-    user_address: String,
-) -> Result<Vec<String>, String> {
+pub async fn get_user_deals(user_address: String) -> Result<Vec<String>, String> {
     debug!("Fetching user deals: user={}", user_address);
-    
+
     Ok(vec![]) // TODO: Implement
 }
 
@@ -157,7 +149,7 @@ pub async fn get_user_deals(
 #[tauri::command]
 pub async fn get_platform_stats() -> Result<PlatformStatsResponse, String> {
     debug!("Fetching platform stats");
-    
+
     Ok(PlatformStatsResponse {
         success: true,
         stats: None, // TODO: Implement
@@ -167,11 +159,9 @@ pub async fn get_platform_stats() -> Result<PlatformStatsResponse, String> {
 
 /// Confirm delivery (buyer)
 #[tauri::command]
-pub async fn confirm_delivery(
-    deal_id: String,
-) -> Result<TxReceiptResponse, String> {
+pub async fn confirm_delivery(deal_id: String) -> Result<TxReceiptResponse, String> {
     info!("Confirming delivery: deal_id={}", deal_id);
-    
+
     Ok(TxReceiptResponse {
         success: true,
         tx_hash: Some("0xplaceholder".to_string()),
@@ -183,11 +173,9 @@ pub async fn confirm_delivery(
 
 /// Complete deal (payout to seller)
 #[tauri::command]
-pub async fn complete_deal(
-    deal_id: String,
-) -> Result<TxReceiptResponse, String> {
+pub async fn complete_deal(deal_id: String) -> Result<TxReceiptResponse, String> {
     info!("Completing deal: id={}", deal_id);
-    
+
     Ok(TxReceiptResponse {
         success: true,
         tx_hash: Some("0xplaceholder".to_string()),
@@ -199,11 +187,9 @@ pub async fn complete_deal(
 
 /// Open dispute
 #[tauri::command]
-pub async fn open_dispute(
-    request: OpenDisputeRequest,
-) -> Result<TxReceiptResponse, String> {
+pub async fn open_dispute(request: OpenDisputeRequest) -> Result<TxReceiptResponse, String> {
     info!("Opening dispute: deal_id={}", request.deal_id);
-    
+
     Ok(TxReceiptResponse {
         success: true,
         tx_hash: Some("0xplaceholder".to_string()),
@@ -215,14 +201,12 @@ pub async fn open_dispute(
 
 /// Resolve dispute (arbiter only)
 #[tauri::command]
-pub async fn resolve_dispute(
-    request: ResolveDisputeRequest,
-) -> Result<TxReceiptResponse, String> {
+pub async fn resolve_dispute(request: ResolveDisputeRequest) -> Result<TxReceiptResponse, String> {
     info!(
         "Resolving dispute: deal_id={}, refund={}, buyer%={}",
         request.deal_id, request.refund_to_buyer, request.buyer_percent
     );
-    
+
     Ok(TxReceiptResponse {
         success: true,
         tx_hash: Some("0xplaceholder".to_string()),
@@ -234,11 +218,9 @@ pub async fn resolve_dispute(
 
 /// Refund after deadline
 #[tauri::command]
-pub async fn refund_after_deadline(
-    deal_id: String,
-) -> Result<TxReceiptResponse, String> {
+pub async fn refund_after_deadline(deal_id: String) -> Result<TxReceiptResponse, String> {
     info!("Refunding after deadline: deal_id={}", deal_id);
-    
+
     Ok(TxReceiptResponse {
         success: true,
         tx_hash: Some("0xplaceholder".to_string()),
@@ -250,11 +232,9 @@ pub async fn refund_after_deadline(
 
 /// Cancel deal (before funding)
 #[tauri::command]
-pub async fn cancel_deal(
-    deal_id: String,
-) -> Result<TxReceiptResponse, String> {
+pub async fn cancel_deal(deal_id: String) -> Result<TxReceiptResponse, String> {
     info!("Cancelling deal: id={}", deal_id);
-    
+
     Ok(TxReceiptResponse {
         success: true,
         tx_hash: Some("0xplaceholder".to_string()),
@@ -266,16 +246,13 @@ pub async fn cancel_deal(
 
 /// Calculate platform fee for amount
 #[tauri::command]
-pub async fn calculate_fee(
-    amount_wei: String,
-) -> Result<String, String> {
-    let amount = U256::from_dec_str(&amount_wei)
-        .map_err(|e| format!("Invalid amount: {}", e))?;
-    
+pub async fn calculate_fee(amount_wei: String) -> Result<String, String> {
+    let amount = U256::from_dec_str(&amount_wei).map_err(|e| format!("Invalid amount: {}", e))?;
+
     // Fee calculation logic (same as Solidity)
     let tier_1_max = U256::from(10u64).pow(U256::from(17u64)); // 0.1 ETH
     let tier_2_max = U256::from(10u64).pow(U256::from(18u64)); // 1 ETH
-    
+
     let fee = if amount < tier_1_max {
         amount * U256::from(200u64) / U256::from(10000u64) // 2%
     } else if amount < tier_2_max {
@@ -283,7 +260,7 @@ pub async fn calculate_fee(
     } else {
         amount * U256::from(50u64) / U256::from(10000u64) // 0.5%
     };
-    
+
     Ok(fee.to_string())
 }
 
@@ -292,8 +269,7 @@ pub async fn calculate_fee(
 // ============================================================================
 
 fn parse_address(addr: &str) -> Result<Address, String> {
-    Address::from_str(addr)
-        .map_err(|e| format!("Invalid address '{}': {}", addr, e))
+    Address::from_str(addr).map_err(|e| format!("Invalid address '{}': {}", addr, e))
 }
 
 fn parse_u256(val: &str) -> Result<U256, String> {
@@ -304,13 +280,12 @@ fn parse_u256(val: &str) -> Result<U256, String> {
 
 fn parse_bytes32(hex: &str) -> Result<[u8; 32], String> {
     let hex_stripped = hex.strip_prefix("0x").unwrap_or(hex);
-    let bytes = hex::decode(hex_stripped)
-        .map_err(|e| format!("Invalid hex: {}", e))?;
-    
+    let bytes = hex::decode(hex_stripped).map_err(|e| format!("Invalid hex: {}", e))?;
+
     if bytes.len() != 32 {
         return Err(format!("Expected 32 bytes, got {}", bytes.len()));
     }
-    
+
     let mut array = [0u8; 32];
     array.copy_from_slice(&bytes);
     Ok(array)

@@ -2,7 +2,7 @@
 // SECURITY: требует аудита перед production
 // TODO: pentest перед release
 
-use axum::{Router, routing::get, Json};
+use axum::{routing::get, Json, Router};
 use serde::Serialize;
 use std::net::SocketAddr;
 
@@ -28,19 +28,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         )
         .init();
 
-    tracing::info!("Starting Secure Messenger Bots v{}", env!("CARGO_PKG_VERSION"));
+    tracing::info!(
+        "Starting Secure Messenger Bots v{}",
+        env!("CARGO_PKG_VERSION")
+    );
 
-    let app = Router::new()
-        .route("/health", get(health));
+    let app = Router::new().route("/health", get(health));
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 3001));
     tracing::info!("Bot server listening on {}", addr);
 
-    axum::serve(
-        tokio::net::TcpListener::bind(&addr).await?,
-        app,
-    )
-    .await?;
+    axum::serve(tokio::net::TcpListener::bind(&addr).await?, app).await?;
 
     Ok(())
 }

@@ -10,11 +10,7 @@
 
 pub mod integration;
 
-pub use integration::{
-    ChatTransport,
-    IntegrationError,
-    UserKeysRegistry,
-};
+pub use integration::{ChatTransport, IntegrationError, UserKeysRegistry};
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -171,7 +167,8 @@ impl PrivateChat {
         self.last_activity = message.created_at;
 
         // Сортировать по timestamp
-        self.messages.sort_by(|a, b| a.created_at.cmp(&b.created_at));
+        self.messages
+            .sort_by(|a, b| a.created_at.cmp(&b.created_at));
 
         debug!(
             "Added message to private chat {} (total: {})",
@@ -384,7 +381,11 @@ impl GroupChat {
             },
         );
 
-        info!("Added member to group {} (total: {})", self.id, self.members.len());
+        info!(
+            "Added member to group {} (total: {})",
+            self.id,
+            self.members.len()
+        );
 
         Ok(())
     }
@@ -405,7 +406,11 @@ impl GroupChat {
         }
 
         self.members.remove(user_id);
-        info!("Removed member from group {} (total: {})", self.id, self.members.len());
+        info!(
+            "Removed member from group {} (total: {})",
+            self.id,
+            self.members.len()
+        );
 
         Ok(())
     }
@@ -437,7 +442,8 @@ impl GroupChat {
     pub fn add_message(&mut self, message: ChatMessage) {
         self.messages.push(message.clone());
         self.last_activity = message.created_at;
-        self.messages.sort_by(|a, b| a.created_at.cmp(&b.created_at));
+        self.messages
+            .sort_by(|a, b| a.created_at.cmp(&b.created_at));
     }
 
     /// Получить список активныхных участников
@@ -606,7 +612,8 @@ impl Channel {
 
         self.messages.push(message.clone());
         self.last_activity = message.created_at;
-        self.messages.sort_by(|a, b| a.created_at.cmp(&b.created_at));
+        self.messages
+            .sort_by(|a, b| a.created_at.cmp(&b.created_at));
 
         info!(
             "Published message to channel {} (total: {})",
@@ -765,11 +772,7 @@ impl ChatManager {
     // ========================================================================
 
     /// Создать или получить приватный чат
-    pub fn get_or_create_private_chat(
-        &mut self,
-        user_id: &str,
-        peer_id: &str,
-    ) -> &PrivateChat {
+    pub fn get_or_create_private_chat(&mut self, user_id: &str, peer_id: &str) -> &PrivateChat {
         // Поиск существующего чата
         let chat_key = Self::private_chat_key(user_id, peer_id);
 
@@ -830,9 +833,7 @@ impl ChatManager {
 
     /// Получить групповой чат mutable
     pub fn get_group_chat_mut(&mut self, chat_id: &str) -> Option<&mut GroupChat> {
-        self.group_chats
-            .values_mut()
-            .find(|c| c.id == chat_id)
+        self.group_chats.values_mut().find(|c| c.id == chat_id)
     }
 
     // ========================================================================
@@ -867,9 +868,7 @@ impl ChatManager {
 
     /// Получить канал mutable
     pub fn get_channel_mut(&mut self, channel_id: &str) -> Option<&mut Channel> {
-        self.channels
-            .values_mut()
-            .find(|c| c.id == channel_id)
+        self.channels.values_mut().find(|c| c.id == channel_id)
     }
 
     // ========================================================================
@@ -922,9 +921,21 @@ impl ChatManager {
             private_chats: self.private_chats.len(),
             group_chats: self.group_chats.len(),
             channels: self.channels.len(),
-            total_messages: self.private_chats.values().map(|c| c.messages.len()).sum::<usize>()
-                + self.group_chats.values().map(|c| c.messages.len()).sum::<usize>()
-                + self.channels.values().map(|c| c.messages.len()).sum::<usize>(),
+            total_messages: self
+                .private_chats
+                .values()
+                .map(|c| c.messages.len())
+                .sum::<usize>()
+                + self
+                    .group_chats
+                    .values()
+                    .map(|c| c.messages.len())
+                    .sum::<usize>()
+                + self
+                    .channels
+                    .values()
+                    .map(|c| c.messages.len())
+                    .sum::<usize>(),
         }
     }
 }
@@ -995,11 +1006,7 @@ mod tests {
 
     #[test]
     fn test_group_chat_creation() {
-        let group = GroupChat::new(
-            "creator".to_string(),
-            vec![1, 2, 3],
-            vec![4, 5, 6],
-        );
+        let group = GroupChat::new("creator".to_string(), vec![1, 2, 3], vec![4, 5, 6]);
 
         assert_eq!(group.members.len(), 1);
         assert!(group.is_admin("creator"));
@@ -1008,18 +1015,10 @@ mod tests {
 
     #[test]
     fn test_group_chat_add_member() {
-        let mut group = GroupChat::new(
-            "creator".to_string(),
-            vec![1, 2, 3],
-            vec![4, 5, 6],
-        );
+        let mut group = GroupChat::new("creator".to_string(), vec![1, 2, 3], vec![4, 5, 6]);
 
         group
-            .add_member(
-                "user-2".to_string(),
-                MemberRole::Member,
-                None,
-            )
+            .add_member("user-2".to_string(), MemberRole::Member, None)
             .unwrap();
 
         assert_eq!(group.member_count(), 2);
@@ -1028,43 +1027,23 @@ mod tests {
 
     #[test]
     fn test_group_chat_duplicate_member() {
-        let mut group = GroupChat::new(
-            "creator".to_string(),
-            vec![1, 2, 3],
-            vec![4, 5, 6],
-        );
+        let mut group = GroupChat::new("creator".to_string(), vec![1, 2, 3], vec![4, 5, 6]);
 
         group
-            .add_member(
-                "user-2".to_string(),
-                MemberRole::Member,
-                None,
-            )
+            .add_member("user-2".to_string(), MemberRole::Member, None)
             .unwrap();
 
-        let result = group.add_member(
-            "user-2".to_string(),
-            MemberRole::Member,
-            None,
-        );
+        let result = group.add_member("user-2".to_string(), MemberRole::Member, None);
 
         assert!(result.is_err());
     }
 
     #[test]
     fn test_group_chat_remove_member() {
-        let mut group = GroupChat::new(
-            "creator".to_string(),
-            vec![1, 2, 3],
-            vec![4, 5, 6],
-        );
+        let mut group = GroupChat::new("creator".to_string(), vec![1, 2, 3], vec![4, 5, 6]);
 
         group
-            .add_member(
-                "user-2".to_string(),
-                MemberRole::Member,
-                None,
-            )
+            .add_member("user-2".to_string(), MemberRole::Member, None)
             .unwrap();
 
         group.remove_member("user-2").unwrap();
@@ -1073,11 +1052,7 @@ mod tests {
 
     #[test]
     fn test_group_chat_cannot_remove_owner() {
-        let mut group = GroupChat::new(
-            "creator".to_string(),
-            vec![1, 2, 3],
-            vec![4, 5, 6],
-        );
+        let mut group = GroupChat::new("creator".to_string(), vec![1, 2, 3], vec![4, 5, 6]);
 
         let result = group.remove_member("creator");
         assert!(result.is_err());
@@ -1085,18 +1060,10 @@ mod tests {
 
     #[test]
     fn test_group_chat_can_send_messages() {
-        let mut group = GroupChat::new(
-            "creator".to_string(),
-            vec![1, 2, 3],
-            vec![4, 5, 6],
-        );
+        let mut group = GroupChat::new("creator".to_string(), vec![1, 2, 3], vec![4, 5, 6]);
 
         group
-            .add_member(
-                "user-2".to_string(),
-                MemberRole::Member,
-                None,
-            )
+            .add_member("user-2".to_string(), MemberRole::Member, None)
             .unwrap();
 
         assert!(group.can_send_message("creator"));
@@ -1110,11 +1077,7 @@ mod tests {
 
     #[test]
     fn test_channel_creation() {
-        let channel = Channel::new(
-            "creator".to_string(),
-            vec![1, 2, 3],
-            vec![4, 5, 6],
-        );
+        let channel = Channel::new("creator".to_string(), vec![1, 2, 3], vec![4, 5, 6]);
 
         assert_eq!(channel.admins.len(), 1);
         assert_eq!(channel.subscriber_count(), 0);
@@ -1123,11 +1086,7 @@ mod tests {
 
     #[test]
     fn test_channel_publish_message() {
-        let mut channel = Channel::new(
-            "creator".to_string(),
-            vec![1, 2, 3],
-            vec![4, 5, 6],
-        );
+        let mut channel = Channel::new("creator".to_string(), vec![1, 2, 3], vec![4, 5, 6]);
 
         let msg = ChatMessage {
             id: "msg-1".to_string(),
@@ -1148,11 +1107,7 @@ mod tests {
 
     #[test]
     fn test_channel_non_admin_cannot_publish() {
-        let mut channel = Channel::new(
-            "creator".to_string(),
-            vec![1, 2, 3],
-            vec![4, 5, 6],
-        );
+        let mut channel = Channel::new("creator".to_string(), vec![1, 2, 3], vec![4, 5, 6]);
 
         let msg = ChatMessage {
             id: "msg-1".to_string(),
@@ -1173,11 +1128,7 @@ mod tests {
 
     #[test]
     fn test_channel_subscribe() {
-        let mut channel = Channel::new(
-            "creator".to_string(),
-            vec![1, 2, 3],
-            vec![4, 5, 6],
-        );
+        let mut channel = Channel::new("creator".to_string(), vec![1, 2, 3], vec![4, 5, 6]);
 
         channel.subscribe("user-2".to_string()).unwrap();
         assert_eq!(channel.subscriber_count(), 1);
@@ -1186,11 +1137,7 @@ mod tests {
 
     #[test]
     fn test_channel_unsubscribe() {
-        let mut channel = Channel::new(
-            "creator".to_string(),
-            vec![1, 2, 3],
-            vec![4, 5, 6],
-        );
+        let mut channel = Channel::new("creator".to_string(), vec![1, 2, 3], vec![4, 5, 6]);
 
         channel.subscribe("user-2".to_string()).unwrap();
         channel.unsubscribe("user-2").unwrap();
@@ -1203,11 +1150,7 @@ mod tests {
 
         manager.get_or_create_private_chat("user-1", "user-2");
         manager
-            .create_group_chat(
-                "user-1".to_string(),
-                vec![1, 2, 3],
-                vec![4, 5, 6],
-            )
+            .create_group_chat("user-1".to_string(), vec![1, 2, 3], vec![4, 5, 6])
             .unwrap();
 
         let stats = manager.get_stats();

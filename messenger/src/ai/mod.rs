@@ -20,16 +20,16 @@
 // - Anthropic → claude-3-5-sonnet-20241022 (flagship)
 // - Anthropic → claude-3-haiku-20240307 (fast/cheap)
 
-pub mod providers;
 pub mod client;
-pub mod translator;
-pub mod summarizer;
-pub mod speech_to_text;
-pub mod text_to_speech;
 pub mod code_generator;
+pub mod providers;
+pub mod speech_to_text;
+pub mod summarizer;
+pub mod text_to_speech;
+pub mod translator;
 
 // Re-export main types
 pub use client::{AiClient, AiConfig, AiError, AiResult};
 pub use providers::{
-    AiProvider, AiProviderRegistry, ProviderConfig, ModelHint, ModelInfo, ProviderStatus,
+    AiProvider, AiProviderRegistry, ModelHint, ModelInfo, ProviderConfig, ProviderStatus,
 };

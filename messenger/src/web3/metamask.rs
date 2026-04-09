@@ -93,12 +93,7 @@ impl MetaMaskManager {
 
     /// Get connected address
     pub fn get_address(&self) -> Option<String> {
-        self.state
-            .lock()
-            .unwrap()
-            .accounts
-            .first()
-            .cloned()
+        self.state.lock().unwrap().accounts.first().cloned()
     }
 
     /// Check if connected to a specific chain
@@ -252,9 +247,7 @@ pub fn metamask_add_chain_script(chain: &Chain) -> String {
 // ============================================================================
 
 /// Parse JS bridge response
-pub fn parse_js_response<T: for<'de> Deserialize<'de>>(
-    js_result: &str,
-) -> Web3Result<T> {
+pub fn parse_js_response<T: for<'de> Deserialize<'de>>(js_result: &str) -> Web3Result<T> {
     let parsed: serde_json::Value = serde_json::from_str(js_result)
         .map_err(|e| Web3Error::Wallet(format!("Invalid JSON from bridge: {}", e)))?;
 
@@ -265,9 +258,8 @@ pub fn parse_js_response<T: for<'de> Deserialize<'de>>(
         return Err(Web3Error::Wallet(error.to_string()));
     }
 
-    serde_json::from_value(parsed).map_err(|e| {
-        Web3Error::Wallet(format!("Failed to parse response: {}", e))
-    })
+    serde_json::from_value(parsed)
+        .map_err(|e| Web3Error::Wallet(format!("Failed to parse response: {}", e)))
 }
 
 // ============================================================================
@@ -375,14 +367,8 @@ mod tests {
         );
 
         assert_eq!(typed_data["primaryType"], "Tip");
-        assert_eq!(
-            typed_data["domain"]["name"],
-            "SecureMessenger"
-        );
-        assert_eq!(
-            typed_data["message"]["nonce"],
-            42
-        );
+        assert_eq!(typed_data["domain"]["name"], "SecureMessenger");
+        assert_eq!(typed_data["message"]["nonce"], 42);
     }
 
     #[test]
@@ -524,7 +510,7 @@ pub async fn metamask_connect(
     // Нужно использовать callback или JS promise
     // Для MetaMask используем window.ethereum напрямую через фронтенд
     // Эта команда только обновляет состояние на фронтенде
-    
+
     // Заглушка: фронтенд должен вызвать eth_requestAccounts и передать результат
     Ok(MetaMaskConnectResponse {
         success: false,
@@ -611,15 +597,15 @@ pub fn metamask_get_state(
 
 /// Tauri команда: отключить MetaMask
 #[tauri::command]
-pub fn metamask_disconnect(
-    state: tauri::State<'_, MetaMaskTauriState>,
-) -> Result<bool, String> {
+pub fn metamask_disconnect(state: tauri::State<'_, MetaMaskTauriState>) -> Result<bool, String> {
     state.manager.disconnect();
     Ok(true)
 }
 
 /// Зарегистрировать все MetaMask команды
-pub fn register_metamask_commands(builder: tauri::Builder<tauri::Wry>) -> tauri::Builder<tauri::Wry> {
+pub fn register_metamask_commands(
+    builder: tauri::Builder<tauri::Wry>,
+) -> tauri::Builder<tauri::Wry> {
     builder
         .manage(MetaMaskTauriState::new())
         .invoke_handler(tauri::generate_handler![

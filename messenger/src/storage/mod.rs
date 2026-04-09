@@ -245,9 +245,11 @@ impl LocalStorage {
         .execute(&self.db_pool)
         .await?;
 
-        sqlx::query("CREATE INDEX IF NOT EXISTS idx_chat_history_updated ON chat_history(updated_at DESC)")
-            .execute(&self.db_pool)
-            .await?;
+        sqlx::query(
+            "CREATE INDEX IF NOT EXISTS idx_chat_history_updated ON chat_history(updated_at DESC)",
+        )
+        .execute(&self.db_pool)
+        .await?;
 
         sqlx::query(
             r#"CREATE TABLE IF NOT EXISTS messages_cache (
@@ -310,7 +312,23 @@ impl LocalStorage {
     }
 
     pub async fn get_contact(&self, contact_id: &str) -> Result<Contact, StorageError> {
-        let row = sqlx::query_as::<_, (String, String, Vec<u8>, Option<String>, Vec<u8>, Vec<u8>, Vec<u8>, Option<Vec<u8>>, i64, Option<i64>, i64, i64)>(
+        let row = sqlx::query_as::<
+            _,
+            (
+                String,
+                String,
+                Vec<u8>,
+                Option<String>,
+                Vec<u8>,
+                Vec<u8>,
+                Vec<u8>,
+                Option<Vec<u8>>,
+                i64,
+                Option<i64>,
+                i64,
+                i64,
+            ),
+        >(
             "SELECT id, user_id, encrypted_display_name, encrypted_avatar,
              public_key_x25519, public_key_kyber, public_key_ed25519,
              encrypted_notes, added_at, last_contacted, is_blocked, is_favorite
@@ -325,18 +343,39 @@ impl LocalStorage {
         })?;
 
         Ok(Contact {
-            id: row.0, user_id: row.1, encrypted_display_name: row.2,
-            encrypted_avatar: row.3, public_key_x25519: row.4,
-            public_key_kyber: row.5, public_key_ed25519: row.6,
+            id: row.0,
+            user_id: row.1,
+            encrypted_display_name: row.2,
+            encrypted_avatar: row.3,
+            public_key_x25519: row.4,
+            public_key_kyber: row.5,
+            public_key_ed25519: row.6,
             encrypted_notes: row.7,
             added_at: DateTime::from_timestamp(row.8, 0).unwrap_or_default(),
             last_contacted: row.9.and_then(|t| DateTime::from_timestamp(t, 0)),
-            is_blocked: row.10 != 0, is_favorite: row.11 != 0,
+            is_blocked: row.10 != 0,
+            is_favorite: row.11 != 0,
         })
     }
 
     pub async fn get_contact_by_user_id(&self, user_id: &str) -> Result<Contact, StorageError> {
-        let row = sqlx::query_as::<_, (String, String, Vec<u8>, Option<String>, Vec<u8>, Vec<u8>, Vec<u8>, Option<Vec<u8>>, i64, Option<i64>, i64, i64)>(
+        let row = sqlx::query_as::<
+            _,
+            (
+                String,
+                String,
+                Vec<u8>,
+                Option<String>,
+                Vec<u8>,
+                Vec<u8>,
+                Vec<u8>,
+                Option<Vec<u8>>,
+                i64,
+                Option<i64>,
+                i64,
+                i64,
+            ),
+        >(
             "SELECT id, user_id, encrypted_display_name, encrypted_avatar,
              public_key_x25519, public_key_kyber, public_key_ed25519,
              encrypted_notes, added_at, last_contacted, is_blocked, is_favorite
@@ -346,23 +385,46 @@ impl LocalStorage {
         .fetch_one(&self.db_pool)
         .await
         .map_err(|e| match e {
-            sqlx::Error::RowNotFound => StorageError::NotFound(format!("Contact by user_id: {}", user_id)),
+            sqlx::Error::RowNotFound => {
+                StorageError::NotFound(format!("Contact by user_id: {}", user_id))
+            }
             _ => StorageError::Database(e),
         })?;
 
         Ok(Contact {
-            id: row.0, user_id: row.1, encrypted_display_name: row.2,
-            encrypted_avatar: row.3, public_key_x25519: row.4,
-            public_key_kyber: row.5, public_key_ed25519: row.6,
+            id: row.0,
+            user_id: row.1,
+            encrypted_display_name: row.2,
+            encrypted_avatar: row.3,
+            public_key_x25519: row.4,
+            public_key_kyber: row.5,
+            public_key_ed25519: row.6,
             encrypted_notes: row.7,
             added_at: DateTime::from_timestamp(row.8, 0).unwrap_or_default(),
             last_contacted: row.9.and_then(|t| DateTime::from_timestamp(t, 0)),
-            is_blocked: row.10 != 0, is_favorite: row.11 != 0,
+            is_blocked: row.10 != 0,
+            is_favorite: row.11 != 0,
         })
     }
 
     pub async fn get_all_contacts(&self) -> Result<Vec<Contact>, StorageError> {
-        let rows = sqlx::query_as::<_, (String, String, Vec<u8>, Option<String>, Vec<u8>, Vec<u8>, Vec<u8>, Option<Vec<u8>>, i64, Option<i64>, i64, i64)>(
+        let rows = sqlx::query_as::<
+            _,
+            (
+                String,
+                String,
+                Vec<u8>,
+                Option<String>,
+                Vec<u8>,
+                Vec<u8>,
+                Vec<u8>,
+                Option<Vec<u8>>,
+                i64,
+                Option<i64>,
+                i64,
+                i64,
+            ),
+        >(
             "SELECT id, user_id, encrypted_display_name, encrypted_avatar,
              public_key_x25519, public_key_kyber, public_key_ed25519,
              encrypted_notes, added_at, last_contacted, is_blocked, is_favorite
@@ -371,19 +433,43 @@ impl LocalStorage {
         .fetch_all(&self.db_pool)
         .await?;
 
-        Ok(rows.into_iter().map(|row| Contact {
-            id: row.0, user_id: row.1, encrypted_display_name: row.2,
-            encrypted_avatar: row.3, public_key_x25519: row.4,
-            public_key_kyber: row.5, public_key_ed25519: row.6,
-            encrypted_notes: row.7,
-            added_at: DateTime::from_timestamp(row.8, 0).unwrap_or_default(),
-            last_contacted: row.9.and_then(|t| DateTime::from_timestamp(t, 0)),
-            is_blocked: row.10 != 0, is_favorite: row.11 != 0,
-        }).collect())
+        Ok(rows
+            .into_iter()
+            .map(|row| Contact {
+                id: row.0,
+                user_id: row.1,
+                encrypted_display_name: row.2,
+                encrypted_avatar: row.3,
+                public_key_x25519: row.4,
+                public_key_kyber: row.5,
+                public_key_ed25519: row.6,
+                encrypted_notes: row.7,
+                added_at: DateTime::from_timestamp(row.8, 0).unwrap_or_default(),
+                last_contacted: row.9.and_then(|t| DateTime::from_timestamp(t, 0)),
+                is_blocked: row.10 != 0,
+                is_favorite: row.11 != 0,
+            })
+            .collect())
     }
 
     pub async fn get_favorite_contacts(&self) -> Result<Vec<Contact>, StorageError> {
-        let rows = sqlx::query_as::<_, (String, String, Vec<u8>, Option<String>, Vec<u8>, Vec<u8>, Vec<u8>, Option<Vec<u8>>, i64, Option<i64>, i64, i64)>(
+        let rows = sqlx::query_as::<
+            _,
+            (
+                String,
+                String,
+                Vec<u8>,
+                Option<String>,
+                Vec<u8>,
+                Vec<u8>,
+                Vec<u8>,
+                Option<Vec<u8>>,
+                i64,
+                Option<i64>,
+                i64,
+                i64,
+            ),
+        >(
             "SELECT id, user_id, encrypted_display_name, encrypted_avatar,
              public_key_x25519, public_key_kyber, public_key_ed25519,
              encrypted_notes, added_at, last_contacted, is_blocked, is_favorite
@@ -392,15 +478,23 @@ impl LocalStorage {
         .fetch_all(&self.db_pool)
         .await?;
 
-        Ok(rows.into_iter().map(|row| Contact {
-            id: row.0, user_id: row.1, encrypted_display_name: row.2,
-            encrypted_avatar: row.3, public_key_x25519: row.4,
-            public_key_kyber: row.5, public_key_ed25519: row.6,
-            encrypted_notes: row.7,
-            added_at: DateTime::from_timestamp(row.8, 0).unwrap_or_default(),
-            last_contacted: row.9.and_then(|t| DateTime::from_timestamp(t, 0)),
-            is_blocked: row.10 != 0, is_favorite: row.11 != 0,
-        }).collect())
+        Ok(rows
+            .into_iter()
+            .map(|row| Contact {
+                id: row.0,
+                user_id: row.1,
+                encrypted_display_name: row.2,
+                encrypted_avatar: row.3,
+                public_key_x25519: row.4,
+                public_key_kyber: row.5,
+                public_key_ed25519: row.6,
+                encrypted_notes: row.7,
+                added_at: DateTime::from_timestamp(row.8, 0).unwrap_or_default(),
+                last_contacted: row.9.and_then(|t| DateTime::from_timestamp(t, 0)),
+                is_blocked: row.10 != 0,
+                is_favorite: row.11 != 0,
+            })
+            .collect())
     }
 
     pub async fn update_contact(&self, contact: &Contact) -> Result<(), StorageError> {
@@ -440,7 +534,11 @@ impl LocalStorage {
         Ok(())
     }
 
-    pub async fn set_contact_blocked(&self, contact_id: &str, blocked: bool) -> Result<(), StorageError> {
+    pub async fn set_contact_blocked(
+        &self,
+        contact_id: &str,
+        blocked: bool,
+    ) -> Result<(), StorageError> {
         sqlx::query("UPDATE contacts SET is_blocked = ? WHERE id = ?")
             .bind(blocked as i64)
             .bind(contact_id)
@@ -449,7 +547,11 @@ impl LocalStorage {
         Ok(())
     }
 
-    pub async fn set_contact_favorite(&self, contact_id: &str, favorite: bool) -> Result<(), StorageError> {
+    pub async fn set_contact_favorite(
+        &self,
+        contact_id: &str,
+        favorite: bool,
+    ) -> Result<(), StorageError> {
         sqlx::query("UPDATE contacts SET is_favorite = ? WHERE id = ?")
             .bind(favorite as i64)
             .bind(contact_id)
@@ -470,7 +572,11 @@ impl LocalStorage {
             VALUES (?, ?, ?)
             ON CONFLICT(key) DO UPDATE SET value = ?, updated_at = ?"#,
         )
-        .bind(key).bind(value).bind(now).bind(value).bind(now)
+        .bind(key)
+        .bind(value)
+        .bind(now)
+        .bind(value)
+        .bind(now)
         .execute(&self.db_pool)
         .await?;
 
@@ -517,10 +623,14 @@ impl LocalStorage {
         .fetch_all(&self.db_pool)
         .await?;
 
-        Ok(rows.into_iter().map(|row| SettingEntry {
-            key: row.0, value: row.1,
-            updated_at: DateTime::from_timestamp(row.2, 0).unwrap_or_default(),
-        }).collect())
+        Ok(rows
+            .into_iter()
+            .map(|row| SettingEntry {
+                key: row.0,
+                value: row.1,
+                updated_at: DateTime::from_timestamp(row.2, 0).unwrap_or_default(),
+            })
+            .collect())
     }
 
     // ========================================================================
@@ -542,16 +652,26 @@ impl LocalStorage {
             VALUES (?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET unread_count = ?, updated_at = ?"#,
         )
-        .bind(chat_id).bind(chat_id).bind(chat_type).bind(peer_id)
-        .bind(unread_count as i64).bind(now).bind(now)
-        .bind(unread_count as i64).bind(now)
+        .bind(chat_id)
+        .bind(chat_id)
+        .bind(chat_type)
+        .bind(peer_id)
+        .bind(unread_count as i64)
+        .bind(now)
+        .bind(now)
+        .bind(unread_count as i64)
+        .bind(now)
         .execute(&self.db_pool)
         .await?;
 
         Ok(())
     }
 
-    pub async fn update_unread_count(&self, chat_id: &str, unread_count: u64) -> Result<(), StorageError> {
+    pub async fn update_unread_count(
+        &self,
+        chat_id: &str,
+        unread_count: u64,
+    ) -> Result<(), StorageError> {
         sqlx::query("UPDATE chat_history SET unread_count = ?, updated_at = ? WHERE chat_id = ?")
             .bind(unread_count as i64)
             .bind(Utc::now().timestamp())
@@ -561,7 +681,11 @@ impl LocalStorage {
         Ok(())
     }
 
-    pub async fn set_chat_archived(&self, chat_id: &str, archived: bool) -> Result<(), StorageError> {
+    pub async fn set_chat_archived(
+        &self,
+        chat_id: &str,
+        archived: bool,
+    ) -> Result<(), StorageError> {
         sqlx::query("UPDATE chat_history SET is_archived = ?, updated_at = ? WHERE chat_id = ?")
             .bind(archived as i64)
             .bind(Utc::now().timestamp())
@@ -585,10 +709,16 @@ impl LocalStorage {
                  created_at, msg_type, delivery_status, reply_to, attachments)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"#,
         )
-        .bind(&message.id).bind(&message.chat_id).bind(&message.sender_id)
-        .bind(&message.encrypted_content).bind(&message.signature)
-        .bind(created_at).bind(&message.msg_type).bind(&message.delivery_status)
-        .bind(&message.reply_to).bind(attachments_json)
+        .bind(&message.id)
+        .bind(&message.chat_id)
+        .bind(&message.sender_id)
+        .bind(&message.encrypted_content)
+        .bind(&message.signature)
+        .bind(created_at)
+        .bind(&message.msg_type)
+        .bind(&message.delivery_status)
+        .bind(&message.reply_to)
+        .bind(attachments_json)
         .execute(&self.db_pool)
         .await?;
 
@@ -601,7 +731,22 @@ impl LocalStorage {
         limit: usize,
         offset: usize,
     ) -> Result<Vec<CachedMessage>, StorageError> {
-        let rows = sqlx::query_as::<_, (String, String, String, Vec<u8>, Vec<u8>, i64, String, String, Option<String>, String, i64)>(
+        let rows = sqlx::query_as::<
+            _,
+            (
+                String,
+                String,
+                String,
+                Vec<u8>,
+                Vec<u8>,
+                i64,
+                String,
+                String,
+                Option<String>,
+                String,
+                i64,
+            ),
+        >(
             r#"SELECT id, chat_id, sender_id, encrypted_content, signature,
                    created_at, msg_type, delivery_status, reply_to, attachments,
                    is_deleted
@@ -620,11 +765,16 @@ impl LocalStorage {
         for row in rows {
             let attachments: Vec<String> = serde_json::from_str(&row.9).unwrap_or_default();
             messages.push(CachedMessage {
-                id: row.0, chat_id: row.1, sender_id: row.2,
-                encrypted_content: row.3, signature: row.4,
+                id: row.0,
+                chat_id: row.1,
+                sender_id: row.2,
+                encrypted_content: row.3,
+                signature: row.4,
                 created_at: DateTime::from_timestamp(row.5, 0).unwrap_or_default(),
-                msg_type: row.6, delivery_status: row.7,
-                reply_to: row.8, attachments,
+                msg_type: row.6,
+                delivery_status: row.7,
+                reply_to: row.8,
+                attachments,
                 is_deleted: row.10 != 0,
             });
         }
@@ -670,13 +820,18 @@ impl LocalStorage {
 
     pub async fn get_stats(&self) -> Result<StorageStats, StorageError> {
         let contacts = sqlx::query_as::<_, (i64,)>("SELECT COUNT(*) FROM contacts")
-            .fetch_one(&self.db_pool).await?;
+            .fetch_one(&self.db_pool)
+            .await?;
         let settings = sqlx::query_as::<_, (i64,)>("SELECT COUNT(*) FROM settings")
-            .fetch_one(&self.db_pool).await?;
+            .fetch_one(&self.db_pool)
+            .await?;
         let chats = sqlx::query_as::<_, (i64,)>("SELECT COUNT(*) FROM chat_history")
-            .fetch_one(&self.db_pool).await?;
-        let messages = sqlx::query_as::<_, (i64,)>("SELECT COUNT(*) FROM messages_cache WHERE is_deleted = 0")
-            .fetch_one(&self.db_pool).await?;
+            .fetch_one(&self.db_pool)
+            .await?;
+        let messages =
+            sqlx::query_as::<_, (i64,)>("SELECT COUNT(*) FROM messages_cache WHERE is_deleted = 0")
+                .fetch_one(&self.db_pool)
+                .await?;
         let db_size = self.get_db_size().await?;
 
         Ok(StorageStats {
@@ -727,7 +882,10 @@ mod tests {
     async fn test_setting_individual() {
         let storage = LocalStorage::in_memory().await.unwrap();
 
-        storage.save_setting("test_key", "test_value").await.unwrap();
+        storage
+            .save_setting("test_key", "test_value")
+            .await
+            .unwrap();
         let value = storage.get_setting("test_key").await.unwrap();
         assert_eq!(value, Some("test_value".to_string()));
 
@@ -838,7 +996,10 @@ mod tests {
         };
 
         storage.add_contact(&contact).await.unwrap();
-        storage.set_contact_favorite("contact-fav", true).await.unwrap();
+        storage
+            .set_contact_favorite("contact-fav", true)
+            .await
+            .unwrap();
 
         let favorites = storage.get_favorite_contacts().await.unwrap();
         assert_eq!(favorites.len(), 1);
@@ -865,7 +1026,10 @@ mod tests {
         };
 
         storage.add_contact(&contact).await.unwrap();
-        storage.set_contact_blocked("contact-block", true).await.unwrap();
+        storage
+            .set_contact_blocked("contact-block", true)
+            .await
+            .unwrap();
 
         let loaded = storage.get_contact("contact-block").await.unwrap();
         assert!(loaded.is_blocked);

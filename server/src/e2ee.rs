@@ -1,12 +1,12 @@
-use serde::{Deserialize, Serialize};
-use x25519_dalek::{StaticSecret, PublicKey};
+use base64::{engine::general_purpose::STANDARD as base64_standard, Engine as _};
 use chacha20poly1305::{
     aead::{Aead, KeyInit},
     ChaCha20Poly1305, Key, Nonce,
 };
 use rand::RngCore;
+use serde::{Deserialize, Serialize};
 use sha3::{Digest, Sha3_256};
-use base64::{Engine as _, engine::general_purpose::STANDARD as base64_standard};
+use x25519_dalek::{PublicKey, StaticSecret};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct E2EEPayload {
@@ -60,11 +60,9 @@ pub fn encrypt_message(
 }
 
 #[allow(dead_code)]
-pub fn decrypt_message(
-    payload: &E2EEPayload,
-    my_secret_key: &[u8; 32],
-) -> Result<Vec<u8>, String> {
-    let ephemeral_pk_bytes = base64_standard.decode(&payload.ephemeral_public_key)
+pub fn decrypt_message(payload: &E2EEPayload, my_secret_key: &[u8; 32]) -> Result<Vec<u8>, String> {
+    let ephemeral_pk_bytes = base64_standard
+        .decode(&payload.ephemeral_public_key)
         .map_err(|e| format!("Invalid ephemeral key: {}", e))?;
     let ephemeral_pk = PublicKey::from(*arrayref::array_ref![ephemeral_pk_bytes, 0, 32]);
 
@@ -72,9 +70,11 @@ pub fn decrypt_message(
     let chacha_key = derive_chacha_key(&my_secret, &ephemeral_pk);
     let chacha_key = Key::from_slice(&chacha_key);
 
-    let nonce_bytes = base64_standard.decode(&payload.nonce)
+    let nonce_bytes = base64_standard
+        .decode(&payload.nonce)
         .map_err(|e| format!("Invalid nonce: {}", e))?;
-    let ciphertext = base64_standard.decode(&payload.ciphertext)
+    let ciphertext = base64_standard
+        .decode(&payload.ciphertext)
         .map_err(|e| format!("Invalid ciphertext: {}", e))?;
 
     let nonce = Nonce::from_slice(&nonce_bytes);

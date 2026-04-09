@@ -11,26 +11,12 @@ pub mod router;
 pub mod telegram_bot;
 
 pub use cloudflare::{
-    CloudflareMessage,
-    CloudflareTransport,
-    DeliveryStatus,
-    QueuedMessage,
-    TransportError,
+    CloudflareMessage, CloudflareTransport, DeliveryStatus, QueuedMessage, TransportError,
 };
 
-pub use router::{
-    EncryptedRouteLog,
-    Route,
-    RouteStats,
-    RouterError,
-    TransportRouter,
-};
+pub use router::{EncryptedRouteLog, Route, RouteStats, RouterError, TransportRouter};
 
 pub use telegram_bot::{
-    DeliveryRoute,
-    EncryptedTelegramPayload,
-    MessageRouter,
-    TelegramBotError,
-    TelegramBotResult,
+    DeliveryRoute, EncryptedTelegramPayload, MessageRouter, TelegramBotError, TelegramBotResult,
     TelegramBotTransport,
 };

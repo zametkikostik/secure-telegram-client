@@ -217,11 +217,7 @@ impl AbcexClient {
     }
 
     /// Создать с кастомной комиссией
-    pub fn with_fee(
-        api_key: Option<String>,
-        api_secret: Option<String>,
-        fee_bps: u64,
-    ) -> Self {
+    pub fn with_fee(api_key: Option<String>, api_secret: Option<String>, fee_bps: u64) -> Self {
         // Валидация комиссии (2-3%)
         assert!(
             fee_bps >= 200 && fee_bps <= 300,
@@ -276,7 +272,7 @@ impl AbcexClient {
 
         // Выполнить запрос
         let mut req = self.http_client.get(&url).query(&query_params);
-        
+
         for (key, value) in self.auth_headers() {
             req = req.header(&key, &value);
         }
@@ -292,7 +288,10 @@ impl AbcexClient {
                 .await
                 .unwrap_or_else(|_| "Unknown error".to_string());
             error!("Abcex API error: {}", error_text);
-            return Err(Web3Error::Network(format!("Abcex API error: {}", error_text)));
+            return Err(Web3Error::Network(format!(
+                "Abcex API error: {}",
+                error_text
+            )));
         }
 
         let quote: BuyQuoteResponse = response
@@ -340,9 +339,7 @@ impl AbcexClient {
             "timestamp": timestamp,
         });
 
-        let mut req = self.http_client
-            .post(&url)
-            .json(&order);
+        let mut req = self.http_client.post(&url).json(&order);
 
         for (key, value) in self.auth_headers() {
             req = req.header(&key, &value);
@@ -359,7 +356,10 @@ impl AbcexClient {
                 .await
                 .unwrap_or_else(|_| "Unknown error".to_string());
             error!("Abcex order error: {}", error_text);
-            return Err(Web3Error::Network(format!("Abcex order error: {}", error_text)));
+            return Err(Web3Error::Network(format!(
+                "Abcex order error: {}",
+                error_text
+            )));
         }
 
         let order_response: BuyOrder = response
@@ -397,7 +397,10 @@ impl AbcexClient {
                 .text()
                 .await
                 .unwrap_or_else(|_| "Unknown error".to_string());
-            return Err(Web3Error::Network(format!("Abcex API error: {}", error_text)));
+            return Err(Web3Error::Network(format!(
+                "Abcex API error: {}",
+                error_text
+            )));
         }
 
         let order: BuyOrder = response
@@ -416,9 +419,7 @@ impl AbcexClient {
     pub async fn check_kyc_status(&self, user_id: &str) -> Web3Result<KycStatus> {
         let url = format!("{}/kyc/status", ABCEX_API_BASE);
 
-        let mut req = self.http_client
-            .get(&url)
-            .query(&[("user_id", user_id)]);
+        let mut req = self.http_client.get(&url).query(&[("user_id", user_id)]);
 
         for (key, value) in self.auth_headers() {
             req = req.header(&key, &value);
@@ -434,7 +435,10 @@ impl AbcexClient {
                 .text()
                 .await
                 .unwrap_or_else(|_| "Unknown error".to_string());
-            return Err(Web3Error::Network(format!("Abcex API error: {}", error_text)));
+            return Err(Web3Error::Network(format!(
+                "Abcex API error: {}",
+                error_text
+            )));
         }
 
         let kyc: KycStatus = response
@@ -453,7 +457,8 @@ impl AbcexClient {
     pub async fn get_supported_cryptos(&self) -> Web3Result<Vec<String>> {
         let url = format!("{}/supported/cryptos", ABCEX_API_BASE);
 
-        let response = self.http_client
+        let response = self
+            .http_client
             .get(&url)
             .send()
             .await
@@ -464,7 +469,10 @@ impl AbcexClient {
                 .text()
                 .await
                 .unwrap_or_else(|_| "Unknown error".to_string());
-            return Err(Web3Error::Network(format!("Abcex API error: {}", error_text)));
+            return Err(Web3Error::Network(format!(
+                "Abcex API error: {}",
+                error_text
+            )));
         }
 
         let cryptos: Vec<String> = response
@@ -479,7 +487,8 @@ impl AbcexClient {
     pub async fn get_limits(&self, country: &str) -> Web3Result<HashMap<String, String>> {
         let url = format!("{}/limits", ABCEX_API_BASE);
 
-        let response = self.http_client
+        let response = self
+            .http_client
             .get(&url)
             .query(&[("country", country)])
             .send()
@@ -491,7 +500,10 @@ impl AbcexClient {
                 .text()
                 .await
                 .unwrap_or_else(|_| "Unknown error".to_string());
-            return Err(Web3Error::Network(format!("Abcex API error: {}", error_text)));
+            return Err(Web3Error::Network(format!(
+                "Abcex API error: {}",
+                error_text
+            )));
         }
 
         let limits: HashMap<String, String> = response
@@ -539,12 +551,9 @@ impl AbcexClient {
         );
 
         // 2. Создать заказ
-        let order = self.create_buy_order(
-            quote.quote_id,
-            deposit_address,
-            payment_method,
-            user_email,
-        ).await?;
+        let order = self
+            .create_buy_order(quote.quote_id, deposit_address, payment_method, user_email)
+            .await?;
 
         Ok(order)
     }
@@ -560,7 +569,11 @@ pub struct BuyQuoteBuilder {
 }
 
 impl BuyQuoteBuilder {
-    pub fn new(fiat_currency: impl Into<String>, fiat_amount: impl Into<String>, crypto: impl Into<String>) -> Self {
+    pub fn new(
+        fiat_currency: impl Into<String>,
+        fiat_amount: impl Into<String>,
+        crypto: impl Into<String>,
+    ) -> Self {
         Self {
             request: BuyQuoteRequest {
                 fiat_currency: fiat_currency.into(),
@@ -618,7 +631,7 @@ pub fn calculate_fee(amount: &str, fee_bps: u64) -> Web3Result<String> {
     let amount_f64: f64 = amount
         .parse()
         .map_err(|_| Web3Error::Wallet(format!("Invalid amount: {}", amount)))?;
-    
+
     let fee = amount_f64 * (fee_bps as f64) / 10000.0;
     Ok(format!("{:.2}", fee))
 }

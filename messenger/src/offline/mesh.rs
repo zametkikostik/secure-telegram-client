@@ -10,13 +10,12 @@
 //! - End-to-end encryption preserved through all hops
 //! - No central server needed
 
-
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::sync::Arc;
+use thiserror::Error;
 use tokio::sync::RwLock;
 use tracing::{debug, info, warn};
-use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum MeshError {
@@ -67,12 +66,7 @@ impl MeshMessage {
     }
 
     /// Create message with default TTL
-    pub fn new(
-        sender_id: &str,
-        recipient_id: &str,
-        encrypted_payload: Vec<u8>,
-        ttl: u32,
-    ) -> Self {
+    pub fn new(sender_id: &str, recipient_id: &str, encrypted_payload: Vec<u8>, ttl: u32) -> Self {
         let now = chrono::Utc::now();
         let expires = now + chrono::Duration::hours(24); // 24 hour expiry
 
@@ -190,7 +184,9 @@ impl MeshNetwork {
 
     /// Get online peers
     pub async fn get_online_peers(&self) -> Vec<MeshPeer> {
-        self.peers.read().await
+        self.peers
+            .read()
+            .await
             .values()
             .filter(|p| p.is_online)
             .cloned()
@@ -223,7 +219,8 @@ impl MeshNetwork {
     /// Get pending messages for a specific recipient
     pub async fn get_pending_for(&self, recipient_id: &str) -> Vec<MeshMessage> {
         let queue = self.message_queue.read().await;
-        queue.iter()
+        queue
+            .iter()
             .filter(|m| m.recipient_id == recipient_id && m.can_forward())
             .cloned()
             .collect()
@@ -232,7 +229,9 @@ impl MeshNetwork {
     /// Mark message as delivered
     pub async fn mark_delivered(&self, message_id: &str) {
         // Remove from queue
-        self.message_queue.write().await
+        self.message_queue
+            .write()
+            .await
             .retain(|m| m.id != message_id);
 
         // Add to delivered set
@@ -275,8 +274,14 @@ impl MeshNetwork {
         if let Some(forwarded) = msg.forward(from_peer) {
             self.stats.write().await.messages_forwarded += 1;
             let fwd_id = forwarded.id.clone();
-            self.message_queue.write().await.push_back(forwarded.clone());
-            debug!("Forwarding message {} (hops: {})", fwd_id, forwarded.hop_count);
+            self.message_queue
+                .write()
+                .await
+                .push_back(forwarded.clone());
+            debug!(
+                "Forwarding message {} (hops: {})",
+                fwd_id, forwarded.hop_count
+            );
             Some(forwarded)
         } else {
             // TTL expired

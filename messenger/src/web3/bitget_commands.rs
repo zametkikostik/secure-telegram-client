@@ -5,9 +5,7 @@
 use serde::{Deserialize, Serialize};
 use tauri::State;
 
-use super::bitget::{
-    BitgetClient, BuyRequest, OrderType, OrderSide,
-};
+use super::bitget::{BitgetClient, BuyRequest, OrderSide, OrderType};
 use super::types::Web3Error;
 
 // ============================================================================
@@ -215,7 +213,11 @@ pub async fn bitget_get_order_status(
     request: BitgetOrderStatusRequest,
     state: State<'_, BitgetState>,
 ) -> Result<BitgetOrderResponse, String> {
-    match state.client.get_order_status(&request.symbol, &request.order_id).await {
+    match state
+        .client
+        .get_order_status(&request.symbol, &request.order_id)
+        .await
+    {
         Ok(order) => Ok(BitgetOrderResponse {
             success: true,
             order: Some(BitgetOrderData {
@@ -249,7 +251,11 @@ pub async fn bitget_cancel_order(
     request: BitgetCancelRequest,
     state: State<'_, BitgetState>,
 ) -> Result<BitgetOrderResponse, String> {
-    match state.client.cancel_order(&request.symbol, &request.order_id).await {
+    match state
+        .client
+        .cancel_order(&request.symbol, &request.order_id)
+        .await
+    {
         Ok(()) => Ok(BitgetOrderResponse {
             success: true,
             order: None,
@@ -318,13 +324,8 @@ pub async fn bitget_get_market_price(
 
 /// Получить список торговых пар
 #[tauri::command]
-pub async fn bitget_get_symbols(
-    state: State<'_, BitgetState>,
-) -> Result<Vec<String>, String> {
-    state.client
-        .get_symbols()
-        .await
-        .map_err(|e| e.to_string())
+pub async fn bitget_get_symbols(state: State<'_, BitgetState>) -> Result<Vec<String>, String> {
+    state.client.get_symbols().await.map_err(|e| e.to_string())
 }
 
 /// Быстрая покупка (market order)
@@ -399,12 +400,8 @@ pub async fn bitget_quick_sell(
 
 /// Рассчитать комиссию для суммы
 #[tauri::command]
-pub fn bitget_calculate_fee(
-    amount: String,
-    fee_bps: u64,
-) -> Result<String, String> {
-    super::bitget::calculate_fee(&amount, fee_bps)
-        .map_err(|e: Web3Error| e.to_string())
+pub fn bitget_calculate_fee(amount: String, fee_bps: u64) -> Result<String, String> {
+    super::bitget::calculate_fee(&amount, fee_bps).map_err(|e: Web3Error| e.to_string())
 }
 
 // ============================================================================

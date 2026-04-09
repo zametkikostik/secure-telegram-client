@@ -85,9 +85,7 @@ pub struct Subscription {
 impl Subscription {
     /// Check if subscription is currently active
     pub fn is_valid(&self) -> bool {
-        self.is_active
-            && chrono::Utc::now() < self.end_date
-            && self.cancelled_at.is_none()
+        self.is_active && chrono::Utc::now() < self.end_date && self.cancelled_at.is_none()
     }
 
     /// Days remaining
@@ -358,7 +356,10 @@ impl MonetizationManager {
             cancelled_at: None,
         };
 
-        self.subscriptions.lock().unwrap().push(subscription.clone());
+        self.subscriptions
+            .lock()
+            .unwrap()
+            .push(subscription.clone());
         subscription
     }
 
@@ -437,7 +438,13 @@ impl MonetizationManager {
     }
 
     /// Earn credits
-    pub fn earn_credits(&self, address: &str, amount: u32, source: CreditSource, description: &str) {
+    pub fn earn_credits(
+        &self,
+        address: &str,
+        amount: u32,
+        source: CreditSource,
+        description: &str,
+    ) {
         let mut accounts = self.credit_accounts.lock().unwrap();
         let account = accounts
             .entry(address.to_string())
@@ -503,11 +510,7 @@ impl MonetizationManager {
     // ========================================================================
 
     /// Purchase a premium feature with credits
-    pub fn purchase_feature(
-        &self,
-        address: &str,
-        feature: PremiumFeature,
-    ) -> bool {
+    pub fn purchase_feature(&self, address: &str, feature: PremiumFeature) -> bool {
         let cost = feature.cost_credits();
 
         if self.spend_credits(address, cost, CreditSource::PremiumFeature, feature.name()) {

@@ -12,21 +12,21 @@
 //! SECURITY: требует аудита перед production
 //! TODO: pentest перед release
 
-use oqs::kem::{Kem, Algorithm, PublicKey, SecretKey, Ciphertext};
-use x25519_dalek::{PublicKey as X25519PublicKey, StaticSecret};
 use chacha20poly1305::{
     aead::{Aead, KeyInit},
     ChaCha20Poly1305, Key, Nonce,
 };
-use ed25519_dalek::{SigningKey, VerifyingKey, Signature, Signer, Verifier};
+use ed25519_dalek::{Signature, Signer, SigningKey, Verifier, VerifyingKey};
+use oqs::kem::{Algorithm, Ciphertext, Kem, PublicKey, SecretKey};
 use rand::rngs::OsRng;
 use rand::RngCore;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
+use x25519_dalek::{PublicKey as X25519PublicKey, StaticSecret};
 
 use crate::crypto::constants::{
-    CHACHA20_KEY_SIZE, CHACHA20_NONCE_SIZE, X25519_KEY_SIZE,
-    ED25519_SIGNATURE_SIZE, HKDF_CHACHA20_INFO,
+    CHACHA20_KEY_SIZE, CHACHA20_NONCE_SIZE, ED25519_SIGNATURE_SIZE, HKDF_CHACHA20_INFO,
+    X25519_KEY_SIZE,
 };
 
 // ============================================================================
@@ -90,9 +90,10 @@ impl HybridKeypair {
 
         // Kyber1024 keypair (post-quantum KEM)
         oqs::init();
-        let kyber_kem = Kem::new(Algorithm::Kyber1024)
-            .map_err(|e| CryptoError::KeyGenFailed(e.to_string()))?;
-        let (kyber_public, kyber_secret) = kyber_kem.keypair()
+        let kyber_kem =
+            Kem::new(Algorithm::Kyber1024).map_err(|e| CryptoError::KeyGenFailed(e.to_string()))?;
+        let (kyber_public, kyber_secret) = kyber_kem
+            .keypair()
             .map_err(|e| CryptoError::KeyGenFailed(e.to_string()))?;
 
         // Ed25519 keypair (signatures)
@@ -156,7 +157,11 @@ impl PublicBundle {
         let mut x25519_public = [0u8; X25519_KEY_SIZE];
         x25519_public.copy_from_slice(&bytes[0..X25519_KEY_SIZE]);
 
-        let kyber_len = u32::from_le_bytes(bytes[X25519_KEY_SIZE..X25519_KEY_SIZE + 4].try_into().unwrap()) as usize;
+        let kyber_len = u32::from_le_bytes(
+            bytes[X25519_KEY_SIZE..X25519_KEY_SIZE + 4]
+                .try_into()
+                .unwrap(),
+        ) as usize;
         let kyber_start = X25519_KEY_SIZE + 4;
         let kyber_public = bytes[kyber_start..kyber_start + kyber_len].to_vec();
 
@@ -194,14 +199,12 @@ pub struct HybridCiphertext {
 impl HybridCiphertext {
     /// Serialize to JSON bytes
     pub fn to_bytes(&self) -> Result<Vec<u8>, CryptoError> {
-        serde_json::to_vec(self)
-            .map_err(|e| CryptoError::EncryptionFailed(e.to_string()))
+        serde_json::to_vec(self).map_err(|e| CryptoError::EncryptionFailed(e.to_string()))
     }
 
     /// Deserialize from JSON bytes
     pub fn from_bytes(bytes: &[u8]) -> Result<Self, CryptoError> {
-        serde_json::from_slice(bytes)
-            .map_err(|e| CryptoError::DecryptionFailed(e.to_string()))
+        serde_json::from_slice(bytes).map_err(|e| CryptoError::DecryptionFailed(e.to_string()))
     }
 }
 
@@ -235,9 +238,10 @@ pub fn encrypt(
 
     // 3. Kyber1024 encapsulation
     oqs::init();
-    let kyber_kem = Kem::new(Algorithm::Kyber1024)
-        .map_err(|e| CryptoError::EncryptionFailed(e.to_string()))?;
-    let (kyber_ciphertext, kyber_shared) = kyber_kem.encapsulate(recipient_kyber)
+    let kyber_kem =
+        Kem::new(Algorithm::Kyber1024).map_err(|e| CryptoError::EncryptionFailed(e.to_string()))?;
+    let (kyber_ciphertext, kyber_shared) = kyber_kem
+        .encapsulate(recipient_kyber)
         .map_err(|e| CryptoError::EncryptionFailed(e.to_string()))?;
 
     // 4. Combine shared secrets via HKDF-SHA3-256
@@ -260,7 +264,8 @@ pub fn encrypt(
     let cipher = ChaCha20Poly1305::new(key);
     let nonce = Nonce::from_slice(&nonce_bytes);
 
-    let ciphertext = cipher.encrypt(nonce, plaintext)
+    let ciphertext = cipher
+        .encrypt(nonce, plaintext)
         .map_err(|e| CryptoError::EncryptionFailed(e.to_string()))?;
 
     // 8. Sign the ciphertext with sender's Ed25519 key
@@ -300,9 +305,10 @@ pub fn decrypt(
 
     // 3. Kyber1024 decapsulation
     oqs::init();
-    let kyber_kem = Kem::new(Algorithm::Kyber1024)
-        .map_err(|e| CryptoError::DecryptionFailed(e.to_string()))?;
-    let kyber_shared = kyber_kem.decapsulate(my_kyber_secret, &ciphertext.kyber_ciphertext)
+    let kyber_kem =
+        Kem::new(Algorithm::Kyber1024).map_err(|e| CryptoError::DecryptionFailed(e.to_string()))?;
+    let kyber_shared = kyber_kem
+        .decapsulate(my_kyber_secret, &ciphertext.kyber_ciphertext)
         .map_err(|e| CryptoError::DecryptionFailed(e.to_string()))?;
 
     // 4. Combine shared secrets via HKDF-SHA3-256
@@ -318,10 +324,14 @@ pub fn decrypt(
 
     // 6. Verify Ed25519 signature
     let signature = Signature::from_bytes(
-        ciphertext.signature.as_slice().try_into()
-            .map_err(|_| CryptoError::InvalidSignature)?
+        ciphertext
+            .signature
+            .as_slice()
+            .try_into()
+            .map_err(|_| CryptoError::InvalidSignature)?,
     );
-    sender_verifying_key.verify(&ciphertext.ciphertext, &signature)
+    sender_verifying_key
+        .verify(&ciphertext.ciphertext, &signature)
         .map_err(|_| CryptoError::InvalidSignature)?;
 
     // 7. Decrypt with ChaCha20-Poly1305
@@ -329,7 +339,8 @@ pub fn decrypt(
     let cipher = ChaCha20Poly1305::new(key);
     let nonce = Nonce::from_slice(&ciphertext.nonce);
 
-    let plaintext = cipher.decrypt(nonce, ciphertext.ciphertext.as_ref())
+    let plaintext = cipher
+        .decrypt(nonce, ciphertext.ciphertext.as_ref())
         .map_err(|e| CryptoError::DecryptionFailed(e.to_string()))?;
 
     tracing::debug!("Message decrypted successfully");
@@ -348,7 +359,8 @@ pub fn verify_signature(
     message: &[u8],
     public: &VerifyingKey,
 ) -> Result<(), CryptoError> {
-    public.verify(message, signature)
+    public
+        .verify(message, signature)
         .map_err(|_| CryptoError::InvalidSignature)
 }
 
@@ -370,14 +382,16 @@ mod tests {
             &keypair.x25519_public,
             &keypair.kyber_public,
             &keypair.ed25519_secret,
-        ).unwrap();
+        )
+        .unwrap();
 
         let decrypted = decrypt(
             &ciphertext,
             &keypair.x25519_secret,
             &keypair.kyber_secret,
             &keypair.ed25519_public,
-        ).unwrap();
+        )
+        .unwrap();
 
         assert_eq!(message, &decrypted[..]);
     }
@@ -413,7 +427,8 @@ mod tests {
             &keypair.x25519_public,
             &keypair.kyber_public,
             &keypair.ed25519_secret,
-        ).unwrap();
+        )
+        .unwrap();
 
         let bytes = ciphertext.to_bytes().unwrap();
         let restored = HybridCiphertext::from_bytes(&bytes).unwrap();
@@ -435,7 +450,8 @@ mod tests {
             &keypair.x25519_public,
             &keypair.kyber_public,
             &keypair.ed25519_secret,
-        ).unwrap();
+        )
+        .unwrap();
 
         // Tamper with the ciphertext
         ciphertext.ciphertext[0] ^= 0xFF;

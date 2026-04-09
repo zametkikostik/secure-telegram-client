@@ -58,14 +58,17 @@ pub mod local {
         /// Generate a new random wallet with mnemonic
         pub fn generate(&mut self) -> Web3Result<WalletInfo> {
             let wallet = LocalWallet::new(&mut thread_rng());
-            
+
             // NOTE: В ethers v2.0 нет метода mnemonic() для Wallet
             // mnemonic доступен только при создании через new_with_mnemonic
             // Для простоты возвращаем приватный ключ в hex
             let address = format!("{:?}", wallet.address());
             let chain = self.chain;
 
-            self.wallet = Some(SecureWallet { wallet, address: address.clone() });
+            self.wallet = Some(SecureWallet {
+                wallet,
+                address: address.clone(),
+            });
 
             Ok(WalletInfo {
                 wallet_type: WalletType::Mnemonic,
@@ -84,7 +87,10 @@ pub mod local {
                 .map_err(|e| Web3Error::Wallet(format!("Invalid private key: {}", e)))?;
 
             let address = format!("{:?}", wallet.address());
-            self.wallet = Some(SecureWallet { wallet, address: address.clone() });
+            self.wallet = Some(SecureWallet {
+                wallet,
+                address: address.clone(),
+            });
 
             Ok(WalletInfo {
                 wallet_type: WalletType::PrivateKey,
@@ -106,7 +112,10 @@ pub mod local {
                 .map_err(|e| Web3Error::Wallet(format!("Failed to decrypt keystore: {}", e)))?;
 
             let address = format!("{:?}", wallet.address());
-            self.wallet = Some(SecureWallet { wallet, address: address.clone() });
+            self.wallet = Some(SecureWallet {
+                wallet,
+                address: address.clone(),
+            });
 
             Ok(WalletInfo {
                 wallet_type: WalletType::Keystore,
@@ -127,7 +136,9 @@ pub mod local {
         ) -> Web3Result<std::path::PathBuf> {
             // В ethers 2.0 нет простого способа экспортировать существующий wallet
             // Нужно использовать decrypt_keystore + импортировать private key
-            Err(Web3Error::Wallet("export_keystore not implemented yet".to_string()))
+            Err(Web3Error::Wallet(
+                "export_keystore not implemented yet".to_string(),
+            ))
         }
 
         /// Get wallet address
@@ -142,10 +153,7 @@ pub mod local {
 
         /// Sign a message (EIP-191 personal_sign)
         pub async fn sign_message(&self, message: &[u8]) -> Web3Result<String> {
-            let wallet = self
-                .wallet
-                .as_ref()
-                .ok_or(Web3Error::NotConnected)?;
+            let wallet = self.wallet.as_ref().ok_or(Web3Error::NotConnected)?;
 
             let signature = wallet
                 .wallet
@@ -160,10 +168,7 @@ pub mod local {
         pub async fn get_balance(&self, rpc_url: &str) -> Web3Result<NativeBalance> {
             use ethers::providers::{Http, Middleware, Provider};
 
-            let wallet = self
-                .wallet
-                .as_ref()
-                .ok_or(Web3Error::NotConnected)?;
+            let wallet = self.wallet.as_ref().ok_or(Web3Error::NotConnected)?;
 
             let provider = Provider::<Http>::try_from(rpc_url)
                 .map_err(|e| Web3Error::Rpc(format!("Invalid RPC URL: {}", e)))?;
@@ -256,7 +261,9 @@ pub mod local {
         async fn test_sign_message() {
             let mut manager = LocalWalletManager::new(Chain::Ethereum);
             manager
-                .import_private_key("ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80")
+                .import_private_key(
+                    "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+                )
                 .unwrap();
 
             let signature = manager.sign_message(b"Hello, Web3!").await.unwrap();
@@ -275,7 +282,8 @@ pub mod local {
         fn test_keystore_export_import() {
             use std::fs;
 
-            let temp_dir = std::env::temp_dir().join(format!("keystore_test_{}", uuid::Uuid::new_v4()));
+            let temp_dir =
+                std::env::temp_dir().join(format!("keystore_test_{}", uuid::Uuid::new_v4()));
             fs::create_dir_all(&temp_dir).unwrap();
 
             // Generate wallet
@@ -288,7 +296,9 @@ pub mod local {
 
             // Import into new manager
             let mut manager2 = LocalWalletManager::new(Chain::Ethereum);
-            let info = manager2.import_keystore(&keystore_path, "test-password").unwrap();
+            let info = manager2
+                .import_keystore(&keystore_path, "test-password")
+                .unwrap();
 
             // Addresses should match
             assert_eq!(info.address, original_address);
@@ -427,14 +437,17 @@ pub fn wallet_generate(
     request: GenerateWalletRequest,
     state: State<'_, WalletState>,
 ) -> Result<WalletInfo, String> {
-    let chain = request.chain.parse::<Chain>()
+    let chain = request
+        .chain
+        .parse::<Chain>()
         .map_err(|e| format!("Invalid chain: {}", e))?;
 
     // Используем blocking lock для sync команды
     let mut manager = state.manager.blocking_lock();
     manager.switch_chain(chain);
-    
-    manager.generate()
+
+    manager
+        .generate()
         .map_err(|e| format!("Generate error: {}", e))
 }
 
@@ -445,25 +458,28 @@ pub fn wallet_import_private_key(
     request: ImportWalletRequest,
     state: State<'_, WalletState>,
 ) -> Result<WalletInfo, String> {
-    let chain = request.chain.parse::<Chain>()
+    let chain = request
+        .chain
+        .parse::<Chain>()
         .map_err(|e| format!("Invalid chain: {}", e))?;
 
-    let private_key = request.private_key
+    let private_key = request
+        .private_key
         .ok_or_else(|| "Private key required".to_string())?;
 
     let mut manager = state.manager.blocking_lock();
     manager.switch_chain(chain);
-    
-    manager.local.import_private_key(&private_key)
+
+    manager
+        .local
+        .import_private_key(&private_key)
         .map_err(|e| format!("Import error: {}", e))
 }
 
 /// Tauri команда: получить адрес кошелька
 #[cfg(feature = "web3")]
 #[tauri::command]
-pub fn wallet_get_address(
-    state: State<'_, WalletState>,
-) -> Result<Option<String>, String> {
+pub fn wallet_get_address(state: State<'_, WalletState>) -> Result<Option<String>, String> {
     let manager = state.manager.blocking_lock();
     Ok(manager.local.address())
 }
@@ -476,7 +492,7 @@ pub async fn wallet_sign_message(
     state: State<'_, WalletState>,
 ) -> Result<SignMessageResponse, String> {
     let manager = state.manager.lock().await;
-    
+
     match manager.local.sign_message(request.message.as_bytes()).await {
         Ok(signature) => Ok(SignMessageResponse {
             success: true,
@@ -502,7 +518,7 @@ pub async fn wallet_get_balance(
 ) -> Result<BalanceResponse, String> {
     let manager = state.manager.lock().await;
     let rpc_url = request.rpc_url.unwrap_or_else(|| state.rpc_url.clone());
-    
+
     match manager.local.get_balance(&rpc_url).await {
         Ok(balance) => Ok(BalanceResponse {
             success: true,
@@ -520,9 +536,7 @@ pub async fn wallet_get_balance(
 /// Tauri команда: отключить кошелек
 #[cfg(feature = "web3")]
 #[tauri::command]
-pub fn wallet_disconnect(
-    state: State<'_, WalletState>,
-) -> Result<bool, String> {
+pub fn wallet_disconnect(state: State<'_, WalletState>) -> Result<bool, String> {
     let mut manager = state.manager.blocking_lock();
     manager.local.disconnect();
     Ok(true)
@@ -531,9 +545,7 @@ pub fn wallet_disconnect(
 /// Tauri команда: проверить загружен ли кошелек
 #[cfg(feature = "web3")]
 #[tauri::command]
-pub fn wallet_is_loaded(
-    state: State<'_, WalletState>,
-) -> Result<bool, String> {
+pub fn wallet_is_loaded(state: State<'_, WalletState>) -> Result<bool, String> {
     let manager = state.manager.blocking_lock();
     Ok(manager.local.is_loaded())
 }
@@ -599,7 +611,8 @@ pub async fn wallet_abcex_quote(
             country: request.country,
         },
         abcex_state,
-    ).await
+    )
+    .await
 }
 
 /// Tauri команда: Bitget покупка через wallet
@@ -610,7 +623,7 @@ pub async fn wallet_bitget_buy(
     bitget_state: State<'_, crate::web3::bitget_commands::BitgetState>,
 ) -> Result<crate::web3::bitget_commands::BitgetOrderResponse, String> {
     use crate::web3::bitget::{OrderSide, OrderType};
-    
+
     // Делегирование к Bitget команде
     crate::web3::bitget_commands::bitget_place_order(
         crate::web3::bitget_commands::BitgetOrderRequest {
@@ -623,7 +636,8 @@ pub async fn wallet_bitget_buy(
             client_order_id: None,
         },
         bitget_state,
-    ).await
+    )
+    .await
 }
 
 /// Tauri команда: Bitget продажа через wallet
@@ -645,7 +659,8 @@ pub async fn wallet_bitget_sell(
             client_order_id: None,
         },
         bitget_state,
-    ).await
+    )
+    .await
 }
 
 /// Tauri команда: получить баланс Bitget
@@ -656,29 +671,27 @@ pub async fn wallet_bitget_balance(
     bitget_state: State<'_, crate::web3::bitget_commands::BitgetState>,
 ) -> Result<crate::web3::bitget_commands::BitgetBalanceResponse, String> {
     crate::web3::bitget_commands::bitget_get_balance(
-        crate::web3::bitget_commands::BitgetBalanceRequest {
-            currency,
-        },
+        crate::web3::bitget_commands::BitgetBalanceRequest { currency },
         bitget_state,
-    ).await
+    )
+    .await
 }
 
 /// Зарегистрировать все команды включая Abcex/Bitget обёртки
 #[cfg(feature = "web3")]
 pub fn register_all_wallet_commands(
-    builder: tauri::Builder<tauri::Wry>
+    builder: tauri::Builder<tauri::Wry>,
 ) -> tauri::Builder<tauri::Wry> {
     // Сначала регистрируем базовые команды кошелька
     let builder = register_wallet_commands(builder);
-    
+
     // Затем добавляем обёртки для Abcex/Bitget
-    builder
-        .invoke_handler(tauri::generate_handler![
-            wallet_abcex_quote,
-            wallet_bitget_buy,
-            wallet_bitget_sell,
-            wallet_bitget_balance,
-        ])
+    builder.invoke_handler(tauri::generate_handler![
+        wallet_abcex_quote,
+        wallet_bitget_buy,
+        wallet_bitget_sell,
+        wallet_bitget_balance,
+    ])
 }
 
 // ============================================================================

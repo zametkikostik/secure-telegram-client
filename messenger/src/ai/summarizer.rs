@@ -15,8 +15,7 @@ pub async fn summarize_text(client: &AiClient, conversation: &str) -> AiResult<S
         return Ok("Нет сообщений для суммаризации".to_string());
     }
 
-    let system_prompt =
-        "You are a chat summarizer. Read the conversation and provide a concise \
+    let system_prompt = "You are a chat summarizer. Read the conversation and provide a concise \
          summary in the same language as the conversation. Include key decisions, \
          action items, and important context. Use bullet points if appropriate.";
 
@@ -61,8 +60,7 @@ pub async fn summarize_title(client: &AiClient, conversation: &str) -> AiResult<
         return Ok("Без названия".to_string());
     }
 
-    let system_prompt =
-        "Generate a short title (3-5 words) for this conversation. \
+    let system_prompt = "Generate a short title (3-5 words) for this conversation. \
          Return ONLY the title, no quotes, no explanations.";
 
     let user_prompt = format!("Conversation:\n{}", conversation);
@@ -85,8 +83,7 @@ pub async fn extract_action_items(client: &AiClient, conversation: &str) -> AiRe
         return Ok("Нет задач".to_string());
     }
 
-    let system_prompt =
-        "Extract all action items, tasks, and TODOs from this conversation. \
+    let system_prompt = "Extract all action items, tasks, and TODOs from this conversation. \
          Format as a numbered list with who is responsible for each item. \
          Return ONLY the list, nothing else.";
 

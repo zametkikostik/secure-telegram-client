@@ -231,39 +231,56 @@ impl AdStorage {
 
         let mut ads = Vec::new();
         for row in rows {
-            let id: String = row.try_get("id")
+            let id: String = row
+                .try_get("id")
                 .map_err(|e| AdError::Storage(e.to_string()))?;
-            let advertiser: String = row.try_get("advertiser")
+            let advertiser: String = row
+                .try_get("advertiser")
                 .map_err(|e| AdError::Storage(e.to_string()))?;
-            let ad_type_str: String = row.try_get("ad_type")
+            let ad_type_str: String = row
+                .try_get("ad_type")
                 .map_err(|e| AdError::Storage(e.to_string()))?;
-            let category_str: String = row.try_get("category")
+            let category_str: String = row
+                .try_get("category")
                 .map_err(|e| AdError::Storage(e.to_string()))?;
-            let title: String = row.try_get("title")
+            let title: String = row
+                .try_get("title")
                 .map_err(|e| AdError::Storage(e.to_string()))?;
-            let body: String = row.try_get("body")
+            let body: String = row
+                .try_get("body")
                 .map_err(|e| AdError::Storage(e.to_string()))?;
-            let image_url: Option<String> = row.try_get("image_url")
+            let image_url: Option<String> = row
+                .try_get("image_url")
                 .map_err(|e| AdError::Storage(e.to_string()))?;
-            let url: Option<String> = row.try_get("url")
+            let url: Option<String> = row
+                .try_get("url")
                 .map_err(|e| AdError::Storage(e.to_string()))?;
-            let cta: Option<String> = row.try_get("cta")
+            let cta: Option<String> = row
+                .try_get("cta")
                 .map_err(|e| AdError::Storage(e.to_string()))?;
-            let credit_reward: i64 = row.try_get("credit_reward")
+            let credit_reward: i64 = row
+                .try_get("credit_reward")
                 .map_err(|e| AdError::Storage(e.to_string()))?;
-            let impression_cap: i64 = row.try_get("impression_cap")
+            let impression_cap: i64 = row
+                .try_get("impression_cap")
                 .map_err(|e| AdError::Storage(e.to_string()))?;
-            let start_date_str: String = row.try_get("start_date")
+            let start_date_str: String = row
+                .try_get("start_date")
                 .map_err(|e| AdError::Storage(e.to_string()))?;
-            let end_date_str: String = row.try_get("end_date")
+            let end_date_str: String = row
+                .try_get("end_date")
                 .map_err(|e| AdError::Storage(e.to_string()))?;
-            let priority: i64 = row.try_get("priority")
+            let priority: i64 = row
+                .try_get("priority")
                 .map_err(|e| AdError::Storage(e.to_string()))?;
-            let viewed: i64 = row.try_get("viewed")
+            let viewed: i64 = row
+                .try_get("viewed")
                 .map_err(|e| AdError::Storage(e.to_string()))?;
-            let click_count: i64 = row.try_get("click_count")
+            let click_count: i64 = row
+                .try_get("click_count")
                 .map_err(|e| AdError::Storage(e.to_string()))?;
-            let impression_count: i64 = row.try_get("impression_count")
+            let impression_count: i64 = row
+                .try_get("impression_count")
                 .map_err(|e| AdError::Storage(e.to_string()))?;
 
             let ad_type = serde_json::from_str(&ad_type_str)
@@ -500,7 +517,10 @@ impl AdBundleFetcher {
 
         let url = format!("{}/api/v1/ads/bundle", self.worker_url);
 
-        debug!("Fetching ad bundle from: {} (categories: {:?})", url, categories);
+        debug!(
+            "Fetching ad bundle from: {} (categories: {:?})",
+            url, categories
+        );
 
         let response = self
             .http_client
@@ -530,10 +550,7 @@ impl AdBundleFetcher {
     }
 
     /// Report impressions anonymously (batch, no PII)
-    pub async fn report_impressions(
-        &self,
-        impressions: &[AdImpression],
-    ) -> Result<(), AdError> {
+    pub async fn report_impressions(&self, impressions: &[AdImpression]) -> Result<(), AdError> {
         if impressions.is_empty() {
             return Ok(());
         }
@@ -546,7 +563,11 @@ impl AdBundleFetcher {
 
         let url = format!("{}/api/v1/ads/report", self.worker_url);
 
-        debug!("Reporting {} impressions to: {}", impression_hashes.len(), url);
+        debug!(
+            "Reporting {} impressions to: {}",
+            impression_hashes.len(),
+            url
+        );
 
         let response = self
             .http_client
@@ -619,9 +640,9 @@ pub fn decrypt_ad_bundle(
         aad: b"ad-bundle", // Additional authenticated data
     };
 
-    let plaintext = cipher
-        .decrypt(nonce, payload)
-        .map_err(|e| AdError::DecryptionFailed(format!("ChaCha20-Poly1305 decryption failed: {}", e)))?;
+    let plaintext = cipher.decrypt(nonce, payload).map_err(|e| {
+        AdError::DecryptionFailed(format!("ChaCha20-Poly1305 decryption failed: {}", e))
+    })?;
 
     // Parse JSON into ads
     let ads: Vec<Ad> = serde_json::from_slice(&plaintext)
@@ -633,10 +654,7 @@ pub fn decrypt_ad_bundle(
 
 /// Encrypt ad bundle for testing
 #[cfg(test)]
-pub fn encrypt_ad_bundle(
-    ads: &[Ad],
-    client_key: &[u8; 32],
-) -> Result<EncryptedAdBundle, String> {
+pub fn encrypt_ad_bundle(ads: &[Ad], client_key: &[u8; 32]) -> Result<EncryptedAdBundle, String> {
     use chacha20poly1305::aead::OsRng;
     use rand::RngCore;
 
@@ -651,8 +669,8 @@ pub fn encrypt_ad_bundle(
     let key_bytes = hasher.finalize();
 
     // Serialize ads to JSON
-    let plaintext = serde_json::to_vec(ads)
-        .map_err(|e| format!("Failed to serialize ads: {}", e))?;
+    let plaintext =
+        serde_json::to_vec(ads).map_err(|e| format!("Failed to serialize ads: {}", e))?;
 
     // Create cipher
     let key = Key::from_slice(&key_bytes);
@@ -687,9 +705,7 @@ pub async fn fetch_and_store_ads(
     last_sync: Option<i64>,
 ) -> AdResult<usize> {
     // Fetch encrypted bundle
-    let encrypted_bundle = fetcher
-        .fetch_bundle(categories, last_sync, 50)
-        .await?;
+    let encrypted_bundle = fetcher.fetch_bundle(categories, last_sync, 50).await?;
 
     // Decrypt bundle
     let ads = decrypt_ad_bundle(&encrypted_bundle, client_private_key)?;

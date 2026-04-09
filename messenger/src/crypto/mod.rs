@@ -11,33 +11,16 @@
 //! TODO: pentest перед release
 
 pub mod constants;
-pub mod hybrid;
 pub mod double_ratchet;
+pub mod hybrid;
 pub mod steganography;
 
 // Re-export main types
 pub use hybrid::{
-    HybridKeypair,
+    decrypt, encrypt, sign, verify_signature, CryptoError, HybridCiphertext, HybridKeypair,
     PublicBundle,
-    HybridCiphertext,
-    CryptoError,
-    encrypt,
-    decrypt,
-    sign,
-    verify_signature,
 };
 
-pub use double_ratchet::{
-    DoubleRatchetSession,
-    RatchetSession,
-    RatchetCiphertext,
-    RatchetError,
-};
+pub use double_ratchet::{DoubleRatchetSession, RatchetCiphertext, RatchetError, RatchetSession};
 
-pub use steganography::{
-    hide,
-    extract,
-    capacity_bits,
-    ImageRgb8,
-    StegoError,
-};
+pub use steganography::{capacity_bits, extract, hide, ImageRgb8, StegoError};
