@@ -1,0 +1,23 @@
+[package]
+name = "crypto"
+version.workspace = true
+edition.workspace = true
+description = "Cryptographic primitives for Secure Telegram Client"
+
+[dependencies]
+# Post-quantum crypto (Kyber1024)
+pqc_kyber = { version = "0.5", features = ["kyber1024"] }
+# Classical crypto
+x25519-dalek.workspace = true
+chacha20poly1305.workspace = true
+argon2.workspace = true
+ed25519-dalek.workspace = true
+sha3.workspace = true
+hmac.workspace = true
+hkdf.workspace = true
+zeroize.workspace = true
+subtle.workspace = true
+rand.workspace = true
+serde.workspace = true
+thiserror.workspace = true
+tracing.workspace = true

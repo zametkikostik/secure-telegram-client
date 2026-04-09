@@ -1,0 +1,41 @@
+# Cloudflare Worker Configuration
+# Secure Messenger Push Notification Worker
+#
+# Docs: https://developers.cloudflare.com/workers/wrangler/configuration/
+
+name = "secure-messenger-push"
+main = "src/worker.js"
+compatibility_date = "2024-03-01"
+# Explicitly set to avoid Pages auto-detection
+workers_dev = true
+
+# Ensure all JS files are included in bundle
+[build]
+command = ""
+
+[[rules]]
+type = "ESModule"
+globs = ["**/*.js"]
+
+# ============================================================================
+# Environment Variables
+# ============================================================================
+
+[vars]
+ENVIRONMENT = "production"
+LOG_LEVEL = "info"
+MAX_MESSAGE_SIZE = "1048576"  # 1MB
+MESSAGE_TTL = "604800000"     # 7 days in milliseconds
+
+# ============================================================================
+# KV Namespace (Key-Value Store)
+# ============================================================================
+# Used for: P2P device registry, message queue, contacts
+#
+# IMPORTANT: Replace with your actual KV namespace ID!
+# Get ID by running: wrangler kv:namespace list
+# Or create new: wrangler kv:namespace create PUSH_STORE
+
+[[kv_namespaces]]
+binding = "PUSH_STORE"
+id = "9c0651f314b64b49bc215fc5f56163f4"

@@ -1,0 +1,75 @@
+# ============================================================================
+# Secure Messenger Server — Configuration Template
+# ============================================================================
+# Copy to config.toml and customize for your deployment
+# ============================================================================
+
+[server]
+host = "0.0.0.0"
+port = 3000
+workers = 4
+keep_alive_secs = 60
+shutdown_timeout_secs = 30
+
+[database]
+# PostgreSQL connection string
+url = "postgres://messenger:password@localhost:5432/messenger"
+max_connections = 10
+idle_timeout_secs = 600
+connect_timeout_secs = 30
+
+[redis]
+# Redis connection string
+url = "redis://:password@localhost:6379/0"
+max_connections = 20
+connection_timeout_secs = 10
+
+[minio]
+# S3-compatible object storage
+endpoint = "http://localhost:9000"
+access_key = "minioadmin"
+secret_key = "minioadmin"
+bucket = "messenger-files"
+use_ssl = false
+
+[jwt]
+secret = "change-this-to-random-secret"
+expiry_secs = 86400
+issuer = "secure-messenger"
+
+[rate_limit]
+# Requests per minute per IP
+requests_per_minute = 60
+burst_size = 20
+
+[upload]
+max_size_mb = 50
+allowed_mime_types = [
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "image/webp",
+    "application/pdf",
+    "video/mp4",
+    "audio/ogg",
+    "audio/mpeg",
+]
+
+[logging]
+level = "info"
+format = "json"  # json or text
+file_path = "/app/logs/server.log"
+max_file_size_mb = 100
+max_files = 5
+
+[security]
+# CORS
+allowed_origins = ["*"]
+allowed_methods = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+allowed_headers = ["Content-Type", "Authorization", "X-Device-ID"]
+
+# TLS (if running standalone without nginx)
+[tls]
+enabled = false
+cert_path = "/app/config/cert.pem"
+key_path = "/app/config/key.pem"

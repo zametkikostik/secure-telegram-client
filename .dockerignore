@@ -1,0 +1,7 @@
+target/
+node_modules/
+*.db
+.env
+.env.local
+dist/
+.git/

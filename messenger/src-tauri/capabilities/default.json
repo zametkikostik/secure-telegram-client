@@ -1,0 +1,10 @@
+{
+  "identifier": "default",
+  "description": "Default permissions for Secure Messenger",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "store:default",
+    "shell:default"
+  ]
+}

@@ -1,0 +1,11 @@
+[package]
+name = "steganography"
+version.workspace = true
+edition.workspace = true
+description = "Steganography module for Secure Telegram Client"
+
+[dependencies]
+image = { workspace = true }
+rand.workspace = true
+thiserror.workspace = true
+tracing.workspace = true

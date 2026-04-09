@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Output files (except test data)
+*.json
+!test_data/result.json
+
+# Virtual environment
+.venv/
+venv/

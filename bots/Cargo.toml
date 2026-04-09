@@ -1,0 +1,27 @@
+[package]
+name = "secure-messenger-bots"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "Bot platform for Secure Telegram Client"
+
+[dependencies]
+axum.workspace = true
+tokio.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+thiserror.workspace = true
+reqwest.workspace = true
+chrono.workspace = true
+
+# Crypto for bot message verification
+ed25519-dalek.workspace = true
+sha3.workspace = true
+
+[[bin]]
+name = "secure-messenger-bots"
+path = "src/main.rs"

@@ -1,0 +1,480 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================================
+   RTL (Right-to-Left) Support for Arabic, Hebrew, etc.
+   ============================================================================ */
+
+[dir="rtl"] {
+  /* Flip flex direction for RTL */
+  .flex-row-rtl {
+    flex-direction: row-reverse;
+  }
+
+  /* Flip text alignment */
+  .text-start-rtl {
+    text-align: right;
+  }
+
+  /* Flip borders */
+  .border-l-rtl {
+    border-left: none;
+    border-right-width: 1px;
+  }
+
+  /* Flip margins */
+  .ml-auto-rtl {
+    margin-left: 0;
+    margin-right: auto;
+  }
+
+  .mr-auto-rtl {
+    margin-right: 0;
+    margin-left: auto;
+  }
+
+  /* Flip dropdowns */
+  .dropdown-right-rtl {
+    right: auto;
+    left: 0;
+  }
+
+  /* Flip padding */
+  .pl-rtl {
+    padding-left: 0;
+    padding-right: inherit;
+  }
+
+  .pr-rtl {
+    padding-right: 0;
+    padding-left: inherit;
+  }
+}
+
+/* ============================================================================
+   Theme Variables - Dark/Light mode support
+   ============================================================================ */
+
+:root {
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f8fafc;
+  --color-bg-tertiary: #f1f5f9;
+  --color-border: #e2e8f0;
+  --color-border-hover: #cbd5e1;
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-muted: #94a3b8;
+  --color-accent: #2563eb;
+  --color-accent-hover: #1d4ed8;
+  --color-success: #16a34a;
+  --color-warning: #f59e0b;
+  --color-error: #dc2626;
+  --color-overlay: rgba(0, 0, 0, 0.5);
+}
+
+.dark {
+  --color-bg-primary: #0f172a;
+  --color-bg-secondary: #1e293b;
+  --color-bg-tertiary: #334155;
+  --color-border: #334155;
+  --color-border-hover: #475569;
+  --color-text-primary: #f8fafc;
+  --color-text-secondary: #cbd5e1;
+  --color-text-muted: #64748b;
+  --color-accent: #3b82f6;
+  --color-accent-hover: #60a5fa;
+  --color-success: #22c55e;
+  --color-warning: #fbbf24;
+  --color-error: #ef4444;
+  --color-overlay: rgba(0, 0, 0, 0.7);
+}
+
+/* ============================================================================
+   Base Styles
+   ============================================================================ */
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  body {
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Light mode overrides */
+  .light body {
+    @apply bg-white text-slate-900;
+  }
+
+  /* Dark mode overrides */
+  .dark body {
+    @apply bg-slate-900 text-slate-50;
+  }
+}
+
+/* ============================================================================
+   Component Styles
+   ============================================================================ */
+
+@layer components {
+  /* Buttons */
+  .btn-primary {
+    @apply px-4 py-2 rounded-lg transition-colors duration-200 font-medium;
+    background-color: var(--color-accent);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background-color: var(--color-accent-hover);
+  }
+
+  .btn-secondary {
+    @apply px-4 py-2 rounded-lg transition-colors duration-200 border font-medium;
+    background-color: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    border-color: var(--color-border);
+  }
+
+  .btn-secondary:hover {
+    background-color: var(--color-bg-tertiary);
+    border-color: var(--color-border-hover);
+  }
+
+  /* Inputs */
+  .input-primary {
+    @apply px-4 py-2 rounded-lg transition-colors duration-200;
+    background-color: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+  }
+
+  .input-primary::placeholder {
+    color: var(--color-text-muted);
+  }
+
+  .input-primary:focus {
+    @apply outline-none ring-2;
+    --tw-ring-color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+
+  /* Cards */
+  .card {
+    @apply rounded-lg p-4 transition-colors duration-200;
+    background-color: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+  }
+
+  .card:hover {
+    border-color: var(--color-border-hover);
+  }
+
+  /* Theme Toggle Button */
+  .theme-toggle {
+    @apply p-2 rounded-lg transition-all duration-200;
+    background-color: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+  }
+
+  .theme-toggle:hover {
+    background-color: var(--color-bg-tertiary);
+    border-color: var(--color-border-hover);
+  }
+
+  /* Scrollbar */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-bg-tertiary) var(--color-bg-secondary);
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: var(--color-bg-secondary);
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: var(--color-bg-tertiary);
+    border-radius: 3px;
+  }
+
+  /* Connection Status Bar */
+  .status-connected {
+    @apply px-4 py-2 text-center text-sm font-medium transition-colors duration-300;
+    background-color: var(--color-success);
+    color: white;
+  }
+
+  .status-disconnected {
+    @apply px-4 py-2 text-center text-sm font-medium transition-colors duration-300;
+    background-color: var(--color-warning);
+    color: white;
+  }
+
+  /* Message Bubble */
+  .message-bubble {
+    @apply rounded-lg p-3 transition-colors duration-200;
+    background-color: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+  }
+
+  .message-bubble:hover {
+    border-color: var(--color-border-hover);
+  }
+
+  /* Chat Window */
+  .chat-window {
+    @apply flex flex-col h-full;
+    background-color: var(--color-bg-primary);
+  }
+
+  .chat-header {
+    @apply px-4 py-3 border-b;
+    background-color: var(--color-bg-secondary);
+    border-color: var(--color-border);
+  }
+
+  .chat-messages {
+    @apply flex-1 overflow-y-auto p-4 space-y-4;
+    scrollbar-width: thin;
+  }
+
+  .chat-input {
+    @apply px-4 py-3 border-t;
+    background-color: var(--color-bg-secondary);
+    border-color: var(--color-border);
+  }
+}
+
+/* ============================================================================
+   Utilities
+   ============================================================================ */
+
+@layer utilities {
+  /* Screen reader only */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  .not-sr-only {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: 0;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+  }
+
+  /* Skip to content link */
+  .skip-link {
+    @apply sr-only;
+  }
+
+  .skip-link:focus {
+    @apply not-sr-only;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    background-color: var(--color-accent);
+    color: white;
+    text-decoration: none;
+    border-radius: 0 0 0.5rem 0;
+  }
+
+  /* Theme transition utility - prevents flash during theme switch */
+  .theme-transitioning * {
+    transition: background-color 0.2s ease,
+                color 0.2s ease,
+                border-color 0.2s ease,
+                box-shadow 0.2s ease !important;
+  }
+
+  /* Smooth scroll for chat messages */
+  .smooth-scroll {
+    scroll-behavior: smooth;
+  }
+
+  /* Focus visible for keyboard users */
+  *:focus-visible {
+    @apply outline-none ring-2;
+    --tw-ring-color: var(--color-accent);
+  }
+
+  /* Remove focus ring for mouse users */
+  *:focus:not(:focus-visible) {
+    outline: none;
+    box-shadow: none;
+  }
+
+  /* ============================================================================
+     Call Animations
+     ============================================================================ */
+
+  /* Slow bounce for incoming call accept button */
+  @keyframes bounce-slow {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  .animate-bounce-slow {
+    animation: bounce-slow 2s infinite;
+  }
+
+  /* Slow pulse for active call avatar */
+  @keyframes pulse-slow {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.8;
+    }
+  }
+
+  .animate-pulse-slow {
+    animation: pulse-slow 3s infinite;
+  }
+
+  /* Slide up animation for call controls */
+  @keyframes slide-up {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.3s ease-out;
+  }
+
+  /* ============================================================================
+     Message Animations
+     ============================================================================ */
+
+  /* Slide in from bottom for new messages */
+  @keyframes messageSlide {
+    from {
+      transform: translateY(12px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  /* Fade in for presence updates */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* Typing indicator bounce */
+  @keyframes typingBounce {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-4px); }
+  }
+
+  /* Online indicator pulse */
+  @keyframes onlinePulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+    50% { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+  }
+
+  .animate-message-slide {
+    animation: messageSlide 0.3s ease-out;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .animate-typing-bounce {
+    animation: typingBounce 1.2s infinite;
+  }
+
+  .animate-online-pulse {
+    animation: onlinePulse 2s infinite;
+  }
+
+  /* ============================================================================
+     Telegram-Style Avatars
+     ============================================================================ */
+
+  .avatar-gradient-1 { background: linear-gradient(135deg, #ff6b6b, #ee5a24); }
+  .avatar-gradient-2 { background: linear-gradient(135deg, #48dbfb, #0abde3); }
+  .avatar-gradient-3 { background: linear-gradient(135deg, #ff9ff3, #f368e0); }
+  .avatar-gradient-4 { background: linear-gradient(135deg, #feca57, #ff9f43); }
+  .avatar-gradient-5 { background: linear-gradient(135deg, #55efc4, #00b894); }
+  .avatar-gradient-6 { background: linear-gradient(135deg, #a29bfe, #6c5ce7); }
+  .avatar-gradient-7 { background: linear-gradient(135deg, #fd79a8, #e84393); }
+  .avatar-gradient-8 { background: linear-gradient(135deg, #74b9ff, #0984e3); }
+
+  /* ============================================================================
+     Custom Scrollbar for Chat
+     ============================================================================ */
+
+  .chat-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .chat-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .chat-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-radius: 3px;
+  }
+
+  .chat-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.25);
+  }
+
+  /* ============================================================================
+     Wallpaper Patterns
+     ============================================================================ */
+
+  .wallpaper-dots {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  .wallpaper-stripes {
+    background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.03) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.03) 50%, rgba(255, 255, 255, 0.03) 75%, transparent 75%, transparent);
+    background-size: 40px 40px;
+  }
+}

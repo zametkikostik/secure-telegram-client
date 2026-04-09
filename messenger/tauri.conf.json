@@ -1,0 +1,33 @@
+{
+  "productName": "SecureMessenger",
+  "version": "0.1.0",
+  "identifier": "io.secure-messenger.app",
+  "build": {
+    "beforeDevCommand": "cd /home/kostik/secure-messenger/secure-telegram-client/frontend && npm run dev",
+    "beforeBuildCommand": "cd /home/kostik/secure-messenger/secure-telegram-client/frontend && npm run build",
+    "frontendDist": "/home/kostik/secure-messenger/secure-telegram-client/frontend/dist",
+    "devUrl": "http://localhost:1420"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [{
+      "title": "Secure Messenger",
+      "width": 1200,
+      "height": 800,
+      "resizable": true,
+      "center": true,
+      "minWidth": 800,
+      "minHeight": 600
+    }],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' https: wss:; img-src 'self' data: blob:; media-src 'self' data:; font-src 'self'"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["deb"],
+    "icon": [
+      "icons/icon.png"
+    ]
+  }
+}

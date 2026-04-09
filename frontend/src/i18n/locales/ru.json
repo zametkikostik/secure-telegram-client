@@ -1,0 +1,163 @@
+{
+  "app": {
+    "title": "Secure Messenger",
+    "subtitle": "Выберите чат для начала общения",
+    "tagline": "Постквантовое E2EE • X25519 + Kyber1024"
+  },
+  "common": {
+    "chats": "Чаты",
+    "messages": "Сообщения",
+    "settings": "Настройки",
+    "send": "Отправить",
+    "search": "Поиск",
+    "cancel": "Отмена",
+    "save": "Сохранить",
+    "delete": "Удалить",
+    "loading": "Загрузка...",
+    "error": "Ошибка",
+    "selected": "выбрано"
+  },
+  "chat": {
+    "new_chat": "Новый чат",
+    "new_group": "Новая группа",
+    "new_channel": "Новый канал",
+    "search_chats": "Поиск чатов...",
+    "no_chats": "Нет чатов",
+    "no_chats_hint": "Начните новый разговор",
+    "typing": "печатает..."
+  },
+  "message": {
+    "type_message": "Введите сообщение...",
+    "encrypted": "Зашифровано",
+    "delivered": "Доставлено",
+    "read": "Прочитано",
+    "sent": "Отправлено",
+    "failed": "Не доставлено",
+    "no_messages": "Нет сообщений",
+    "no_messages_hint": "Отправьте первое сообщение"
+  },
+  "status": {
+    "online": "В сети",
+    "offline": "Не в сети",
+    "connecting": "Подключение...",
+    "connected": "Подключено",
+    "disconnected": "Отключено",
+    "reconnecting": "Переподключение..."
+  },
+  "encryption": {
+    "title": "Сквозное шифрование",
+    "algorithm": "Алгоритм",
+    "route": "Маршрут",
+    "p2p": "P2P",
+    "cloudflare": "Cloudflare",
+    "verified": "Верифицировано"
+  },
+  "language": {
+    "title": "Язык",
+    "ru": "Русский",
+    "en": "English",
+    "bg": "Български",
+    "ar": "العربية",
+    "zh": "中文",
+    "vi": "Tiếng Việt"
+  },
+  "theme": {
+    "title": "Тема",
+    "dark": "Тёмная",
+    "light": "Светлая",
+    "system": "Системная"
+  },
+  "a11y": {
+    "skip_to_content": "Перейти к содержимому",
+    "press_slash": "Нажмите / для фокуса на поиск",
+    "use_arrows": "Используйте стрелки для навигации, Enter для выбора, Escape для закрытия",
+    "attach_file": "Прикрепить файл",
+    "insert_emoji": "Вставить эмодзи",
+    "before_send": "перед отправкой",
+    "open_menu": "Открыть меню",
+    "close_menu": "Закрыть меню"
+  },
+  "import": {
+    "telegram": {
+      "title": "Импорт из Telegram",
+      "button_label": "Импорт из Telegram",
+      "dropzone": "Перетащите файл экспорта Telegram сюда или нажмите для выбора",
+      "drop_here": "Отпустите файл здесь",
+      "format_hint": "Поддерживаемые форматы: JSON экспорт Telegram Desktop",
+      "start": "Начать импорт",
+      "try_again": "Попробовать снова",
+      "parsing": "Анализ файла...",
+      "importing_chats": "Импорт чатов...",
+      "importing_messages": "Импорт сообщений...",
+      "importing_contacts": "Импорт контактов...",
+      "success": "Импорт завершён успешно!",
+      "error": "Ошибка импорта",
+      "chats_imported": "Чатов импортировано",
+      "messages_imported": "Сообщений импортировано",
+      "contacts_imported": "Контактов импортировано",
+      "duration": "Затрачено времени: {{duration}}",
+      "parse_error": "Ошибка парсинга JSON. Убедитесь, что файл является корректным экспортом Telegram",
+      "read_error": "Не удалось прочитать файл",
+      "invalid_format": "Неверный формат файла. Поддерживаются только .json файлы",
+      "unknown_format": "Не распознана структура экспорта Telegram",
+      "unknown_error": "Произошла неизвестная ошибка",
+      "settings": "Настройки",
+      "auto_translate": "Авто-перевод импортированных чатов",
+      "auto_translate_on": "Включён — сообщения будут переведены на ваш язык",
+      "auto_translate_off": "Выключен — сообщения останутся на оригинальном языке"
+    }
+  },
+  "call": {
+    "audio": "Аудиозвонок",
+    "video": "Видеозвонок",
+    "incoming_audio": "Входящий аудиозвонок",
+    "incoming_video": "Входящий видеозвонок",
+    "accept": "Принять",
+    "reject": "Отклонить",
+    "connecting": "Подключение...",
+    "hangup": "Завершить звонок",
+    "mute": "Выключить микрофон",
+    "unmute": "Включить микрофон",
+    "camera_on": "Включить камеру",
+    "camera_off": "Выключить камеру",
+    "speaker_on": "Динамик вкл",
+    "speaker_off": "Динамик выкл"
+  },
+  "sticker": {
+    "picker_title": "Стикеры",
+    "select_pack": "Выберите пак стикеров",
+    "send_sticker": "Отправить стикер"
+  },
+  "story": {
+    "your_story": "Ваша история",
+    "create_story": "Создать историю",
+    "no_stories": "Историй пока нет",
+    "views": "просмотров",
+    "posted_at": "Опубликовано"
+  },
+  "bot": {
+    "manager": "Мои боты",
+    "store": "Магазин ботов",
+    "create": "Создать бота",
+    "new_bot": "Новый бот",
+    "name_placeholder": "Имя бота",
+    "username_placeholder": "@имя_бота",
+    "description_placeholder": "Что делает ваш бот?",
+    "type_internal": "Встроенный (команды)",
+    "type_webhook": "Webhook (внешний сервер)",
+    "type_ai": "AI ассистент (OpenRouter)",
+    "ai_prompt_placeholder": "Системный промпт для ИИ...",
+    "no_bots": "Ботов пока нет. Создайте первого!",
+    "active": "Активен",
+    "inactive": "Неактивен",
+    "settings": "Настройки",
+    "delete": "Удалить",
+    "confirm_delete": "Подтвердить",
+    "token_warning": "Сохраните токен! Он больше не будет показан.",
+    "commands": "Команды",
+    "install": "Установить",
+    "installing": "Установка...",
+    "search_placeholder": "Поиск ботов...",
+    "no_results": "Боты не найдены"
+  }
+}

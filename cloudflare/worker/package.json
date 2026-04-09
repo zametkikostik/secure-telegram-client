@@ -1,0 +1,35 @@
+{
+  "name": "secure-messenger-worker",
+  "version": "1.0.0",
+  "description": "Cloudflare Worker for Secure Messenger - Push notifications and message relay",
+  "main": "src/worker.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "build": "echo 'No build step required for vanilla JS worker'",
+    "test": "node --test test/",
+    "db:migrate": "wrangler d1 migrations apply secure-messenger-db --local",
+    "db:migrate:prod": "wrangler d1 migrations apply secure-messenger-db --remote",
+    "db:seed": "node scripts/seed.js",
+    "kv:create": "wrangler kv:namespace create PUSH_STORE",
+    "kv:create:preview": "wrangler kv:namespace create PUSH_STORE --preview",
+    "r2:create": "wrangler r2 bucket create secure-messenger-backups",
+    "d1:create": "wrangler d1 create secure-messenger-db"
+  },
+  "keywords": [
+    "cloudflare",
+    "worker",
+    "messenger",
+    "e2ee",
+    "post-quantum",
+    "push-notifications"
+  ],
+  "author": "Secure Telegram Team",
+  "license": "MIT",
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

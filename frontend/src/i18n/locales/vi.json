@@ -1,0 +1,99 @@
+{
+  "app": {
+    "title": "Secure Messenger",
+    "subtitle": "Chọn cuộc trò chuyện để bắt đầu nhắn tin",
+    "tagline": "Mã hóa đầu cuối hậu lượng tử • X25519 + Kyber1024"
+  },
+  "common": {
+    "chats": "Trò chuyện",
+    "messages": "Tin nhắn",
+    "settings": "Cài đặt",
+    "send": "Gửi",
+    "search": "Tìm kiếm",
+    "cancel": "Hủy",
+    "save": "Lưu",
+    "delete": "Xóa",
+    "loading": "Đang tải...",
+    "error": "Lỗi"
+  },
+  "chat": {
+    "new_chat": "Trò chuyện mới",
+    "new_group": "Nhóm mới",
+    "new_channel": "Kênh mới",
+    "search_chats": "Tìm kiếm trò chuyện...",
+    "no_chats": "Không có trò chuyện",
+    "no_chats_hint": "Bắt đầu cuộc trò chuyện mới",
+    "typing": "đang gõ..."
+  },
+  "message": {
+    "type_message": "Nhập tin nhắn...",
+    "encrypted": "Đã mã hóa",
+    "delivered": "Đã gửi",
+    "read": "Đã đọc",
+    "sent": "Đã gửi",
+    "failed": "Thất bại",
+    "no_messages": "Không có tin nhắn",
+    "no_messages_hint": "Gửi tin nhắn đầu tiên"
+  },
+  "status": {
+    "online": "Trực tuyến",
+    "offline": "Ngoại tuyến",
+    "connecting": "Đang kết nối...",
+    "connected": "Đã kết nối",
+    "disconnected": "Đã ngắt kết nối",
+    "reconnecting": "Đang kết nối lại..."
+  },
+  "encryption": {
+    "title": "Mã hóa đầu cuối",
+    "algorithm": "Thuật toán",
+    "route": "Đường truyền",
+    "p2p": "Ngang hàng",
+    "cloudflare": "Cloudflare",
+    "verified": "Đã xác minh"
+  },
+  "language": {
+    "title": "Ngôn ngữ",
+    "ru": "Русский",
+    "en": "English",
+    "bg": "Български",
+    "ar": "العربية",
+    "zh": "中文",
+    "vi": "Tiếng Việt"
+  },
+  "theme": {
+    "title": "Giao diện",
+    "dark": "Tối",
+    "light": "Sáng",
+    "system": "Theo hệ thống"
+  },
+  "import": {
+    "telegram": {
+      "title": "Nhập từ Telegram",
+      "button_label": "Nhập từ Telegram",
+      "dropzone": "Kéo tệp xuất Telegram vào đây hoặc nhấp để chọn",
+      "drop_here": "Thả tệp vào đây",
+      "format_hint": "Định dạng hỗ trợ: Xuất JSON từ Telegram Desktop",
+      "start": "Bắt đầu nhập",
+      "try_again": "Thử lại",
+      "parsing": "Đang phân tích tệp...",
+      "importing_chats": "Đang nhập cuộc trò chuyện...",
+      "importing_messages": "Đang nhập tin nhắn...",
+      "importing_contacts": "Đang nhập danh bạ...",
+      "success": "Nhập thành công!",
+      "error": "Lỗi nhập",
+      "chats_imported": "Cuộc trò chuyện đã nhập",
+      "messages_imported": "Tin nhắn đã nhập",
+      "contacts_imported": "Danh bạ đã nhập",
+      "duration": "Thời gian: {{duration}}",
+      "parse_error": "Lỗi phân tích JSON. Đảm bảo tệp là xuất hợp lệ từ Telegram",
+      "read_error": "Không thể đọc tệp",
+      "invalid_format": "Định dạng tệp không hợp lệ. Chỉ hỗ trợ tệp .json",
+      "unknown_format": "Cấu trúc xuất Telegram không nhận dạng được",
+      "unknown_error": "Đã xảy ra lỗi không xác định",
+      "settings": "Cài đặt",
+      "auto_translate": "Tự động dịch cuộc trò chuyện đã nhập",
+      "auto_translate_on": "Đã bật — tin nhắn sẽ được dịch sang ngôn ngữ của bạn",
+      "auto_translate_off": "Đã tắt — tin nhắn sẽ giữ nguyên ngôn ngữ gốc"
+    }
+  }
+}

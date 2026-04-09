@@ -1,0 +1,99 @@
+{
+  "app": {
+    "title": "Secure Messenger",
+    "subtitle": "选择聊天开始消息",
+    "tagline": "后量子端到端加密 • X25519 + Kyber1024"
+  },
+  "common": {
+    "chats": "聊天",
+    "messages": "消息",
+    "settings": "设置",
+    "send": "发送",
+    "search": "搜索",
+    "cancel": "取消",
+    "save": "保存",
+    "delete": "删除",
+    "loading": "加载中...",
+    "error": "错误"
+  },
+  "chat": {
+    "new_chat": "新聊天",
+    "new_group": "新群组",
+    "new_channel": "新频道",
+    "search_chats": "搜索聊天...",
+    "no_chats": "没有聊天",
+    "no_chats_hint": "开始新对话",
+    "typing": "正在输入..."
+  },
+  "message": {
+    "type_message": "输入消息...",
+    "encrypted": "已加密",
+    "delivered": "已送达",
+    "read": "已读",
+    "sent": "已发送",
+    "failed": "发送失败",
+    "no_messages": "没有消息",
+    "no_messages_hint": "发送第一条消息"
+  },
+  "status": {
+    "online": "在线",
+    "offline": "离线",
+    "connecting": "连接中...",
+    "connected": "已连接",
+    "disconnected": "已断开",
+    "reconnecting": "重新连接中..."
+  },
+  "encryption": {
+    "title": "端到端加密",
+    "algorithm": "算法",
+    "route": "路由",
+    "p2p": "点对点",
+    "cloudflare": "Cloudflare",
+    "verified": "已验证"
+  },
+  "language": {
+    "title": "语言",
+    "ru": "Русский",
+    "en": "English",
+    "bg": "Български",
+    "ar": "العربية",
+    "zh": "中文",
+    "vi": "Tiếng Việt"
+  },
+  "theme": {
+    "title": "主题",
+    "dark": "深色",
+    "light": "浅色",
+    "system": "跟随系统"
+  },
+  "import": {
+    "telegram": {
+      "title": "从 Telegram 导入",
+      "button_label": "从 Telegram 导入",
+      "dropzone": "将 Telegram 导出文件拖放到此处或点击选择",
+      "drop_here": "在此处释放文件",
+      "format_hint": "支持的格式：Telegram Desktop 的 JSON 导出",
+      "start": "开始导入",
+      "try_again": "重试",
+      "parsing": "解析文件...",
+      "importing_chats": "导入聊天...",
+      "importing_messages": "导入消息...",
+      "importing_contacts": "导入联系人...",
+      "success": "导入成功！",
+      "error": "导入错误",
+      "chats_imported": "已导入聊天",
+      "messages_imported": "已导入消息",
+      "contacts_imported": "已导入联系人",
+      "duration": "耗时：{{duration}}",
+      "parse_error": "JSON 解析错误。请确保文件是有效的 Telegram 导出",
+      "read_error": "无法读取文件",
+      "invalid_format": "无效的文件格式。仅支持 .json 文件",
+      "unknown_format": "无法识别的 Telegram 导出结构",
+      "unknown_error": "发生未知错误",
+      "settings": "设置",
+      "auto_translate": "自动翻译导入的聊天",
+      "auto_translate_on": "已启用 — 消息将翻译为您的语言",
+      "auto_translate_off": "已禁用 — 消息将保持原始语言"
+    }
+  }
+}

@@ -1,0 +1,45 @@
+[package]
+name = "secure-messenger-tauri"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "Secure Telegram Client - Tauri v2 desktop application"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+thiserror.workspace = true
+tauri.workspace = true
+tauri-plugin-store.workspace = true
+tauri-plugin-shell.workspace = true
+sqlx.workspace = true
+chrono.workspace = true
+uuid.workspace = true
+
+# Crypto
+pqc_kyber.workspace = true
+x25519-dalek.workspace = true
+chacha20poly1305.workspace = true
+argon2.workspace = true
+ed25519-dalek.workspace = true
+sha3.workspace = true
+hmac.workspace = true
+hkdf.workspace = true
+zeroize.workspace = true
+subtle.workspace = true
+rand.workspace = true
+
+# Local
+crypto = { path = "crypto" }
+steganography = { path = "steganography" }
+
+[build-dependencies]
+tauri-build.workspace = true
+
+[features]
+custom-protocol = ["tauri/custom-protocol"]

@@ -1,0 +1,99 @@
+{
+  "app": {
+    "title": "Secure Messenger",
+    "subtitle": "اختر محادثة لبدء المراسلة",
+    "tagline": "تشفير شامل من طرف لطرف • X25519 + Kyber1024"
+  },
+  "common": {
+    "chats": "المحادثات",
+    "messages": "الرسائل",
+    "settings": "الإعدادات",
+    "send": "إرسال",
+    "search": "بحث",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "delete": "حذف",
+    "loading": "جار التحميل...",
+    "error": "خطأ"
+  },
+  "chat": {
+    "new_chat": "محادثة جديدة",
+    "new_group": "مجموعة جديدة",
+    "new_channel": "قناة جديدة",
+    "search_chats": "البحث في المحادثات...",
+    "no_chats": "لا توجد محادثات",
+    "no_chats_hint": "ابدأ محادثة جديدة",
+    "typing": "يكتب..."
+  },
+  "message": {
+    "type_message": "اكتب رسالة...",
+    "encrypted": "مشفّر",
+    "delivered": "تم التسليم",
+    "read": "مقروء",
+    "sent": "مُرسل",
+    "failed": "فشل",
+    "no_messages": "لا توجد رسائل",
+    "no_messages_hint": "أرسل أول رسالة"
+  },
+  "status": {
+    "online": "متصل",
+    "offline": "غير متصل",
+    "connecting": "جار الاتصال...",
+    "connected": "متصل",
+    "disconnected": "غير متصل",
+    "reconnecting": "إعادة الاتصال..."
+  },
+  "encryption": {
+    "title": "تشفير شامل من طرف لطرف",
+    "algorithm": "الخوارزمية",
+    "route": "المسار",
+    "p2p": "نظير لنظير",
+    "cloudflare": "Cloudflare",
+    "verified": "تم التحقق"
+  },
+  "language": {
+    "title": "اللغة",
+    "ru": "Русский",
+    "en": "English",
+    "bg": "Български",
+    "ar": "العربية",
+    "zh": "中文",
+    "vi": "Tiếng Việt"
+  },
+  "theme": {
+    "title": "السمة",
+    "dark": "داكنة",
+    "light": "فاتحة",
+    "system": "النظام"
+  },
+  "import": {
+    "telegram": {
+      "title": "استيراد من Telegram",
+      "button_label": "استيراد من Telegram",
+      "dropzone": "اسحب ملف تصدير Telegram هنا أو انقر للتحديد",
+      "drop_here": "أفلت الملف هنا",
+      "format_hint": "الصيغ المدعومة: تصدير JSON من Telegram Desktop",
+      "start": "بدء الاستيراد",
+      "try_again": "حاول مرة أخرى",
+      "parsing": "تحليل الملف...",
+      "importing_chats": "استيراد المحادثات...",
+      "importing_messages": "استيراد الرسائل...",
+      "importing_contacts": "استيراد جهات الاتصال...",
+      "success": "تم الاستيراد بنجاح!",
+      "error": "خطأ في الاستيراد",
+      "chats_imported": "المحادثات المستوردة",
+      "messages_imported": "الرسائل المستوردة",
+      "contacts_imported": "جهات الاتصال المستوردة",
+      "duration": "الوقت المستغرق: {{duration}}",
+      "parse_error": "خطأ في تحليل JSON. تأكد من أن الملف تصدير صالح من Telegram",
+      "read_error": "فشل في قراءة الملف",
+      "invalid_format": "صيغة ملف غير صالحة. فقط ملفات .json مدعومة",
+      "unknown_format": "بنية تصدير Telegram غير معروفة",
+      "unknown_error": "حدث خطأ غير معروف",
+      "settings": "الإعدادات",
+      "auto_translate": "الترجمة التلقائية للمحادثات المستوردة",
+      "auto_translate_on": "مفعّل — سيتم ترجمة الرسائل إلى لغتك",
+      "auto_translate_off": "معطّل — ستبقى الرسائل باللغة الأصلية"
+    }
+  }
+}

@@ -1,0 +1,270 @@
+# ============================================================================
+# Secure Messenger — Self-Hosted Docker Compose
+# ============================================================================
+# Services:
+# - backend:    Axum Rust server
+# - postgres:   Primary database (SQLx)
+# - redis:      Cache + session store
+# - minio:      S3-compatible object storage (files, images)
+# - nginx:      Reverse proxy + TLS
+#
+# Usage:
+#   docker-compose up -d
+#   docker-compose logs -f backend
+#   docker-compose down
+# ============================================================================
+
+version: '3.8'
+
+services:
+  # ===========================================================================
+  # Backend Server (Axum Rust)
+  # ===========================================================================
+  backend:
+    build:
+      context: ..
+      dockerfile: self-hosting/docker/Dockerfile
+    container_name: messenger-backend
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT:-3000}:3000"
+    environment:
+      - RUST_LOG=${RUST_LOG:-info}
+      - DATABASE_URL=postgres://${POSTGRES_USER:-messenger}:${POSTGRES_PASSWORD:-changeme}@postgres:5432/${POSTGRES_DB:-messenger}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-changeme}@redis:6379/0
+      - MINIO_ENDPOINT=http://minio:9000
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-minioadmin}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-changeme-change-me}
+      - MINIO_BUCKET=${MINIO_BUCKET:-messenger-files}
+      - JWT_SECRET=${JWT_SECRET:-change-this-to-random-256-bit-secret}
+      - JWT_EXPIRY=${JWT_EXPIRY:-86400}
+      - CLOUDFLARE_WORKER_URL=${CLOUDFLARE_WORKER_URL:-}
+      - RATE_LIMIT_PER_MINUTE=${RATE_LIMIT_PER_MINUTE:-60}
+      - MAX_UPLOAD_SIZE_MB=${MAX_UPLOAD_SIZE_MB:-50}
+    volumes:
+      - backend-data:/app/data
+      - backend-logs:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    networks:
+      - messenger-net
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '1.0'
+        reservations:
+          memory: 256M
+          cpus: '0.5'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ===========================================================================
+  # PostgreSQL — Primary Database
+  # ===========================================================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: messenger-postgres
+    restart: unless-stopped
+    ports:
+      - "${POSTGRES_EXTERNAL_PORT:-5432}:5432"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-messenger}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
+      - POSTGRES_DB=${POSTGRES_DB:-messenger}
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=en_US.UTF-8 --lc-ctype=en_US.UTF-8
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d:ro
+    networks:
+      - messenger-net
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-messenger} -d ${POSTGRES_DB:-messenger}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ===========================================================================
+  # Redis — Cache + Session Store
+  # ===========================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: messenger-redis
+    restart: unless-stopped
+    command: >
+      redis-server
+      --requirepass ${REDIS_PASSWORD:-changeme}
+      --maxmemory ${REDIS_MAX_MEMORY:-256mb}
+      --maxmemory-policy allkeys-lru
+      --appendonly yes
+      --save 900 1
+      --save 300 10
+      --save 60 10000
+    ports:
+      - "${REDIS_EXTERNAL_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - messenger-net
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-changeme}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ===========================================================================
+  # MinIO — S3-Compatible Object Storage
+  # ===========================================================================
+  minio:
+    image: minio/minio:latest
+    container_name: messenger-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    ports:
+      - "${MINIO_API_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ACCESS_KEY:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_SECRET_KEY:-changeme-change-me}
+      - MINIO_BROWSER=on
+    volumes:
+      - minio-data:/data
+    networks:
+      - messenger-net
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ===========================================================================
+  # MinIO Setup — Create bucket on startup
+  # ===========================================================================
+  minio-setup:
+    image: minio/mc:latest
+    container_name: messenger-minio-setup
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      sleep 5 &&
+      mc alias set myminio http://minio:9000 ${MINIO_ACCESS_KEY:-minioadmin} ${MINIO_SECRET_KEY:-changeme-change-me} &&
+      mc mb --ignore-existing myminio/${MINIO_BUCKET:-messenger-files} &&
+      mc anonymous set download myminio/${MINIO_BUCKET:-messenger-files}/public &&
+      echo 'MinIO bucket created successfully' &&
+      exit 0
+      "
+    networks:
+      - messenger-net
+
+  # ===========================================================================
+  # Nginx — Reverse Proxy + TLS
+  # ===========================================================================
+  nginx:
+    image: nginx:alpine
+    container_name: messenger-nginx
+    restart: unless-stopped
+    ports:
+      - "${NGINX_HTTP_PORT:-80}:80"
+      - "${NGINX_HTTPS_PORT:-443}:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - nginx-ssl:/etc/nginx/ssl:ro
+      - nginx-logs:/var/log/nginx
+    depends_on:
+      - backend
+    networks:
+      - messenger-net
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:80/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+# ============================================================================
+# Networks
+# ============================================================================
+networks:
+  messenger-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# ============================================================================
+# Volumes
+# ============================================================================
+volumes:
+  postgres-data:
+    driver: local
+  redis-data:
+    driver: local
+  minio-data:
+    driver: local
+  backend-data:
+    driver: local
+  backend-logs:
+    driver: local
+  nginx-ssl:
+    driver: local
+  nginx-logs:
+    driver: local

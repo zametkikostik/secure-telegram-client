@@ -1,0 +1,163 @@
+{
+  "app": {
+    "title": "Secure Messenger",
+    "subtitle": "Select a chat to start messaging",
+    "tagline": "Post-Quantum E2EE • X25519 + Kyber1024"
+  },
+  "common": {
+    "chats": "Chats",
+    "messages": "Messages",
+    "settings": "Settings",
+    "send": "Send",
+    "search": "Search",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "loading": "Loading...",
+    "error": "Error",
+    "selected": "selected"
+  },
+  "chat": {
+    "new_chat": "New Chat",
+    "new_group": "New Group",
+    "new_channel": "New Channel",
+    "search_chats": "Search chats...",
+    "no_chats": "No chats",
+    "no_chats_hint": "Start a new conversation",
+    "typing": "typing..."
+  },
+  "message": {
+    "type_message": "Type a message...",
+    "encrypted": "Encrypted",
+    "delivered": "Delivered",
+    "read": "Read",
+    "sent": "Sent",
+    "failed": "Failed",
+    "no_messages": "No messages",
+    "no_messages_hint": "Send the first message"
+  },
+  "status": {
+    "online": "Online",
+    "offline": "Offline",
+    "connecting": "Connecting...",
+    "connected": "Connected",
+    "disconnected": "Disconnected",
+    "reconnecting": "Reconnecting..."
+  },
+  "encryption": {
+    "title": "End-to-end encryption",
+    "algorithm": "Algorithm",
+    "route": "Route",
+    "p2p": "P2P",
+    "cloudflare": "Cloudflare",
+    "verified": "Verified"
+  },
+  "language": {
+    "title": "Language",
+    "ru": "Русский",
+    "en": "English",
+    "bg": "Български",
+    "ar": "العربية",
+    "zh": "中文",
+    "vi": "Tiếng Việt"
+  },
+  "theme": {
+    "title": "Theme",
+    "dark": "Dark",
+    "light": "Light",
+    "system": "System"
+  },
+  "a11y": {
+    "skip_to_content": "Skip to content",
+    "press_slash": "Press / to focus search",
+    "use_arrows": "Use arrows to navigate, Enter to select, Escape to close",
+    "attach_file": "Attach file",
+    "insert_emoji": "Insert emoji",
+    "before_send": "before sending",
+    "open_menu": "Open menu",
+    "close_menu": "Close menu"
+  },
+  "import": {
+    "telegram": {
+      "title": "Import from Telegram",
+      "button_label": "Import from Telegram",
+      "dropzone": "Drag Telegram export file here or click to select",
+      "drop_here": "Drop file here",
+      "format_hint": "Supported formats: JSON export from Telegram Desktop",
+      "start": "Start Import",
+      "try_again": "Try Again",
+      "parsing": "Parsing file...",
+      "importing_chats": "Importing chats...",
+      "importing_messages": "Importing messages...",
+      "importing_contacts": "Importing contacts...",
+      "success": "Import completed successfully!",
+      "error": "Import error",
+      "chats_imported": "Chats imported",
+      "messages_imported": "Messages imported",
+      "contacts_imported": "Contacts imported",
+      "duration": "Time spent: {{duration}}",
+      "parse_error": "JSON parsing error. Make sure the file is a valid Telegram export",
+      "read_error": "Failed to read file",
+      "invalid_format": "Invalid file format. Only .json files are supported",
+      "unknown_format": "Unrecognized Telegram export structure",
+      "unknown_error": "An unknown error occurred",
+      "settings": "Settings",
+      "auto_translate": "Auto-translate imported chats",
+      "auto_translate_on": "Enabled — messages will be translated to your language",
+      "auto_translate_off": "Disabled — messages will remain in original language"
+    }
+  },
+  "call": {
+    "audio": "Audio Call",
+    "video": "Video Call",
+    "incoming_audio": "Incoming Audio Call",
+    "incoming_video": "Incoming Video Call",
+    "accept": "Accept",
+    "reject": "Reject",
+    "connecting": "Connecting...",
+    "hangup": "End Call",
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "camera_on": "Turn On Camera",
+    "camera_off": "Turn Off Camera",
+    "speaker_on": "Speaker On",
+    "speaker_off": "Speaker Off"
+  },
+  "sticker": {
+    "picker_title": "Stickers",
+    "select_pack": "Select a sticker pack",
+    "send_sticker": "Send Sticker"
+  },
+  "story": {
+    "your_story": "Your Story",
+    "create_story": "Create Story",
+    "no_stories": "No stories yet",
+    "views": "views",
+    "posted_at": "Posted"
+  },
+  "bot": {
+    "manager": "My Bots",
+    "store": "Bot Store",
+    "create": "Create Bot",
+    "new_bot": "New Bot",
+    "name_placeholder": "Bot name",
+    "username_placeholder": "@bot_username",
+    "description_placeholder": "What does your bot do?",
+    "type_internal": "Internal (built-in commands)",
+    "type_webhook": "Webhook (external server)",
+    "type_ai": "AI Assistant (OpenRouter)",
+    "ai_prompt_placeholder": "System prompt for the AI...",
+    "no_bots": "No bots yet. Create your first bot!",
+    "active": "Active",
+    "inactive": "Inactive",
+    "settings": "Settings",
+    "delete": "Delete",
+    "confirm_delete": "Confirm",
+    "token_warning": "Save this token! It won't be shown again.",
+    "commands": "Commands",
+    "install": "Install",
+    "installing": "Installing...",
+    "search_placeholder": "Search bots...",
+    "no_results": "No bots found"
+  }
+}

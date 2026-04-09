@@ -1,0 +1,30 @@
+{
+  "productName": "SecureMessenger",
+  "version": "0.1.0",
+  "identifier": "io.secure-messenger",
+  "build": {
+    "beforeDevCommand": "",
+    "beforeBuildCommand": "bash -c 'cd \"$(git rev-parse --show-toplevel)/frontend\" && npm run build'",
+    "frontendDist": "../frontend/dist",
+    "devUrl": "http://localhost:1420"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "title": "Secure Messenger",
+        "width": 1200,
+        "height": 800,
+        "resizable": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["deb"],
+    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/icon.png"]
+  }
+}

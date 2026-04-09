@@ -1,0 +1,109 @@
+[workspace]
+resolver = "2"
+members = [
+    "messenger",
+    "server",
+    "bots",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+authors = ["Secure Telegram Team"]
+license = "MIT"
+repository = "https://github.com/secure-telegram/client"
+
+[workspace.dependencies]
+# === Post-Quantum Crypto ===
+oqs = { version = "0.11", features = ["kems", "serde"] }
+x25519-dalek = { version = "2.0", features = ["static_secrets"] }
+chacha20poly1305 = "0.10"
+argon2 = { version = "0.5", features = ["std"] }
+ed25519-dalek = { version = "2.1", features = ["rand_core"] }
+sha3 = "0.10"
+hmac = "0.12"
+hkdf = "0.12"
+zeroize = "1.7"
+subtle = "2.5"
+rand = "0.8"
+
+# === Utils ===
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1", features = ["full"] }
+thiserror = "1.0"
+hex = "0.4"
+base64 = "0.21"
+
+# === Tauri ===
+tauri = { version = "2.0" }
+tauri-build = { version = "2.0" }
+tauri-plugin-store = "2.0"
+tauri-plugin-shell = "2.0"
+
+# === Keychain ===
+keyring = "2.0"
+
+# === P2P Networking ===
+libp2p = { version = "0.56", features = [
+    "tcp",
+    "quic",
+    "dns",
+    "noise",
+    "yamux",
+    "kad",
+    "gossipsub",
+    "mdns",
+    "request-response",
+    "relay",
+    "dcutr",
+    "identify",
+    "ping",
+    "tokio",
+    "macros",
+    "serde",
+] }
+async-std = { version = "1.12", features = ["attributes"] }
+futures = "0.3"
+unsigned-varint = "0.8"
+
+# === Web framework ===
+axum = { version = "0.7", features = ["ws", "multipart"] }
+tower = { version = "0.4", features = ["timeout", "limit"] }
+tower-http = { version = "0.5", features = ["cors", "trace", "fs"] }
+
+# === Database ===
+sqlx = { version = "0.7", features = ["runtime-tokio", "sqlite", "chrono", "uuid"] }
+redis = { version = "0.24", features = ["tokio-comp"] }
+
+# === Logging ===
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+
+# === Time ===
+chrono = { version = "0.4", features = ["serde"] }
+
+# === UUID ===
+uuid = { version = "1.6", features = ["v4", "serde"] }
+
+# === HTTP client ===
+reqwest = { version = "0.11", features = ["json", "stream", "multipart"] }
+
+# === Image processing ===
+image = { version = "0.24", default-features = false, features = ["png", "jpeg"] }
+
+# === Web3 / Blockchain ===
+ethers = { version = "2.0", default-features = false, features = ["rustls"] }
+alloy-primitives = "0.8"
+coinbase-qr = "0.1"
+sha2 = "0.10"
+
+# E2EE
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"

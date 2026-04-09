@@ -1,0 +1,39 @@
+{
+  "name": "secure-telegram-client",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Децентрализованный мессенджер нового поколения с постквантовым шифрованием",
+  "workspaces": [
+    "frontend",
+    "mobile",
+    "cloudflare"
+  ],
+  "scripts": {
+    "frontend:dev": "npm run dev --workspace=frontend",
+    "frontend:build": "npm run build --workspace=frontend",
+    "frontend:lint": "npm run lint --workspace=frontend",
+    "mobile:android": "npm run android --workspace=mobile",
+    "mobile:ios": "npm run ios --workspace=mobile",
+    "cloudflare:dev": "wrangler dev --config cloudflare/wrangler.toml",
+    "cloudflare:deploy": "wrangler deploy --config cloudflare/wrangler.toml",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "clean": "rm -rf frontend/dist mobile/android/app/build mobile/ios/build"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "prettier": "^3.2.4",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "packageManager": "npm@10.2.4"
+}

@@ -1,0 +1,99 @@
+{
+  "app": {
+    "title": "Secure Messenger",
+    "subtitle": "Изберете чат, за да започнете да пишете",
+    "tagline": "Постквантово E2EE • X25519 + Kyber1024"
+  },
+  "common": {
+    "chats": "Чатове",
+    "messages": "Съобщения",
+    "settings": "Настройки",
+    "send": "Изпрати",
+    "search": "Търсене",
+    "cancel": "Отказ",
+    "save": "Запази",
+    "delete": "Изтрий",
+    "loading": "Зареждане...",
+    "error": "Грешка"
+  },
+  "chat": {
+    "new_chat": "Нов чат",
+    "new_group": "Нова група",
+    "new_channel": "Нов канал",
+    "search_chats": "Търсене на чатове...",
+    "no_chats": "Няма чатове",
+    "no_chats_hint": "Започнете нов разговор",
+    "typing": "пише..."
+  },
+  "message": {
+    "type_message": "Въведете съобщение...",
+    "encrypted": "Криптирано",
+    "delivered": "Доставено",
+    "read": "Прочетено",
+    "sent": "Изпратено",
+    "failed": "Неуспешно",
+    "no_messages": "Няма съобщения",
+    "no_messages_hint": "Изпратете първото съобщение"
+  },
+  "status": {
+    "online": "На линия",
+    "offline": "Извън линия",
+    "connecting": "Свързване...",
+    "connected": "Свързано",
+    "disconnected": "Изключено",
+    "reconnecting": "Повторно свързване..."
+  },
+  "encryption": {
+    "title": "Криптиране от край до край",
+    "algorithm": "Алгоритъм",
+    "route": "Маршрут",
+    "p2p": "P2P",
+    "cloudflare": "Cloudflare",
+    "verified": "Верифицирано"
+  },
+  "language": {
+    "title": "Език",
+    "ru": "Русский",
+    "en": "English",
+    "bg": "Български",
+    "ar": "العربية",
+    "zh": "中文",
+    "vi": "Tiếng Việt"
+  },
+  "theme": {
+    "title": "Тема",
+    "dark": "Тъмна",
+    "light": "Светла",
+    "system": "Системна"
+  },
+  "import": {
+    "telegram": {
+      "title": "Импорт от Telegram",
+      "button_label": "Импорт от Telegram",
+      "dropzone": "Плъзнете експорт файл от Telegram тук или натиснете за избор",
+      "drop_here": "Пуснете файла тук",
+      "format_hint": "Поддържани формати: JSON експорт от Telegram Desktop",
+      "start": "Започни импорт",
+      "try_again": "Опитай отново",
+      "parsing": "Анализ на файла...",
+      "importing_chats": "Импортиране на чатове...",
+      "importing_messages": "Импортиране на съобщения...",
+      "importing_contacts": "Импортиране на контакти...",
+      "success": "Импортът завърши успешно!",
+      "error": "Грешка при импорт",
+      "chats_imported": "Импортирани чатове",
+      "messages_imported": "Импортирани съобщения",
+      "contacts_imported": "Импортирани контакти",
+      "duration": "Изминало време: {{duration}}",
+      "parse_error": "Грешка при анализ на JSON. Уверете се, че файлът е валиден експорт от Telegram",
+      "read_error": "Неуспешно четене на файла",
+      "invalid_format": "Невалиден формат. Поддържат се само .json файлове",
+      "unknown_format": "Неразпозната структура на експорт от Telegram",
+      "unknown_error": "Възникна неизвестна грешка",
+      "settings": "Настройки",
+      "auto_translate": "Авто-превод на импортирани чатове",
+      "auto_translate_on": "Включено — съобщенията ще бъдат преведени на вашия език",
+      "auto_translate_off": "Изключено — съобщенията ще останат на оригиналния език"
+    }
+  }
+}

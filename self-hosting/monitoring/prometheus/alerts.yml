@@ -1,0 +1,233 @@
+# ============================================================================
+# Prometheus Alert Rules
+# ============================================================================
+
+groups:
+  # ===========================================================================
+  # Application Alerts
+  # ===========================================================================
+  - name: application
+    rules:
+      # High error rate (> 1% 5xx responses)
+      - alert: HighErrorRate
+        expr: |
+          sum(rate(http_requests_total{status=~"5.."}[5m])) /
+          sum(rate(http_requests_total[5m])) > 0.01
+        for: 5m
+        labels:
+          severity: critical
+          team: backend
+        annotations:
+          summary: "High HTTP error rate: {{ $value | humanizePercentage }}"
+          description: "More than 1% of requests are returning 5xx errors"
+          runbook_url: "https://wiki.your-domain.com/runbooks/high-error-rate"
+
+      # High latency (p99 > 2s)
+      - alert: HighLatency
+        expr: |
+          histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, path)) > 2
+        for: 10m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "High latency on {{ $labels.path }}: {{ $value | humanizeDuration }}"
+          description: "99th percentile latency is above 2 seconds"
+          runbook_url: "https://wiki.your-domain.com/runbooks/high-latency"
+
+      # Service down (no metrics for 2 minutes)
+      - alert: ServiceDown
+        expr: up{job="backend"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          team: infrastructure
+        annotations:
+          summary: "Backend service is down"
+          description: "Backend has been unreachable for more than 2 minutes"
+          runbook_url: "https://wiki.your-domain.com/runbooks/service-down"
+
+  # ===========================================================================
+  # Authentication Alerts
+  # ===========================================================================
+  - name: authentication
+    rules:
+      # High auth failure rate
+      - alert: HighAuthFailureRate
+        expr: |
+          sum(rate(auth_failures_total[5m])) /
+          sum(rate(auth_attempts_total[5m])) > 0.2
+        for: 5m
+        labels:
+          severity: warning
+          team: security
+        annotations:
+          summary: "High authentication failure rate: {{ $value | humanizePercentage }}"
+          description: "More than 20% of authentication attempts are failing"
+
+      # Brute force detection (> 100 failures/min from same provider)
+      - alert: PossibleBruteForce
+        expr: |
+          sum(rate(auth_failures_total[1m])) by (provider) > 100
+        for: 2m
+        labels:
+          severity: critical
+          team: security
+        annotations:
+          summary: "Possible brute force attack via {{ $labels.provider }}"
+          description: "Over 100 auth failures per minute from {{ $labels.provider }}"
+
+  # ===========================================================================
+  # Database Alerts
+  # ===========================================================================
+  - name: database
+    rules:
+      # High DB query latency (p95 > 500ms)
+      - alert: HighDatabaseLatency
+        expr: |
+          histogram_quantile(0.95, sum(rate(db_query_duration_seconds_bucket[5m])) by (le, operation)) > 0.5
+        for: 10m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "High database latency for {{ $labels.operation }}: {{ $value | humanizeDuration }}"
+
+      # DB connections near limit
+      - alert: DatabaseConnectionsNearLimit
+        expr: |
+          db_connections_active{pool="main"} > 80
+        for: 5m
+        labels:
+          severity: warning
+          team: infrastructure
+        annotations:
+          summary: "Database connections near limit: {{ $value }}"
+          description: "Active connections: {{ $value }}/100"
+
+      # PostgreSQL down
+      - alert: PostgreSQLDown
+        expr: up{job="postgres"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: infrastructure
+        annotations:
+          summary: "PostgreSQL is down"
+
+  # ===========================================================================
+  # Cache Alerts
+  # ===========================================================================
+  - name: cache
+    rules:
+      # Low cache hit ratio (< 70%)
+      - alert: LowCacheHitRatio
+        expr: |
+          sum(rate(cache_hits_total[5m])) /
+          (sum(rate(cache_hits_total[5m])) + sum(rate(cache_misses_total[5m]))) < 0.7
+        for: 15m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "Low cache hit ratio: {{ $value | humanizePercentage }}"
+
+      # Redis down
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: infrastructure
+        annotations:
+          summary: "Redis is down"
+
+  # ===========================================================================
+  # Infrastructure Alerts
+  # ===========================================================================
+  - name: infrastructure
+    rules:
+      # High CPU usage (> 85%)
+      - alert: HighCPUUsage
+        expr: |
+          100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
+        for: 10m
+        labels:
+          severity: warning
+          team: infrastructure
+        annotations:
+          summary: "High CPU usage: {{ $value | humanize }}%"
+
+      # High memory usage (> 90%)
+      - alert: HighMemoryUsage
+        expr: |
+          (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 90
+        for: 10m
+        labels:
+          severity: warning
+          team: infrastructure
+        annotations:
+          summary: "High memory usage: {{ $value | humanize }}%"
+
+      # Disk space low (< 15% free)
+      - alert: DiskSpaceLow
+        expr: |
+          (1 - (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"})) * 100 > 85
+        for: 15m
+        labels:
+          severity: warning
+          team: infrastructure
+        annotations:
+          summary: "Disk space low: {{ $value | humanize }}% used"
+
+      # Disk will fill in 24 hours
+      - alert: DiskWillFillIn24Hours
+        expr: |
+          predict_linear(node_filesystem_avail_bytes{mountpoint="/"}[6h], 24 * 3600) < 0
+        for: 1h
+        labels:
+          severity: critical
+          team: infrastructure
+        annotations:
+          summary: "Disk will fill in 24 hours"
+
+  # ===========================================================================
+  # WebSocket Alerts
+  # ===========================================================================
+  - name: websocket
+    rules:
+      # High WS connection count (> 10000)
+      - alert: HighWebSocketConnections
+        expr: ws_connections_active > 10000
+        for: 5m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "High WebSocket connection count: {{ $value }}"
+
+  # ===========================================================================
+  # Business Alerts
+  # ===========================================================================
+  - name: business
+    rules:
+      # No active users (all users disconnected)
+      - alert: NoActiveUsers
+        expr: active_users == 0
+        for: 30m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "No active users for 30 minutes"
+
+      # Message throughput dropped
+      - alert: LowMessageThroughput
+        expr: |
+          rate(messages_sent_total[1h]) < 0.1
+        for: 30m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "Very low message throughput"

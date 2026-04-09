@@ -1,0 +1,46 @@
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# Build output
+dist/
+build/
+.vite/
+
+# Rust build
+target/
+
+# Environment
+.env
+.env.local
+.env.production
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# SQLite databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Migration tool test data
+migration-tool/test_data/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Tauri
+src-tauri/target/
+
+# Temporary files
+*.tmp
+*.bak
