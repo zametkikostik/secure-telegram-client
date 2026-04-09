@@ -65,8 +65,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: smart-contracts/package-lock.json
 
       - name: Install smart contract dependencies
         run: cd smart-contracts && npm ci
