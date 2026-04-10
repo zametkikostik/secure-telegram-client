@@ -7,7 +7,6 @@ buildscript {
         compileSdkVersion = 34
         targetSdkVersion = 34
         ndkVersion = "25.1.8937393"
-        kotlinVersion = "1.8.0"
     }
     repositories {
         google()
@@ -15,7 +14,6 @@ buildscript {
     }
     dependencies {
         classpath("com.android.tools.build:gradle:8.1.1")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
     }
 }
 
@@ -23,11 +21,5 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        maven { url 'https://www.jitpack.io' }
-        // React Native local dependency (from mobile/node_modules)
-        def reactNative = file("../node_modules/react-native/android")
-        if (reactNative.exists()) {
-            maven { url reactNative }
-        }
     }
 }

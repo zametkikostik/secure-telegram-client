@@ -1,5 +1,4 @@
 apply plugin: "com.android.application"
-apply plugin: "org.jetbrains.kotlin.android"
 
 def enableProguardInReleaseBuilds = true
 
@@ -48,9 +47,6 @@ android {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = '17'
-    }
 }
 
 dependencies {
@@ -58,15 +54,4 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.11.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
-    
-    // React Native (будет подключено позже при наличии node_modules)
-    def reactNativeLibs = [
-        "../../node_modules/react-native/android",
-    ]
-    reactNativeLibs.each { path ->
-        if (file(path).exists()) {
-            implementation files(path)
-        }
-    }
 }
