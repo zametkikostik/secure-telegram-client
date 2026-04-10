@@ -1,0 +1,47 @@
+# OSX
+#
+.DS_Store
+
+# Editor
+.vscode
+.idea
+
+# Node
+node_modules/
+npm-debug.*
+
+# Testing
+coverage/
+
+# Android
+*.keystore
+*.jks
+*.key
+android/app/build/
+android/.gradle/
+android/.idea/
+android/local.properties
+*.apk
+*.aab
+
+# iOS
+ios/build/
+ios/Pods/
+ios/*.xcodeproj/
+ios/*.xcworkspace/
+
+# Metro
+.metro-health-check*
+
+# Bundle artifacts
+*.jsbundle
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Temp files
+*.tmp
+*.swp
+*~
