@@ -5,7 +5,6 @@
   "description": "Децентрализованный мессенджер нового поколения с постквантовым шифрованием",
   "workspaces": [
     "frontend",
-    "mobile",
     "cloudflare"
   ],
   "scripts": {

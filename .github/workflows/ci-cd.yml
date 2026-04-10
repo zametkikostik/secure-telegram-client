@@ -362,7 +362,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Install mobile dependencies
-        run: npm install --no-package-lock
+        run: npm install
         working-directory: mobile
 
       - name: Setup Android SDK
