@@ -44,3 +44,9 @@ src-tauri/target/
 # Temporary files
 *.tmp
 *.bak
+
+# Android Keystore
+*.keystore
+*.jks
+*.key
+keystore-base64.txt
