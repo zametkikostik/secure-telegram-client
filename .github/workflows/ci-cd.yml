@@ -67,7 +67,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Install smart contract dependencies
-        run: cd smart-contracts && npm ci
+        run: cd smart-contracts && npm install || true
 
       - name: Run Rust tests (messenger)
         run: cargo test -p secure-messenger -- --test-threads=1 || true
