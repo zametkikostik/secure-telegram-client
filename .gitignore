@@ -47,6 +47,7 @@ src-tauri/target/
 
 # Android Keystore
 *.keystore
+!debug.keystore
 *.jks
 *.key
 keystore-base64.txt
