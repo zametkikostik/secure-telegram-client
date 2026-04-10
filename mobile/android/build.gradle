@@ -15,17 +15,19 @@ buildscript {
     }
     dependencies {
         classpath("com.android.tools.build:gradle:8.1.1")
-        classpath("com.facebook.react:react-native-gradle-plugin")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
     }
 }
-
-apply plugin: "com.facebook.react.rootproject"
 
 allprojects {
     repositories {
         google()
         mavenCentral()
         maven { url 'https://www.jitpack.io' }
+        // React Native local dependency (from mobile/node_modules)
+        def reactNative = file("../node_modules/react-native/android")
+        if (reactNative.exists()) {
+            maven { url reactNative }
+        }
     }
 }

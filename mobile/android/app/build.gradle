@@ -1,18 +1,7 @@
 apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 
-// Check if React Native Gradle Plugin exists
-def rnPluginExists = file("../../node_modules/@react-native/gradle-plugin/build.gradle").exists()
-if (rnPluginExists) {
-    apply plugin: "com.facebook.react"
-}
-
 def enableProguardInReleaseBuilds = true
-
-def reactNativeArchitectures() {
-    def value = project.getProperties().get("reactNativeArchitectures")
-    return value ? value.split(",") : ["armeabi-v7a", "arm64-v8a", "x86", "x86_64"]
-}
 
 android {
     ndkVersion rootProject.ext.ndkVersion
@@ -26,11 +15,7 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "0.1.0-alpha"
-
         multiDexEnabled true
-        ndk {
-            abiFilters (*reactNativeArchitectures())
-        }
     }
 
     signingConfigs {
@@ -59,14 +44,29 @@ android {
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = '17'
+    }
 }
 
 dependencies {
-    implementation("com.facebook.react:react-android")
-    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
-
-    def hermesEnabled = true
-    if (hermesEnabled) {
-        implementation("com.facebook.react:hermes-android")
+    implementation 'androidx.core:core-ktx:1.12.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.11.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    
+    // React Native (будет подключено позже при наличии node_modules)
+    def reactNativeLibs = [
+        "../../node_modules/react-native/android",
+    ]
+    reactNativeLibs.each { path ->
+        if (file(path).exists()) {
+            implementation files(path)
+        }
     }
 }
