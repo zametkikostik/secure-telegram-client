@@ -32,6 +32,11 @@ react {
 
 def enableProguardInReleaseBuilds = true
 
+def reactNativeArchitectures() {
+    def value = project.getProperties().get("reactNativeArchitectures")
+    return value ? value.split(",") : ["armeabi-v7a", "arm64-v8a", "x86", "x86_64"]
+}
+
 android {
     ndkVersion rootProject.ext.ndkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
@@ -83,11 +88,8 @@ dependencies {
     implementation("com.facebook.react:react-android")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 
-    if (hermesEnabled.toBoolean()) {
+    def hermesEnabled = true
+    if (hermesEnabled) {
         implementation("com.facebook.react:hermes-android")
-    } else {
-        implementation jscFlavor
     }
 }
-
-apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
