@@ -1,33 +1,10 @@
 apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
-apply plugin: "com.facebook.react"
 
-import com.android.build.OutputFile
-
-react {
-    /* Folders */
-    root = file("../../")
-    reactNativeDir = file("../../node_modules/react-native")
-    codegenDir = file("../../node_modules/@react-native/codegen")
-
-    /* Variants */
-    def flavors = []
-    if (project.hasProperty("universalApk")) {
-        flavors.add("universal")
-    }
-    flavorDimensions "default"
-    if (flavors.size() > 0) {
-        productFlavors {
-            flavors.each { name ->
-                create(name) {
-                    resValue "string", "app_name", "Secure Messenger"
-                }
-            }
-        }
-    }
-
-    /* Developer options */
-    devDisabledInRelease = true
+// Check if React Native Gradle Plugin exists
+def rnPluginExists = file("../../node_modules/@react-native/gradle-plugin/build.gradle").exists()
+if (rnPluginExists) {
+    apply plugin: "com.facebook.react"
 }
 
 def enableProguardInReleaseBuilds = true
