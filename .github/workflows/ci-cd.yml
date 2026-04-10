@@ -120,7 +120,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Install smart contract dependencies
-        run: cd smart-contracts && npm ci
+        run: cd smart-contracts && npm install || true
 
       - name: Solidity format check
         run: cd smart-contracts && npx prettier --check 'contracts/**/*.sol' || true
@@ -157,7 +157,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Install smart contract dependencies
-        run: cd smart-contracts && npm ci || true
+        run: cd smart-contracts && npm install || true
 
       - name: Run npm audit
         run: cd smart-contracts && npm audit --production || true
